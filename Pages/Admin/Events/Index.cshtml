@@ -1,0 +1,262 @@
+@page
+@model soft20181_starter.Pages.Admin.Events.IndexModel
+@{
+    ViewData["Title"] = "Event Management - EventScape";
+    Layout = "_Layout";
+}
+
+<div class="container my-5">
+    <div class="featured-events-header">
+        <h2 class="featured-title">Event Management</h2>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col text-center">
+            <a href="/Admin" class="admin-dashboard-btn">Admin Dashboard</a>
+        </div>
+    </div>
+
+    <div class="admin-overview-cards">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="admin-overview-card">
+                    <div class="admin-overview-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="admin-overview-content">
+                        <h3>@Model.Events.Count()</h3>
+                        <p>Total Events</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mt-4 mt-md-0">
+                <div class="admin-overview-card">
+                    <div class="admin-overview-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="admin-overview-content">
+                        <h3>@Model.Events.Select(e => e.location).Distinct().Count()</h3>
+                        <p>Unique Locations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mt-4 mt-md-0">
+                <div class="admin-overview-card">
+                    <div class="admin-overview-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="admin-overview-content">
+                        <h3>@Model.Events.Count(e => DateTime.TryParse(e.date, out DateTime date) && date > DateTime.Now)</h3>
+                        <p>Upcoming Events</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="user-management-actions">
+        <a asp-page="Create" class="user-action-btn">
+            <i class="fas fa-plus"></i> Add New Event
+        </a>
+        <a asp-page="SearchForEdit" class="user-action-btn">
+            <i class="fas fa-edit"></i> Edit Events
+        </a>
+        <a asp-page="SearchForDelete" class="user-action-btn">
+            <i class="fas fa-trash"></i> Delete Events
+        </a>
+        <a href="/Admin/Users" class="user-action-btn">
+            <i class="fas fa-users"></i> Manage Users
+        </a>
+        <a href="/Admin" class="user-action-btn">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Featured Events title styling from EventDetail */
+        .featured-title {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 28px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        
+        .featured-events-header {
+            margin-top: 60px;
+            text-align: center;
+            margin-left: 0;
+        }
+        
+        /* Admin Dashboard Button */
+        .admin-dashboard-btn {
+            display: inline-block;
+            background-color: #854F6C;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin: 10px auto 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .admin-dashboard-btn:hover {
+            background-color: #522B5B;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+        
+        .admin-overview-cards {
+            margin: 30px 0;
+        }
+        
+        .admin-overview-card {
+            background-color: #BFACB5;
+            border-radius: 8px;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            height: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .admin-overview-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .admin-overview-icon {
+            background-color: #522B5B;
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-right: 25px;
+        }
+        
+        .admin-overview-content h3 {
+            color: #522B5B;
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .admin-overview-content p {
+            color: #522B5B;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        /* User Management Action Buttons */
+        .user-management-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 30px auto 100px;
+            max-width: 1300px;
+        }
+        
+        .user-action-btn {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 20px 35px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            min-width: 300px;
+        }
+        
+        .user-action-btn i {
+            margin-right: 15px;
+            font-size: 22px;
+        }
+        
+        .user-action-btn:hover {
+            background-color: #854F6C;
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.25);
+            text-decoration: none;
+        }
+        
+        .container {
+            margin-bottom: 100px !important;
+            max-width: 1600px;
+        }
+        
+        @@media (max-width: 768px) {
+            .main-container {
+                padding: 20px;
+                margin-top: 30px !important;
+            }
+            
+            .mt-md-0 {
+                margin-top: 30px !important;
+            }
+            
+            .admin-overview-card {
+                margin-bottom: 30px;
+                padding: 25px;
+            }
+            
+            .admin-overview-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+            }
+            
+            .admin-overview-content h3 {
+                font-size: 32px;
+            }
+            
+            .featured-title {
+                font-size: 26px;
+                padding: 15px 25px;
+            }
+            
+            .user-action-btn {
+                width: 100%;
+                margin-bottom: 10px;
+                font-size: 18px;
+                padding: 15px 25px;
+                min-width: 100%;
+            }
+            
+            .user-management-actions {
+                flex-direction: column;
+                gap: 20px;
+                margin-bottom: 100px;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/javascript.js"></script>
+} 

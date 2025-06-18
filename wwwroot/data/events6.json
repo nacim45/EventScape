@@ -1,0 +1,152 @@
+[
+  {
+    "id": "1",
+    "title": "Dublin Tech Innovation Summit",
+    "image": "images/json61.png",
+    "description": "Explore the latest technological innovations and connect with industry leaders.",
+    "date": "January 15-17, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=dublin?id=1",
+    "location": "dublin"
+  },
+  {
+    "id": "2",
+    "title": "Creative Writing Workshop",
+    "image": "images/json62.png",
+    "description": "Unleash your creativity with expert-led writing sessions and exercises.",
+    "date": "January 20-21, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=dublin?id=2",
+    "location": "dublin"
+  },
+  {
+    "id": "3",
+    "title": "Dublin Arts and Culture Fair",
+    "image": "images/json63.png",
+    "description": "Celebrate Dublin’s vibrant arts and culture scene with live performances and exhibits.",
+    "date": "January 25-27, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=dublin?id=3",
+    "location": "dublin"
+  },
+  {
+    "id": "4",
+    "title": "Business Growth Strategies Workshop",
+    "image": "images/json64.png",
+    "description": "Learn effective business strategies to scale your organization from industry experts.",
+    "date": "February 10-11, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=dublin?id=4",
+    "location": "dublin"
+  },
+  {
+    "id": "5",
+    "title": "Health and Fitness Expo",
+    "image": "images/json65.png",
+    "description": "Explore health trends, wellness tips, and fitness activities at this engaging expo.",
+    "date": "February 14-15, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=dublin?id=5",
+    "location": "dublin"
+  },
+  {
+    "id": "6",
+    "title": "Marketing and Social Media Summit",
+    "image": "images/json66.png",
+    "description": "Stay updated on the latest marketing and social media trends with expert insights.",
+    "date": "February 20-22, 2025",
+    "price": "£30",
+    "link": "/EventDetail?location=dublin?id=6",
+    "location": "dublin"
+  },
+  {
+    "id": "7",
+    "title": "Blockchain and Crypto Forum",
+    "image": "images/json67.png",
+    "description": "Dive into the world of blockchain and cryptocurrencies with engaging talks and workshops.",
+    "date": "February 25-26, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=dublin?id=7",
+    "location": "dublin"
+  },
+  {
+    "id": "8",
+    "title": "Public Speaking and Leadership Workshop",
+    "image": "images/json68.png",
+    "description": "Enhance your speaking and leadership skills with interactive sessions.",
+    "date": "March 1-2, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=dublin?id=8",
+    "location": "dublin"
+  },
+  {
+    "id": "9",
+    "title": "Dublin International Film Festival",
+    "image": "images/json69.png",
+    "description": "Enjoy screenings of independent films and discussions with filmmakers.",
+    "date": "March 5-7, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=dublin?id=9",
+    "location": "dublin"
+  },
+  {
+    "id": "10",
+    "title": "AI and Robotics Workshop",
+    "image": "images/json610.png",
+    "description": "Learn about the latest advancements in AI and robotics in this hands-on workshop.",
+    "date": "March 10-12, 2025",
+    "price": "£30",
+    "link": "/EventDetail?location=dublin?id=10",
+    "location": "dublin"
+  },
+  {
+    "id": "11",
+    "title": "Entrepreneurship Bootcamp",
+    "image": "images/json611.png",
+    "description": "Kickstart your business idea with guidance from seasoned entrepreneurs.",
+    "date": "March 15-17, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=dublin?id=11",
+    "location": "dublin"
+  },
+  {
+    "id": "12",
+    "title": "Graphic Design and Creativity Workshop",
+    "image": "images/json612.png",
+    "description": "Enhance your design skills with practical tips and creative exercises.",
+    "date": "March 20-21, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=dublin?id=12",
+    "location": "dublin"
+  },
+  {
+    "id": "13",
+    "title": "Sustainability and Green Living Fair",
+    "image": "images/json613.png",
+    "description": "Discover sustainable solutions and practices to adopt a greener lifestyle.",
+    "date": "March 25-26, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=dublin?id=13",
+    "location": "dublin"
+  },
+  {
+    "id": "14",
+    "title": "Yoga and Wellness Retreat",
+    "image": "images/json614.png",
+    "description": "Relax and rejuvenate with yoga sessions and wellness workshops.",
+    "date": "January 22-24, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=dublin?id=14",
+    "location": "dublin"
+  },
+  {
+    "id": "15",
+    "title": "Tech Startups Networking Event",
+    "image": "images/json615.png",
+    "description": "Network with tech entrepreneurs and investors to share ideas and collaborate.",
+    "date": "February 28 - March 1, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=dublin?id=15",
+    "location": "dublin"
+  }
+]

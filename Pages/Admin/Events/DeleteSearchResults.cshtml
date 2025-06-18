@@ -1,0 +1,244 @@
+@page
+@model DeleteSearchResultsModel
+@{
+    ViewData["Title"] = "Delete Event Results - EventScape";
+}
+
+<div class="main-container">
+    <div class="breadcrumb-nav">
+        <a href="/Admin/Dashboard" class="breadcrumb-link">Dashboard</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="/Admin/Events" class="breadcrumb-link">All Events</a>
+        <span class="breadcrumb-separator">/</span>
+        <a asp-page="SearchForDelete" class="breadcrumb-link">Search</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Delete Results</span>
+    </div>
+
+    <div class="search-header">
+        <h1>Delete Event Results</h1>
+        <p>Select an event from the results below to delete it.</p>
+    </div>
+
+    @if (!Model.HasSearchResults)
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <span>No events found matching your search criteria. Please try a different search.</span>
+        </div>
+        <div class="back-button-container">
+            <a asp-page="SearchForDelete" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Search
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="events-list-container">
+            @foreach (var eventItem in Model.Events)
+            {
+                <div class="event-card">
+                    <div class="event-details">
+                        <h3 class="event-title">@eventItem.title</h3>
+                        <div class="event-info">
+                            <p><i class="fas fa-map-marker-alt"></i> @eventItem.location</p>
+                            <p><i class="fas fa-calendar-day"></i> @eventItem.date</p>
+                            <p><i class="fas fa-pound-sign"></i> @eventItem.price</p>
+                        </div>
+                    </div>
+                    <div class="event-actions">
+                        <a asp-page="Delete" asp-route-id="@eventItem.id" class="btn btn-danger delete-btn">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="back-button-container">
+            <a asp-page="SearchForDelete" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Search
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .main-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .breadcrumb-link {
+        color: #0056b3;
+        text-decoration: none;
+    }
+
+    .breadcrumb-link:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        margin: 0 8px;
+        color: #6c757d;
+    }
+
+    .breadcrumb-current {
+        color: #495057;
+        font-weight: 500;
+    }
+
+    .search-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .search-header h1 {
+        color: #343a40;
+        margin-bottom: 10px;
+    }
+
+    .search-header p {
+        color: #6c757d;
+    }
+
+    .alert {
+        padding: 15px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+    }
+
+    .alert i {
+        font-size: 20px;
+        margin-right: 10px;
+    }
+
+    .events-list-container {
+        margin-bottom: 30px;
+    }
+
+    .event-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 15px;
+        background-color: #f8f9fa;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .event-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .event-details {
+        flex: 1;
+    }
+
+    .event-title {
+        color: #343a40;
+        margin-bottom: 10px;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .event-info p {
+        margin: 5px 0;
+        color: #495057;
+        font-size: 14px;
+    }
+
+    .event-info i {
+        width: 20px;
+        color: #6c757d;
+        margin-right: 5px;
+    }
+
+    .event-actions {
+        margin-left: 15px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s ease-in-out;
+    }
+
+    .btn i {
+        margin-right: 5px;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: 1px solid #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: 1px solid #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0069d9;
+        border-color: #0062cc;
+    }
+
+    .back-button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    /* Media queries */
+    @@media (max-width: 768px) {
+        .event-card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .event-actions {
+            margin-left: 0;
+            margin-top: 15px;
+            align-self: stretch;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style> 

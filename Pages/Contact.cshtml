@@ -1,0 +1,453 @@
+﻿@page
+@model soft20181_starter.Pages.ContactModel
+@{
+    ViewData["Title"] = "Contact Us";
+}
+
+<div class="head">
+    <div class="settings">
+        <a>
+            <div class="logo2">
+                <img src="~/images/settings.png" id="icon2" alt="EventScape Logo">
+                <h1>Customise your website</h1>
+            </div>
+        </a>
+        <div id="div6">
+            <button id="btn1">increase the font</button>
+            <button id="btn2">decrease the font</button>
+            <button id="btn3">darker background</button>
+            <button id="btn4">lighter background</button>
+        </div>
+    </div>    
+    <a asp-page="/Index">
+        <div class="logo">
+            <img src="~/images/ticket.png" class="icon" alt="EventScape Logo">
+            <h1>EventScape</h1>
+        </div>
+    </a>
+</div>
+
+<div class="navbar">
+    <button class="toggle">☰</button>
+    <ul class="navigation">
+        <li><a asp-page="/Index">Home</a></li>
+        <li><a asp-page="/Events">Events</a></li>
+        <li><a asp-page="/EventDetail">Details</a></li>
+        <li><a asp-page="/Contact" class="active">Contact</a></li>
+        @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Administrator")))
+        {
+            <li><a asp-page="/Admin/Index">Admin</a></li>
+        }
+    </ul>
+</div>
+
+<div class="auth-links">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <span class="welcome-user">Welcome, @User.Identity.Name!</span>
+        <a asp-page="/Account/Logout" class="auth-button logout-button">Logout</a>
+    }
+    else
+    {
+        <a asp-page="/Account/Login" class="auth-button login-button">Login</a>
+        <a asp-page="/Account/Register" class="auth-button register-button">Register</a>
+    }
+</div>
+
+@if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Administrator")))
+{
+    <a asp-page="/Admin/Index" class="admin-button">Admin Dashboard</a>
+}
+
+<div class="samerow">
+    <div class="samecolumn">
+        <div class="presentation contact-title">
+            <h3><b>Please leave us your information so that we can contact you</b></h3>
+        </div>
+        <div class="div">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="success-message">
+                    <p>Thank you <span>@TempData["Name"]</span>. We will be in touch shortly.</p>
+                </div>
+            }
+            else
+            {
+                <form id="contactForm" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <input asp-for="ContactInfo.Name" type="text" class="form-control" placeholder="Your first name" required />
+                        <span asp-validation-for="ContactInfo.Name" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="Surname">Surname</label>
+                        <input asp-for="ContactInfo.Surname" type="text" class="form-control" placeholder="Your last name" required />
+                        <span asp-validation-for="ContactInfo.Surname" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="Email">Email</label>
+                        <input asp-for="ContactInfo.Email" type="email" class="form-control" placeholder="example@email.com" required />
+                        <span asp-validation-for="ContactInfo.Email" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="Phone">Phone</label>
+                        <input asp-for="ContactInfo.Phone" type="tel" class="form-control" pattern="^[0-9\+\-\s()]+$" placeholder="Your phone number" required />
+                        <span asp-validation-for="ContactInfo.Phone" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="Message">Message (Optional)</label>
+                        <textarea asp-for="ContactInfo.Message" rows="4" class="form-control" placeholder="What would you like to tell us?"></textarea>
+                        <span asp-validation-for="ContactInfo.Message" class="text-danger"></span>
+                    </div>
+                    
+                    <button type="submit" id="button2">Submit</button>
+                </form>
+            }
+        </div>
+    </div>
+    <div class="samecolumn">
+        <div class="rightcolumn about-section">
+            <h3><b>About EventScape</b></h3>
+            <p>EventScape is your premier destination for discovering and booking events across the UK. Founded in 2023, we're dedicated to connecting people with unforgettable experiences.</p>
+            <p><strong>Location:</strong> 50 Shakespeare Street, Nottingham, NG1 4FQ</p>
+            <p><strong>Our Mission:</strong> To make finding and attending events simple, enjoyable, and accessible for everyone.</p>
+            
+            <h3><b>You can also join us and connect with us via our socials</b></h3>
+            <ul class="wrapper">
+                <li class="icon linkedin">
+                    <span class="tooltip">LinkedIn</span>
+                    <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">
+                        <img src="~/images/linkedin.png" alt="LinkedIn Icon" class="icon">
+                    </a>
+                </li>
+                <li class="icon email">
+                    <span class="tooltip">Email</span>
+                    <a href="mailto:contact@eventscape.com">
+                        <img src="~/images/email.png" alt="Email Icon" class="icon">
+                    </a>
+                </li>
+                <li class="icon instagram">
+                    <span class="tooltip">Instagram</span>
+                    <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">
+                        <img src="~/images/insta.png" alt="Instagram Icon" class="icon">
+                    </a>
+                </li>
+            </ul>
+
+            <h3><b>If you want to leave a feedback, it is right</b></h3>
+            <form method="post" asp-page-handler="Feedback" id="form2">
+                <label for="feedback">Here</label>
+                <textarea asp-for="FeedbackMessage" name="feedback" rows="5" id="feedback" 
+                          placeholder="Share your thoughts with us" required maxlength="2000"></textarea>
+                <span asp-validation-for="FeedbackMessage" class="text-danger"></span>
+                
+                <button id="button3" type="submit">Submit</button>
+            </form>
+            
+            <div class="back-to-home">
+                <a asp-page="/Index" class="back-button">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5">
+    <p><b>&copy; @DateTime.Now.Year EventScape</b></p>
+    <a asp-page="/Events" class="footerbutton"><b>Browse upcoming events</b></a>
+    <a asp-page="/Contact" class="footerbutton"><b>Contact us!</b></a>
+</footer>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/slides.css">
+    <link rel="stylesheet" href="~/css/contact.css">
+    <style>
+        .samerow {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 150px;
+            margin-bottom: 100px;
+            padding: 0 20px;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .text-danger {
+            color: #dc3545;
+            font-size: 14px;
+            display: block;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .rightcolumn p {
+            color: #522B5B;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .back-to-home {
+            text-align: center;
+            margin: 30px 0 10px;
+        }
+        
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #522B5B;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-button:hover {
+            background-color: #854F6C;
+            text-decoration: none;
+            color: white;
+        }
+
+        #button3 {
+            margin-top: 15px;
+            background-color: #522B5B;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        #button3:hover {
+            background-color: #854F6C;
+        }
+        
+        /* Form styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #522B5B;
+            border-radius: 4px;
+            background-color: #ffffff;
+            color: #333;
+            box-sizing: border-box;
+        }
+        
+        input.form-control {
+            height: 40px;
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-control:focus {
+            border-color: #854F6C;
+            box-shadow: 0 0 8px rgba(82, 43, 91, 0.4);
+            outline: none;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #522B5B;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        #button2 {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #522B5B;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #button2:hover {
+            background-color: #854F6C;
+            transform: scale(0.98);
+        }
+        
+        .contact-title {
+            padding: 20px 30px;
+            margin-bottom: 20px;
+        }
+        
+        .contact-title h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        /* Make sure the form container is properly sized */
+        .div {
+            padding: 30px;
+            background-color: #BFACB5;
+            border-radius: 8px;
+            margin-top: 30px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+        
+        /* Ensure form takes full width */
+        #contactForm {
+            width: 100%;
+        }
+        
+        /* Validation styling */
+        .invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+        
+        .form-control.input-validation-error {
+            border-color: #dc3545;
+        }
+        
+        .text-danger {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        /* Success message styling */
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .register-button:hover {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .admin-button {
+            background-color: #522B5B;
+            color: white;
+            font-weight: bold;
+            display: block;
+            width: 180px;
+            text-align: center;
+            padding: 10px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin: 100px auto 15px auto;
+        }
+        
+        .admin-button:hover {
+            background-color: #854F6C;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+        }
+        
+        .welcome-user {
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Added space between content and footer */
+        footer {
+            margin-top: 80px !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/javascript.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('contactForm');
+            const nameInput = document.getElementById('ContactInfo_Name');
+            const surnameInput = document.getElementById('ContactInfo_Surname');
+            const emailInput = document.getElementById('ContactInfo_Email');
+            const phoneInput = document.getElementById('ContactInfo_Phone');
+            
+            form.addEventListener('submit', function(event) {
+                let isValid = true;
+                
+                // Validate name
+                const nameRegex = /^[A-Za-z\s]+$/;
+                if (!nameRegex.test(nameInput.value)) {
+                    isValid = false;
+                    nameInput.classList.add('invalid');
+                } else {
+                    nameInput.classList.remove('invalid');
+                }
+                
+                // Validate surname
+                const surnameRegex = /^[A-Za-z\s]+$/;
+                if (!surnameRegex.test(surnameInput.value)) {
+                    isValid = false;
+                    surnameInput.classList.add('invalid');
+                } else {
+                    surnameInput.classList.remove('invalid');
+                }
+                
+                // Validate email
+                const emailRegex = /^[^@@\s]+@@[^@@\s]+\.[^@@\s]+$/;
+                if (!emailRegex.test(emailInput.value)) {
+                    isValid = false;
+                    emailInput.classList.add('invalid');
+                } else {
+                    emailInput.classList.remove('invalid');
+                }
+                
+                // Validate phone
+                const phoneRegex = /^[0-9\+\-\s()]+$/;
+                if (!phoneRegex.test(phoneInput.value)) {
+                    isValid = false;
+                    phoneInput.classList.add('invalid');
+                } else {
+                    phoneInput.classList.remove('invalid');
+                }
+                
+                if (!isValid) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+}
+
+
+

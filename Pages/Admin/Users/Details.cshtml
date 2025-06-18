@@ -1,0 +1,152 @@
+@page "{id}"
+@model soft20181_starter.Pages.Admin.Users.DetailsModel
+@{
+    ViewData["Title"] = "User Details - EventScape";
+    Layout = "_Layout";
+}
+
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4">User Details</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/Admin">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item"><a asp-page="Index">Users</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-auto align-self-center">
+            <div class="btn-group" role="group">
+                <a asp-page="Edit" asp-route-id="@Model.User?.Id" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                @if (Model.User != null && Model.User.UserRoles.All(r => r.ToLower() != "administrator"))
+                {
+                    <a asp-page="Delete" asp-route-id="@Model.User.Id" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                }
+                <a asp-page="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.User == null)
+    {
+        <div class="alert alert-danger">
+            <h4 class="alert-heading">User Not Found!</h4>
+            <p>The user you're looking for does not exist or has been deleted.</p>
+            <hr>
+            <div class="mb-0">
+                <a asp-page="Index" class="btn btn-outline-danger">Return to Users List</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h2 class="h5 mb-0">Account Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div class="avatar-circle mx-auto">
+                                <span class="avatar-initials">@Model.User.Name.Substring(0, 1)@Model.User.Surname.Substring(0, 1)</span>
+                            </div>
+                        </div>
+                        
+                        <dl class="row">
+                            <dt class="col-sm-4">Name</dt>
+                            <dd class="col-sm-8">@Model.User.Name @Model.User.Surname</dd>
+                            
+                            <dt class="col-sm-4">Email</dt>
+                            <dd class="col-sm-8">@Model.User.Email</dd>
+                            
+                            <dt class="col-sm-4">Roles</dt>
+                            <dd class="col-sm-8">
+                                @foreach (var role in Model.User.UserRoles)
+                                {
+                                    <span class="badge @(role.ToLower() == "administrator" ? "bg-danger" : "bg-primary")">@role</span>
+                                }
+                            </dd>
+                            
+                            <dt class="col-sm-4">Registered</dt>
+                            <dd class="col-sm-8">@Model.User.RegisteredDate.ToString("yyyy-MM-dd")</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h3 class="h5 mb-0">Event Attendances</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model.EventAttendances.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Event</th>
+                                            <th>Location</th>
+                                            <th>Date</th>
+                                            <th>Registration Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var attendance in Model.EventAttendances)
+                                        {
+                                            <tr>
+                                                <td><a asp-page="/Admin/Events/Details" asp-route-id="@attendance.Event.id">@attendance.Event.title</a></td>
+                                                <td>@attendance.Event.location</td>
+                                                <td>@attendance.Event.date</td>
+                                                <td>@attendance.RegisteredDate.ToString("yyyy-MM-dd")</td>
+                                                <td><span class="badge @(attendance.Status == "Registered" ? "bg-success" : attendance.Status == "Cancelled" ? "bg-danger" : "bg-primary")">@attendance.Status</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <div class="text-muted mb-2">
+                                    <i class="fas fa-calendar-xmark fa-2x"></i>
+                                </div>
+                                <p class="mb-0">This user has not registered for any events yet.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        background-color: #007bff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .avatar-initials {
+        font-size: 40px;
+        color: white;
+        font-weight: bold;
+    }
+</style> 

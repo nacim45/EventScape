@@ -1,0 +1,549 @@
+@page "/AdminLegacy"
+@model soft20181_starter.Pages.AdminModel
+@{
+    ViewData["Title"] = "Admin Panel";
+}
+
+<div class="head">
+    <a>
+        <div class="logo2">
+            <img src="~/images/settings.png" id="icon2" alt="EventScape Logo">
+            <h1>Customise your website</h1>
+        </div>
+    </a>
+    <div id="div6">
+        <button id="btn1">increase the font</button>
+        <button id="btn2">decrease the font</button>
+        <button id="btn3">darker background</button>
+        <button id="btn4">lighter background</button>
+    </div>
+    <a asp-page="/Index">
+        <div class="logo">
+            <img src="~/images/ticket.png" class="icon" alt="EventScape Logo">
+            <h1>EventScape</h1>
+        </div>
+    </a>
+</div>
+
+<div class="auth-links">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <span class="welcome-user">Welcome, @User.Identity.Name!</span>
+        <a asp-page="/Account/Logout" style="display: inline-block; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-weight: bold; transition: all 0.3s ease; text-align: center; background-color: #854F6C; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">Logout</a>
+    }
+    else
+    {
+        <a asp-page="/Account/Login" class="auth-button login-button">Login</a>
+        <a asp-page="/Account/Register" class="auth-button register-button">Register</a>
+    }
+</div>
+
+<div class="navbar">
+    <button class="toggle">☰</button>
+    <ul class="navigation">
+        <li><a asp-page="/Index">Home</a></li>
+        <li><a asp-page="/Events">Events</a></li>
+        <li><a asp-page="/EventDetail">Details</a></li>
+        <li><a asp-page="/Contact">Contact</a></li>
+        <li><a asp-page="/Admin" class="active">Admin</a></li>
+    </ul>
+</div>
+
+<div class="admin-panel">
+    <h1>Admin Panel</h1>
+    
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert @(Model.StatusMessage.Contains("Error") ? "alert-danger" : "alert-success")">
+            @Model.StatusMessage
+        </div>
+    }
+
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active admin-tab-button" id="events-tab" data-toggle="tab" href="#events" role="tab">Event Management</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link admin-tab-button" id="users-tab" data-toggle="tab" href="#users" role="tab">User Management</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabContent">
+        <div class="tab-pane fade show active" id="events" role="tabpanel">
+            <h2>Event Management</h2>
+            
+            <!-- Add Event Form -->
+            <div class="card mb-4" style="margin-bottom: 250px !important;">
+                <div class="card-header">
+                    <h3>Add Event</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="AddEvent" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label asp-for="NewEvent.title">Title</label>
+                            <input asp-for="NewEvent.title" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="NewEvent.location">Location</label>
+                            <input asp-for="NewEvent.location" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="NewEvent.date">Date</label>
+                            <input asp-for="NewEvent.date" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="NewEvent.description">Description</label>
+                            <textarea asp-for="NewEvent.description" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="NewEvent.price">Price</label>
+                            <input asp-for="NewEvent.price" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Images (Up to 3)</label>
+                            <input type="file" name="Images" multiple class="form-control-file" accept="image/*" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Event</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- List of Events -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Existing Events</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Location</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Events != null && Model.Events.Any())
+                                {
+                                    @foreach (var eventItem in Model.Events)
+                                    {
+                                        <tr>
+                                            <td>@eventItem.title</td>
+                                            <td>@eventItem.location</td>
+                                            <td>@eventItem.date</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#editEventModal-@eventItem.id">
+                                                    Edit
+                                                </button>
+                                                <form method="post" asp-page-handler="DeleteEvent" style="display: inline;">
+                                                    <input type="hidden" name="eventId" value="@eventItem.id" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this event?')">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Edit Event Modal -->
+                                        <div class="modal fade" id="editEventModal-@eventItem.id" tabindex="-1" role="dialog" aria-labelledby="editEventModalLabel-@eventItem.id" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editEventModalLabel-@eventItem.id">Edit Event</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form method="post" asp-page-handler="EditEvent" enctype="multipart/form-data">
+                                                            <input type="hidden" name="EditEvent.id" value="@eventItem.id" />
+                                                            <div class="form-group">
+                                                                <label>Title</label>
+                                                                <input type="text" name="EditEvent.title" class="form-control" value="@eventItem.title" required />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Location</label>
+                                                                <input type="text" name="EditEvent.location" class="form-control" value="@eventItem.location" required />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Date</label>
+                                                                <input type="text" name="EditEvent.date" class="form-control" value="@eventItem.date" required />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Description</label>
+                                                                <textarea name="EditEvent.description" class="form-control" rows="3" required>@eventItem.description</textarea>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Price</label>
+                                                                <input type="text" name="EditEvent.price" class="form-control" value="@eventItem.price" required />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Current Images</label>
+                                                                <div class="d-flex flex-wrap">
+                                                                    @if (eventItem.images != null && eventItem.images.Any())
+                                                                    {
+                                                                        @foreach (var image in eventItem.images)
+                                                                        {
+                                                                            <div class="mr-2 mb-2" style="width: 100px;">
+                                                                                <img src="~/@image" class="img-thumbnail" style="width: 100%; height: auto;" alt="Event image" />
+                                                                            </div>
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <p>No images available</p>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Add New Images (Up to 3)</label>
+                                                                <input type="file" name="EditImages" multiple class="form-control-file" accept="image/*" />
+                                                            </div>
+                                                            <div class="form-group form-check">
+                                                                <input type="checkbox" name="ReplaceImages" class="form-check-input" id="replaceImagesCheck-@eventItem.id" />
+                                                                <label class="form-check-label" for="replaceImagesCheck-@eventItem.id">Replace existing images</label>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center">No events found</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="users" role="tabpanel">
+            <h2>User Management</h2>
+            
+            <!-- Add User Form -->
+            <div class="card mb-4" style="margin-bottom: 250px !important;">
+                <div class="card-header">
+                    <h3>Add User</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="AddUser">
+                        <div class="form-group">
+                            <label for="newUserName">Name</label>
+                            <input type="text" id="newUserName" name="Name" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserSurname">Surname</label>
+                            <input type="text" id="newUserSurname" name="Surname" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserEmail">Email</label>
+                            <input type="email" id="newUserEmail" name="Email" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserPassword">Password</label>
+                            <input type="password" id="newUserPassword" name="Password" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserRole">Role</label>
+                            <select id="newUserRole" name="Role" class="form-control" required>
+                                <option value="User">User</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- List of Users -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Existing Users</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Users != null && Model.Users.Any())
+                                {
+                                    @foreach (var user in Model.Users)
+                                    {
+                                        <tr>
+                                            <td>@user.Name @user.Surname</td>
+                                            <td>@user.Email</td>
+                                            <td>@user.Role</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#editUserModal-@user.Id">
+                                                    Edit
+                                                </button>
+                                                <form method="post" asp-page-handler="DeleteUser" style="display: inline;">
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Edit User Modal -->
+                                        <div class="modal fade" id="editUserModal-@user.Id" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel-@user.Id" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editUserModalLabel-@user.Id">Edit User</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form method="post" asp-page-handler="EditUser">
+                                                            <input type="hidden" name="Id" value="@user.Id" />
+                                                            <div class="form-group">
+                                                                <label>Name</label>
+                                                                <input type="text" name="Name" class="form-control" value="@user.Name" required />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Surname</label>
+                                                                <input type="text" name="Surname" class="form-control" value="@user.Surname" required />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Email</label>
+                                                                <input type="email" name="Email" class="form-control" value="@user.Email" required />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>New Password (leave blank to keep current)</label>
+                                                                <input type="password" name="Password" class="form-control" />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Role</label>
+                                                                <select name="Role" class="form-control" required>
+                                                                    @if (user.Role == "User")
+                                                                    {
+                                                                        <option value="User" selected>User</option>
+                                                                        <option value="Admin">Admin</option>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <option value="User">User</option>
+                                                                        <option value="Admin" selected>Admin</option>
+                                                                    }
+                                                                </select>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center">No users found</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p><b>&copy; @DateTime.Now.Year EventScape</b></p>
+    <a asp-page="/Events" class="footerbutton"><b>Browse upcoming events</b></a>
+    <a asp-page="/Contact" class="footerbutton"><b>Contact us!</b></a>
+</footer>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/slides.css">
+    <link rel="stylesheet" href="~/css/contact.css">
+    <style>
+        .admin-panel {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            margin-bottom: 450px; /* Increased space before footer even more */
+        }
+        
+        .nav-tabs {
+            margin-bottom: 30px;
+            border-bottom: none;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .admin-tab-button {
+            background-color: #854F6C;
+            color: white !important;
+            padding: 8px 15px !important;
+            border-radius: 4px !important;
+            font-weight: bold;
+            font-size: 16px;
+            border: none !important;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .admin-tab-button:hover, .admin-tab-button.active {
+            background-color: #854F6C !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: white !important;
+            border: none !important;
+        }
+        
+        .card {
+            margin-bottom: 100px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        
+        .card-header {
+            background-color: #BFACB5;
+            color: #522B5B;
+            padding: 15px 20px;
+        }
+        
+        .card-header h3 {
+            margin: 0;
+            font-weight: bold;
+        }
+        
+        .btn-sm {
+            margin-right: 5px;
+        }
+        
+        .welcome-user {
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Authentication links styling to match Index.cshtml */
+        .auth-links {
+            position: absolute;
+            top: 130px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 1000;
+            width: 150px;
+        }
+        
+        .auth-button {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .login-button {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .register-button {
+            background-color: #BFACB5;
+            color: #522B5B;
+            border: 1px solid #522B5B;
+        }
+        
+        .logout-button {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+        
+        .login-button:hover, .logout-button:hover {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        .register-button:hover {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .tab-pane {
+            margin-bottom: 300px; /* Increased margin to separate management sections from footer */
+        }
+        
+        /* Footer spacing */
+        footer {
+            margin-top: 200px; /* Increased for even more spacing */
+        }
+        
+        /* Override card margins */
+        .card {
+            margin-bottom: 100px !important;
+        }
+        
+        #events .card:last-child,
+        #users .card:last-child {
+            margin-bottom: 300px !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Bootstrap tabs
+            $('#adminTabs a').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+            
+            // Navbar toggle functionality
+            const toggleButton = document.querySelector('.toggle');
+            const navMenu = document.querySelector('.navigation');
+            
+            if (toggleButton && navMenu) {
+                toggleButton.addEventListener('click', () => {
+                    navMenu.classList.toggle('active');
+                });
+            }
+        });
+    </script>
+}

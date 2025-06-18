@@ -1,0 +1,648 @@
+@page
+@model soft20181_starter.Pages.PaymentModel
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<div class="payment-container">
+    <div class="payment-header">
+        <div class="header-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+        <h2>Secure Payment</h2>
+        <p class="secure-message">Your payment information is encrypted and secure</p>
+        <div class="total-amount">
+            <span class="amount-label">Total Amount:</span>
+            <span class="amount-value">£@Model.TotalAmount.ToString("0.00")</span>
+        </div>
+    </div>
+
+    <div class="payment-form">
+        <form id="payment-form">
+            <div class="form-section">
+                <h3><i class="fas fa-credit-card"></i> Payment Details</h3>
+                <div class="form-group">
+                    <label for="cardholder-name">
+                        <i class="fas fa-user"></i> Cardholder Name
+                    </label>
+                    <input type="text" id="cardholder-name" class="form-control" placeholder="Name as it appears on card" required>
+                </div>
+                <div class="form-group">
+                    <label for="card-element">
+                        <i class="fas fa-hashtag"></i> Card Number
+                    </label>
+                    <div id="card-element" class="form-control"></div>
+                    <div id="card-errors" class="text-danger" role="alert"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="card-expiry">
+                            <i class="fas fa-calendar-alt"></i> Expiry Date (MM/YY)
+                        </label>
+                        <div id="card-expiry" class="form-control"></div>
+                    </div>
+                    <div class="form-group half">
+                        <label for="card-cvc">
+                            <i class="fas fa-lock"></i> CVC
+                        </label>
+                        <div id="card-cvc" class="form-control"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-user"></i> Billing Information</h3>
+                <div class="form-group">
+                    <label for="name">
+                        <i class="fas fa-user-circle"></i> Full Name
+                    </label>
+                    <input type="text" id="name" class="form-control" value="@Model.UserName @Model.UserSurname" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    <input type="email" id="email" class="form-control" value="@Model.UserEmail" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="address">
+                        <i class="fas fa-map-marker-alt"></i> Billing Address
+                    </label>
+                    <textarea id="address" class="form-control" rows="3" placeholder="Enter your billing address"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="city">
+                            <i class="fas fa-city"></i> City
+                        </label>
+                        <input type="text" id="city" class="form-control" placeholder="Enter your city">
+                    </div>
+                    <div class="form-group half">
+                        <label for="postcode">
+                            <i class="fas fa-map-pin"></i> Postcode
+                        </label>
+                        <input type="text" id="postcode" class="form-control" placeholder="Enter your postcode">
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-summary">
+                <h3><i class="fas fa-receipt"></i> Payment Summary</h3>
+                <div class="summary-item">
+                    <span>Subtotal:</span>
+                    <span>£@Model.TotalAmount.ToString("0.00")</span>
+                </div>
+                <div class="summary-item">
+                    <span>Processing Fee:</span>
+                    <span>£0.00</span>
+                </div>
+                <div class="summary-item total">
+                    <span>Total:</span>
+                    <span>£@Model.TotalAmount.ToString("0.00")</span>
+                </div>
+            </div>
+
+            <div class="payment-methods">
+                <div class="payment-method-icons">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-amex"></i>
+                    <i class="fab fa-cc-discover"></i>
+                </div>
+            </div>
+
+            <button type="submit" id="submit-button" class="payment-button">
+                <span id="button-text">Pay Now</span>
+                <div id="spinner" class="spinner hidden"></div>
+            </button>
+
+            <div class="secure-payment-info">
+                <i class="fas fa-shield-alt"></i>
+                <p>Your payment is secured by Stripe's 256-bit SSL encryption</p>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .payment-container {
+            max-width: 800px;
+            margin: 150px auto 50px;
+            padding: 40px;
+            background-color: #BFACB5;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .payment-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            width: 100%;
+        }
+
+        .header-icon {
+            font-size: 40px;
+            color: #522B5B;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .payment-header h2 {
+            color: #522B5B;
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .secure-message {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .total-amount {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .total-amount:hover {
+            transform: translateY(-2px);
+        }
+
+        .payment-form {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 30px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+
+        .form-section:hover {
+            transform: translateY(-2px);
+        }
+
+        .form-section h3 {
+            color: #522B5B;
+            font-size: 20px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section h3 i {
+            color: #522B5B;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .form-group.half {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: #522B5B;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .form-group label i {
+            color: #522B5B;
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #BFACB5;
+            border-radius: 8px;
+            background-color: #fff;
+            color: #333;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            border-color: #522B5B;
+            box-shadow: 0 0 0 3px rgba(82, 43, 91, 0.1);
+            outline: none;
+        }
+
+        #card-element,
+        #card-expiry,
+        #card-cvc {
+            padding: 15px;
+            border: 2px solid #BFACB5;
+            border-radius: 8px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #card-element.StripeElement--focus,
+        #card-expiry.StripeElement--focus,
+        #card-cvc.StripeElement--focus {
+            border-color: #522B5B;
+            box-shadow: 0 0 0 3px rgba(82, 43, 91, 0.1);
+        }
+
+        .text-danger {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff5f5;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .payment-summary {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+
+        .payment-summary:hover {
+            transform: translateY(-2px);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 16px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-item.total {
+            border-top: 2px solid #BFACB5;
+            padding-top: 15px;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #522B5B;
+            font-size: 18px;
+        }
+
+        .payment-methods {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .payment-method-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 32px;
+            color: #666;
+        }
+
+        .payment-method-icons i {
+            transition: transform 0.3s ease;
+        }
+
+        .payment-method-icons i:hover {
+            transform: scale(1.2);
+            color: #522B5B;
+        }
+
+        .payment-button {
+            width: 100%;
+            max-width: 700px;
+            padding: 18px;
+            background-color: #522B5B;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .payment-button:hover {
+            background-color: #854F6C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(82, 43, 91, 0.2);
+        }
+
+        .payment-button:disabled {
+            background-color: #BFACB5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @@keyframes spin {
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .secure-payment-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+            width: 100%;
+            text-align: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .secure-payment-info i {
+            color: #28a745;
+            font-size: 18px;
+        }
+
+        .amount-label {
+            color: #522B5B;
+            font-size: 18px;
+            margin-right: 10px;
+        }
+
+        .amount-value {
+            color: #522B5B;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .payment-container {
+                margin: 100px 20px 50px;
+                padding: 20px;
+                width: 90%;
+            }
+
+            .payment-form {
+                width: 100%;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .form-group.half {
+                width: 100%;
+            }
+
+            .payment-button {
+                width: 100%;
+            }
+
+            .payment-method-icons {
+                font-size: 24px;
+                gap: 15px;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stripe = Stripe('@Model.StripePublicKey');
+            const elements = stripe.elements();
+            
+            // Custom styling for the card elements
+            const style = {
+                base: {
+                    color: '#522B5B',
+                    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                    fontSmoothing: 'antialiased',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: '#BFACB5'
+                    },
+                    ':-webkit-autofill': {
+                        color: '#522B5B'
+                    }
+                },
+                invalid: {
+                    color: '#dc3545',
+                    iconColor: '#dc3545',
+                    '::placeholder': {
+                        color: '#dc3545'
+                    }
+                }
+            };
+
+            // Create card elements
+            const cardElement = elements.create('cardNumber', { style });
+            const cardExpiry = elements.create('cardExpiry', { style });
+            const cardCvc = elements.create('cardCvc', { style });
+
+            // Mount the elements
+            cardElement.mount('#card-element');
+            cardExpiry.mount('#card-expiry');
+            cardCvc.mount('#card-cvc');
+
+            const form = document.getElementById('payment-form');
+            const submitButton = document.getElementById('submit-button');
+            const spinner = document.getElementById('spinner');
+            const buttonText = document.getElementById('button-text');
+
+            // Real-time validation feedback
+            const displayError = document.getElementById('card-errors');
+            
+            function handleCardError(event) {
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                    submitButton.disabled = true;
+                } else {
+                    displayError.textContent = '';
+                    submitButton.disabled = false;
+                }
+            }
+
+            cardElement.addEventListener('change', handleCardError);
+            cardExpiry.addEventListener('change', handleCardError);
+            cardCvc.addEventListener('change', handleCardError);
+
+            // Form submission
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                // Disable the submit button to prevent double submission
+                submitButton.disabled = true;
+                spinner.classList.remove('hidden');
+                buttonText.textContent = 'Processing...';
+
+                try {
+                    // Create payment intent
+                    const response = await fetch('/api/payment/create-payment-intent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: @Model.TotalAmount,
+                            email: document.getElementById('email').value,
+                            name: document.getElementById('name').value,
+                            cardholderName: document.getElementById('cardholder-name').value,
+                            address: document.getElementById('address').value,
+                            city: document.getElementById('city').value,
+                            postcode: document.getElementById('postcode').value
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+
+                    // Handle 3D Secure authentication if required
+                    if (data.requiresAction) {
+                        const { error: actionError } = await stripe.handleCardAction(data.clientSecret);
+                        if (actionError) {
+                            throw actionError;
+                        }
+                    }
+
+                    // Confirm the payment
+                    const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+                        payment_method: {
+                            card: cardElement,
+                            billing_details: {
+                                name: document.getElementById('cardholder-name').value,
+                                email: document.getElementById('email').value,
+                                address: {
+                                    line1: document.getElementById('address').value,
+                                    city: document.getElementById('city').value,
+                                    postal_code: document.getElementById('postcode').value
+                                }
+                            }
+                        }
+                    });
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    if (paymentIntent.status === 'succeeded') {
+                        // Send email with ticket
+                        await fetch('/api/payment/send-ticket-email', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: document.getElementById('email').value,
+                                name: document.getElementById('name').value,
+                                paymentIntentId: paymentIntent.id,
+                                amount: @Model.TotalAmount,
+                                address: document.getElementById('address').value,
+                                city: document.getElementById('city').value,
+                                postcode: document.getElementById('postcode').value
+                            })
+                        });
+
+                        // Show success message before redirect
+                        buttonText.textContent = 'Payment Successful!';
+                        setTimeout(() => {
+                            window.location.href = '/PaymentSuccess?paymentIntentId=' + paymentIntent.id;
+                        }, 1000);
+                    }
+                } catch (error) {
+                    displayError.textContent = error.message;
+                    submitButton.disabled = false;
+                    spinner.classList.add('hidden');
+                    buttonText.textContent = 'Pay Now';
+                }
+            });
+        });
+    </script>
+} 

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "1",
+    "image": "images/json51.png",
+    "title": "Birmingham Tech Expo 2025",
+    "description": "Join top innovators at the Birmingham Tech Expo to explore the latest in AI, robotics, and blockchain. Attend hands-on workshops, panel discussions, and a tech showcase. Perfect for those looking to stay ahead in the tech world.",
+    "date": "Jan 14-16, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=birmingham?id=1",
+    "location": "birmingham"
+  },
+  {
+    "id": "2",
+    "image": "images/json52.png",
+    "title": "AI and Robotics Symposium",
+    "description": "Dive deep into AI and robotics with industry leaders discussing automation, ethical AI, and real-world applications. Great networking opportunities and insights into the future of tech.",
+    "date": "Feb 3-5, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=birmingham?id=2",
+    "location": "birmingham"
+  },
+  {
+    "id": "3",
+    "image": "images/json53.png",
+    "title": "Future of Science and Innovation Forum",
+    "description": "Join renowned scientists to explore breakthroughs in biology, physics, and space exploration. Participate in workshops and engage in discussions on the latest scientific advancements.",
+    "date": "Mar 10-12, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=birmingham?id=3",
+    "location": "birmingham"
+  },
+  {
+    "id": "4",
+    "image": "images/json54.png",
+    "title": "Birmingham Startup Week 2025",
+    "description": "Connect with entrepreneurs and investors to boost your startup. Attend workshops on scaling businesses, pitching ideas, and creating winning business models. Free and paid options available for every budget.",
+    "date": "Apr 7-11, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=birmingham?id=4",
+    "location": "birmingham"
+  },
+  {
+    "id": "5",
+    "image": "images/json55.png",
+    "title": "Innovative Business Strategies Conference",
+    "description": "Learn strategies that have disrupted industries from top entrepreneurs. Topics include agile management, growth hacking, and digital transformation. This is your chance to learn from the best.",
+    "date": "May 4-6, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=birmingham?id=5",
+    "location": "birmingham"
+  },
+  {
+    "id": "6",
+    "image": "images/json56.png",
+    "title": "Sustainable Tech and Green Innovation Summit",
+    "description": "Explore the future of sustainable technologies and eco-friendly innovations at this summit. Topics cover renewable energy, sustainable business practices, and green tech solutions.",
+    "date": "Jun 10-12, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=birmingham?id=6",
+    "location": "birmingham"
+  },
+  {
+    "id": "7",
+    "image": "images/json57.png",
+    "title": "Space Exploration and Technology Conference",
+    "description": "Join experts in the space industry to discuss future missions, satellite technologies, and the role of technology in space exploration. A must-attend for space enthusiasts and innovators.",
+    "date": "Jul 15-17, 2025",
+    "price": "free",
+    "link": "/EventDetail?location=birmingham?id=7",
+    "location": "birmingham"
+  },
+  {
+    "id": "8",
+    "image": "images/json58.png",
+    "title": "Digital Transformation Summit 2025",
+    "description": "Unlock the potential of digital technologies to improve your business. Join panels, case studies, and workshops on AI, cloud computing, and automation, and stay ahead in the digital transformation journey.",
+    "date": "Aug 5-7, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=birmingham?id=8",
+    "location": "birmingham"
+  },
+  {
+    "id": "9",
+    "image": "images/json59.png",
+    "title": "Cybersecurity and Data Protection Forum",
+    "description": "Learn about the latest trends in cybersecurity and how to protect your data in a rapidly changing digital landscape. Topics include AI-driven security and privacy laws.",
+    "date": "Sep 3-5, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=birmingham?id=9",
+    "location": "birmingham"
+  },
+  {
+    "id": "10",
+    "image": "images/json510.png",
+    "title": "Tech for Good: Social Impact Innovation Conference",
+    "description": "Learn how technology is solving global issues like poverty, climate change, and social inequality. Meet innovators creating impactful tech solutions and be part of the change.",
+    "date": "Oct 12-14, 2025",
+    "price": "free",
+    "link": "/EventDetail?location=birmingham?id=10",
+    "location": "birmingham"
+  },
+  {
+    "id": "11",
+    "image": "images/json511.png",
+    "title": "The Future of Work and Workforce Development Conference",
+    "description": "Join experts in discussing how AI, automation, and digital tools are reshaping the workplace. Learn strategies to build a future-ready workforce and manage remote teams effectively.",
+    "date": "Nov 1-3, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=birmingham?id=11",
+    "location": "birmingham"
+  },
+  {
+    "id": "12",
+    "image": "images/json512.png",
+    "title": "Smart Cities and IoT Expo 2025",
+    "description": "Discover how smart technologies are transforming cities with IoT solutions that enhance sustainability, safety, and efficiency. Ideal for tech lovers and urban innovators.",
+    "date": "Dec 5-7, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=birmingham?id=12",
+    "location": "birmingham"
+  },
+  {
+    "id": "13",
+    "image": "images/json513.png",
+    "title": "Digital Health and MedTech Conference",
+    "description": "Explore how digital technologies like telemedicine and health data analytics are revolutionizing healthcare. This conference covers innovative health tech and wearable devices.",
+    "date": "Jan 20-22, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=birmingham?id=13",
+    "location": "birmingham"
+  },
+  {
+    "id": "14",
+    "image": "images/json514.png",
+    "title": "Blockchain and Fintech Summit 2025",
+    "description": "Delve into the future of cryptocurrency, blockchain, and decentralized finance. This summit covers the latest in fintech, digital banking, and blockchain technology.",
+    "date": "Feb 20-22, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=birmingham?id=14",
+    "location": "birmingham"
+  },
+  {
+    "id": "15",
+    "image": "images/json515.png",
+    "title": "Women in Tech Conference 2025",
+    "description": "Celebrate the achievements of women in technology at this empowering event. Network with female innovators, attend inspirational talks, and explore mentorship opportunities.",
+    "date": "Mar 18-20, 2025",
+    "price": "free",
+    "link": "/EventDetail?location=birmingham?id=15",
+    "location": "birmingham"
+  }
+]

@@ -1,0 +1,149 @@
+@page "{id:int}"
+@model soft20181_starter.Pages.Admin.Events.DetailsModel
+@{
+    ViewData["Title"] = "Event Details - EventScape";
+    Layout = "_Layout";
+}
+
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4">Event Details</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/Admin">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item"><a asp-page="Index">Events</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-auto align-self-center">
+            <div class="btn-group" role="group">
+                <a asp-page="Edit" asp-route-id="@Model.Event.id" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a asp-page="Delete" asp-route-id="@Model.Event.id" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+                <a asp-page="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Event != null)
+    {
+        <div class="row">
+            <div class="col-md-5">
+                @if (Model.Event.images.Any())
+                {
+                    <div id="eventCarousel" class="carousel slide mb-4 shadow-sm" data-bs-ride="carousel">
+                        <div class="carousel-inner rounded">
+                            @for (int i = 0; i < Model.Event.images.Count; i++)
+                            {
+                                <div class="carousel-item @(i == 0 ? "active" : "")">
+                                    <img src="@Model.Event.images[i]" class="d-block w-100" alt="Event image">
+                                </div>
+                            }
+                        </div>
+                        @if (Model.Event.images.Count > 1)
+                        {
+                            <button class="carousel-control-prev" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#eventCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="bg-light rounded p-5 text-center mb-4 shadow-sm">
+                        <i class="fas fa-image fa-4x text-secondary mb-3"></i>
+                        <p class="mb-0">No images available</p>
+                    </div>
+                }
+            </div>
+            <div class="col-md-7">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h2 class="h3 mb-0">@Model.Event.title</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h4 class="h6 text-muted">Event Details</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Location:</strong> @Model.Event.location</p>
+                                    <p class="mb-1"><strong>Date:</strong> @Model.Event.date</p>
+                                    <p class="mb-1"><strong>Price:</strong> @Model.Event.price</p>
+                                </div>
+                                <div class="col-md-6">
+                                    @if (!string.IsNullOrEmpty(Model.Event.link))
+                                    {
+                                        <p class="mb-1">
+                                            <strong>Website:</strong>
+                                            <a href="@Model.Event.link" target="_blank">@Model.Event.link</a>
+                                        </p>
+                                    }
+                                    <p class="mb-1"><strong>Attendees:</strong> @Model.AttendeeCount</p>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="h6 text-muted">Description</h4>
+                        <p class="mb-0">@Model.Event.description</p>
+                    </div>
+                </div>
+                
+                @if (Model.Attendees.Any())
+                {
+                    <div class="card mt-4 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h3 class="h5 mb-0">Attendee List</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Registration Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var attendee in Model.Attendees)
+                                        {
+                                            <tr>
+                                                <td>@attendee.User.Name @attendee.User.Surname</td>
+                                                <td>@attendee.User.Email</td>
+                                                <td>@attendee.RegisteredDate.ToString("yyyy-MM-dd")</td>
+                                                <td><span class="badge @(attendee.Status == "Registered" ? "bg-success" : attendee.Status == "Cancelled" ? "bg-danger" : "bg-primary")">@attendee.Status</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <h4 class="alert-heading">Event Not Found!</h4>
+            <p>The event you're looking for does not exist or has been deleted.</p>
+            <hr>
+            <div class="mb-0">
+                <a asp-page="Index" class="btn btn-outline-danger">Return to Events List</a>
+            </div>
+        </div>
+    }
+</div> 

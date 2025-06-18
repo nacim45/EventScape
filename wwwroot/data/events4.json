@@ -1,0 +1,152 @@
+[
+  {
+    "id": "1",
+    "title": "Liverpool Art and Culture Festival",
+    "image": "images/json41.png",
+    "description": "Celebrate Liverpool's vibrant art and culture scene with exhibitions, performances, and interactive workshops.",
+    "date": "January 10-12, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=liverpool?id=1",
+    "location": "liverpool"
+  },
+  {
+    "id": "2",
+    "title": "Personal Finance Workshop",
+    "image": "images/json42.png",
+    "description": "Learn budgeting, saving, and investment strategies to achieve financial independence.",
+    "date": "January 15-16, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=liverpool?id=2",
+    "location": "liverpool"
+  },
+  {
+    "id": "3",
+    "title": "Liverpool Film and Media Festival",
+    "image": "images/json43.png",
+    "description": "Experience a showcase of films, documentaries, and creative media projects from emerging artists.",
+    "date": "February 5-7, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=liverpool?id=3",
+    "location": "liverpool"
+  },
+  {
+    "id": "4",
+    "title": "Startup Accelerator Workshop",
+    "image": "images/json44.png",
+    "description": "Kickstart your business idea with guidance on planning, funding, and scaling from industry experts.",
+    "date": "February 10-12, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=liverpool?id=4",
+    "location": "liverpool"
+  },
+  {
+    "id": "5",
+    "title": "Health and Fitness Expo",
+    "image": "images/json45.png",
+    "description": "Explore fitness trends, healthy eating tips, and wellness solutions to improve your lifestyle.",
+    "date": "February 20-21, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=liverpool?id=5",
+    "location": "liverpool"
+  },
+  {
+    "id": "6",
+    "title": "Digital Marketing Conference",
+    "image": "images/json46.png",
+    "description": "Stay updated on the latest marketing trends and techniques with insights from industry leaders.",
+    "date": "March 1-2, 2025",
+    "price": "£30",
+    "link": "/EventDetail?location=liverpool?id=6",
+    "location": "liverpool"
+  },
+  {
+    "id": "7",
+    "title": "Liverpool Tech Showcase",
+    "image": "images/json47.png",
+    "description": "Discover cutting-edge technologies and innovative startups shaping the future of tech.",
+    "date": "March 8-10, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=liverpool?id=7",
+    "location": "liverpool"
+  },
+  {
+    "id": "8",
+    "title": "Leadership Skills Workshop",
+    "image": "images/json48.png",
+    "description": "Develop your leadership skills with practical exercises and expert coaching.",
+    "date": "March 12-13, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=liverpool?id=8",
+    "location": "liverpool"
+  },
+  {
+    "id": "9",
+    "title": "Sustainable Living Fair",
+    "image": "images/json49.png",
+    "description": "Learn how to live sustainably with eco-friendly products, talks, and workshops.",
+    "date": "March 15-16, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=liverpool?id=9",
+    "location": "liverpool"
+  },
+  {
+    "id": "10",
+    "title": "Digital Skills Bootcamp",
+    "image": "images/json410.png",
+    "description": "Upgrade your digital skills in this intensive bootcamp covering essential tech tools.",
+    "date": "January 20-22, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=liverpool?id=10",
+    "location": "liverpool"
+  },
+  {
+    "id": "11",
+    "title": "Photography and Storytelling Workshop",
+    "image": "images/json411.png",
+    "description": "Learn to capture compelling images and tell stories through photography.",
+    "date": "January 28-29, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=liverpool?id=11",
+    "location": "liverpool"
+  },
+  {
+    "id": "12",
+    "title": "AI and Robotics Forum",
+    "image": "images/json412.png",
+    "description": "Join discussions and demos on the latest advancements in AI and robotics technology.",
+    "date": "February 8-9, 2025",
+    "price": "£30",
+    "link": "/EventDetail?location=liverpool?id=12",
+    "location": "liverpool"
+  },
+  {
+    "id": "13",
+    "title": "Culinary Arts Festival",
+    "image": "images/json413.png",
+    "description": "Taste and learn from top chefs with live cooking demos and food tastings.",
+    "date": "February 18-19, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=liverpool?id=13",
+    "location": "liverpool"
+  },
+  {
+    "id": "14",
+    "title": "Mindfulness and Meditation Retreat",
+    "image": "images/json414.png",
+    "description": "Rejuvenate with guided meditation sessions and mindfulness practices.",
+    "date": "March 20-22, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=liverpool?id=14",
+    "location": "liverpool"
+  },
+  {
+    "id": "15",
+    "title": "Game Development Workshop",
+    "image": "images/json415.png",
+    "description": "Learn the basics of game development and create your own interactive games.",
+    "date": "March 25-27, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=liverpool?id=15",
+    "location": "liverpool"
+  }
+]

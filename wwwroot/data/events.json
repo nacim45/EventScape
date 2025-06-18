@@ -1,0 +1,152 @@
+[
+  {
+    "id": "1",
+    "title": "Nottingham Festival of Science and Curiosity 2025",
+    "images": ["images/json1-2.png", "images/json1.png", "images/json1-3.png"],
+    "description": "Celebrating its 10th anniversary, this popular festival returns during the February half-term. Enjoy interactive, free, and fun events across Nottinghamshire, showcasing the exciting world of science and curiosity around us every day.",
+    "date": "February 2025",
+    "price": "£5",
+    "link": "/EventDetail?location=nottingham?id=1",
+    "location": "nottingham"
+  },
+  {
+    "id": "2",
+    "title": "The History & Endurance of Witchcraft with Dr. Julia Phillips",
+    "images": [ "images/json2.png", "images/json2-2.png", "images/json2-3.png" ],
+    "description": "Join Dr. Julia Phillips for an insightful talk on the history and enduring fascination with witchcraft. Explore the cultural and historical contexts that have shaped perceptions of witchcraft over the centuries.",
+    "date": "February 5, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=nottingham?id=2",
+    "location": "nottingham"
+  },
+  {
+    "id": "3",
+    "title": "Family Science Day",
+    "images": [ "images/json3.png", "images/json3-2.png", "images/json3-3.png" ],
+    "description": "A fun-filled day for the whole family, featuring hands-on science experiments, interactive demonstrations, and exciting workshops for kids and adults alike.",
+    "date": "February 10, 2025",
+    "price": "£5",
+    "link": "/EventDetail?location=nottingham?id=3",
+    "location": "nottingham"
+  },
+  {
+    "id": "4",
+    "title": "Art in the Park",
+    "images": [ "images/json4.png", "images/json4-2.png", "images/json4-3.png" ],
+    "description": "Explore stunning artwork from local and international artists in this open-air art exhibition held in Nottingham's beautiful parks.",
+    "date": "February 14, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=nottingham?id=4",
+    "location": "nottingham"
+  },
+  {
+    "id": "5",
+    "title": "Creative Writing Workshop",
+    "images": [ "images/json5.png", "images/json5-2.png", "images/json5-3.png" ],
+    "description": "Join Nottingham's top authors and poets for a hands-on workshop. Perfect for aspiring writers, this session will spark your creativity and improve your storytelling skills.",
+    "date": "February 20, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=nottingham?id=5",
+    "location": "nottingham"
+  },
+  {
+    "id": "6",
+    "title": "Nottingham - Powered Up Business Networking",
+    "images": [ "images/json6.png", "images/json6-2.png", "images/json6-3.png" ],
+    "description": "Connect with local entrepreneurs and business professionals at this networking event. Share ideas, build relationships, and discover new opportunities to grow your business.",
+    "date": "January 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=nottingham?id=6",
+    "location": "nottingham"
+  },
+  {
+    "id": "7",
+    "title": "Sustainability and the Future: A Talk by Dr. Emma Green",
+    "images": [ "images/json7.png", "images/json7-2.png", "images/json7-3.png" ],
+    "description": "Join Dr. Emma Green for an engaging discussion on sustainability and its role in shaping Nottingham's future. Discover practical ways to make a positive impact in your community.",
+    "date": "February 25, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=nottingham?id=7",
+    "location": "nottingham"
+  },
+  {
+    "id": "8",
+    "title": "Science of the Stars: A Night of Astronomy",
+    "images": [ "images/json8.png", "images/json8-2.png", "images/json8-3.png" ],
+    "description": "Explore the wonders of the universe with Nottingham's astronomy experts. Enjoy stargazing sessions, informative talks, and interactive exhibits suitable for all ages.",
+    "date": "February 18, 2025",
+    "price": "£5",
+    "link": "/EventDetail?location=nottingham?id=8",
+    "location": "nottingham"
+  },
+  {
+    "id": "9",
+    "title": "Artisan Fair at Nottingham Contemporary",
+    "images": [ "images/json9.png", "images/json9-2.png", "images/json9-3.png" ],
+    "description": "Browse unique handcrafted items by local artists and makers at Nottingham Contemporary's artisan fair. Find one-of-a-kind treasures and support your local art community.",
+    "date": "February 20, 2025",
+    "price": "free",
+    "link": "/EventDetail?location=nottingham?id=9",
+    "location": "nottingham"
+  },
+  {
+    "id": "10",
+    "title": "Tech Innovations Showcase",
+    "images": [ "images/json10.png", "images/json10-2.png", "images/json10-3.png" ],
+    "description": "Discover cutting-edge technology and innovative ideas from Nottingham's brightest minds. Attend talks, demonstrations, and exhibits showcasing the latest in tech and design.",
+    "date": "March 1, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=nottingham?id=10",
+    "location": "nottingham"
+  },
+  {
+    "id": "11",
+    "title": "Art and Technology: A Collaboration at Nottingham Arts Centre",
+    "images": [ "images/json11.png", "images/json11-2.png", "images/json11-3.png" ],
+    "description": "This event explores the intersection of art and technology, featuring local artists who incorporate digital tools and media into their work. Attendees can also participate in interactive art workshops.",
+    "date": "February 28, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=nottingham?id=11",
+    "location": "nottingham"
+  },
+  {
+    "id": "12",
+    "title": "Nottingham Poetry Slam",
+    "images": [ "images/json12-2.png", "images/json12.png", "images/json12-3.png" ],
+    "description": "A thrilling evening of poetry and spoken word performances from local talent. Join the competition to see who will be crowned Nottingham's top poet.",
+    "date": "February 26, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=nottingham?id=12",
+    "location": "nottingham"
+  },
+  {
+    "id": "13",
+    "title": "Nottingham Museum's Interactive History Exhibition",
+    "images": [ "images/json13.png", "images/json13-2.png", "images/json13-3.png" ],
+    "description": "Step back in time with this interactive exhibition at the Nottingham Museum. Explore the rich history of Nottingham through engaging displays and hands-on activities.",
+    "date": "January 2025",
+    "price": "£5",
+    "link": "/EventDetail?location=nottingham?id=13",
+    "location": "nottingham"
+  },
+  {
+    "id": "14",
+    "title": "Women in Tech Panel Discussion",
+    "images": [ "images/json14.png", "images/json14-2.png", "images/json14-3.png" ],
+    "description": "Join a panel of leading women in the tech industry as they discuss their careers, challenges, and the future of women in technology. An inspiring event for aspiring young women in tech.",
+    "date": "February 22, 2025",
+    "price": "free",
+    "link": "/EventDetail?location=nottingham?id=14",
+    "location": "nottingham"
+  },
+  {
+    "id": "15",
+    "title": "Green Architecture Workshop",
+    "images": [ "images/json15.png", "images/json15-2.png", "images/json15-3.png" ],
+    "description": "Learn about sustainable building practices at this hands-on workshop. Discover how green architecture can help address climate change and improve urban environments.",
+    "date": "January 30, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=nottingham?id=15",
+    "location": "nottingham"
+  }
+]

@@ -1,0 +1,245 @@
+@page
+@model soft20181_starter.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Log In";
+}
+
+<div class="head">
+    <a asp-page="/Index">
+        <div class="logo">
+            <img src="~/images/ticket.png" class="icon" alt="EventScape Logo">
+            <h1>EventScape</h1>
+        </div>
+    </a>
+</div>
+
+<div class="navbar">
+    <button class="toggle">☰</button>
+    <ul class="navigation">
+        <li><a asp-page="/Index">Home</a></li>
+        <li><a asp-page="/Events">Events</a></li>
+        <li><a asp-page="/EventDetail">Details</a></li>
+        <li><a asp-page="/Contact">Contact</a></li>
+        <li><a asp-page="/Admin/Index">Admin</a></li>
+    </ul>
+</div>
+
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Log In</h2>
+        
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert-error">
+                @Model.ErrorMessage
+            </div>
+        }
+        
+        <form method="post">
+            <div class="form-group">
+                <label for="LoginInput_Email">Email</label>
+                <input asp-for="LoginInput.Email" class="form-control" required type="email" id="LoginInput_Email" placeholder="Enter your email" />
+                <span asp-validation-for="LoginInput.Email" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="LoginInput_Password">Password</label>
+                <input asp-for="LoginInput.Password" class="form-control" required type="password" id="LoginInput_Password" placeholder="Enter your password" />
+                <span asp-validation-for="LoginInput.Password" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox">
+                    <input asp-for="LoginInput.RememberMe" id="LoginInput_RememberMe" />
+                    <label for="LoginInput_RememberMe">Remember me</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn-login">Log In</button>
+            </div>
+            
+            <div class="register-link">
+                Don't have an account? <a asp-page="./Register">Register here</a>
+            </div>
+            
+            <div class="admin-link">
+                <hr />
+                <a asp-page="/Admin/Index" class="btn-admin">Access Admin Dashboard</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer>
+    <p><b>&copy; @DateTime.Now.Year EventScape</b></p>
+    <a asp-page="/Events" class="footerbutton"><b>Browse upcoming events</b></a>
+    <a asp-page="/Contact" class="footerbutton"><b>Contact us!</b></a>
+</footer>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/slides.css">
+    <link rel="stylesheet" href="~/css/contact.css">
+    <style>
+        .head {
+            margin-bottom: 40px;
+        }
+        
+        .navbar {
+            margin-bottom: 30px;
+        }
+        
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+            padding: 20px;
+        }
+        
+        .auth-box {
+            background-color: #BFACB5;
+            border-radius: 10px;
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .auth-box h2 {
+            color: #522B5B;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #522B5B;
+            border-radius: 4px;
+            background-color: #ffffff;
+            color: #333;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            border-color: #854F6C;
+            outline: none;
+            box-shadow: 0 0 8px rgba(82, 43, 91, 0.5);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #522B5B;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .btn-login {
+            background-color: #522B5B;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn-login:hover {
+            background-color: #854F6C;
+        }
+        
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox input {
+            width: auto;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #522B5B;
+        }
+        
+        .register-link a {
+            color: #522B5B;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .text-danger {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .admin-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #522B5B;
+        }
+        
+        .admin-link hr {
+            margin-bottom: 15px;
+            border-color: #ddd;
+        }
+        
+        .admin-link p {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .btn-admin {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            text-align: center;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        .btn-admin:hover {
+            background-color: #854F6C;
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/javascript.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+}

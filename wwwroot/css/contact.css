@@ -1,0 +1,415 @@
+﻿.navbar {
+    position: fixed;
+    top: 15px;
+    left: 49%;
+    transform: translateX(-50%); /* Shift back to center */
+    padding: 8px 16px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    z-index: 1000;
+    background-color: #f5f5f5;
+    width: max-content;
+    display: flex;
+    justify-content: center;
+}
+
+.toggle {
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #522B5B;
+    transition: all 0.5s ease-in-out;
+}
+
+.navigation {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    display: none;
+    flex-direction: row;
+    gap: 10px;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+    .navigation.active {
+        display: flex;
+    }
+
+    .navigation li a {
+        text-decoration: none;
+        color: #7F7B82;
+        padding: 10px;
+        background-color: none;
+        text-align: center;
+        width: auto;
+        transition: all 0.5s ease-in-out;
+    }
+
+        .navigation li a:hover {
+            font-weight: 900;
+            display: inline-block;
+            transform: scale(1.3);
+            color: #522B5B;
+        }
+
+        .navigation li a:not(:hover) {
+            color: #7F7B82;
+            font-size: 14px;
+            font-weight: lighter;
+        }
+
+.div {
+    padding: 30px;
+    justify-content: center;
+    background-color: #BFACB5;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    margin-top: 50px;
+    position: relative;
+}
+
+form {
+    display: inline-flex;
+    flex-direction: column;
+}
+
+label {
+    padding-right: 5px;
+    margin-bottom: 8px;
+    color: #522B5B;
+    font-weight: bold;
+}
+
+input {
+    margin-bottom: 16px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: fit-content;
+    box-sizing: border-box;
+}
+
+button, #button1 {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #522B5B;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+#button1 {
+    background-color: #BFACB5;
+    color: #522B5B;
+    width: fit-content;
+    margin-top: 15px;
+    position: absolute;
+    left: 90px;
+    top: 490px;
+}
+
+    #button1:hover, #button3:hover {
+        background-color: #854F6C;
+        transform: scale(0.8);
+        color: whitesmoke;
+    }
+
+button:hover {
+    transform: scale(0.8);
+    background-color: #854F6C;
+    color: white;
+}
+
+#button2 {
+    text-align: center;
+    align-content: center;
+}
+
+.location-button {
+    position: absolute;
+    display: inline-block;
+    top: 0;
+    margin-top: 200px;
+    width: auto;
+    text-align: center;
+    display: inline-block;
+    transition: all 1s ease;
+    cursor: pointer;
+    margin-right: 30px;
+}
+
+.location-button1 {
+    position: absolute;
+    display: inline-block;
+    width: auto;
+    text-align: center;
+    display: inline-block;
+    transition: all 1s ease;
+    cursor: pointer;
+    margin-right: 10px;
+    top: 0;
+    margin-top: 650px;
+}
+
+.circle-btn:hover {
+    background-color: #BFACB5;
+    transform: scale(1);
+}
+
+.circle-btn {
+    background-color: #BFACB5;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.location-icon {
+    width: 24px;
+    height: auto;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.location-links-container {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    width: auto;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.right {
+    display: flex;
+    justify-content: flex-start;
+    padding-right: 20px;
+}
+
+.left {
+    display: flex;
+    justify-content: flex-start;
+    margin-right: 150px;
+}
+
+.location-link {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 5px;
+    text-align: center;
+    display: block;
+    opacity: 1;
+    margin: 0 10px;
+    transition: all 0.3s ease;
+}
+
+    .location-link:hover {
+        transform: scale(130%);
+        color: #522B5B;
+        transition: all 0.3s ease;
+    }
+
+.circle-btn.expanded {
+    width: calc(69rem);
+    height: 50px;
+    border-radius: 25px;
+}
+
+.circle-btn:active {
+    width: 50px;
+}
+
+.circle-btn.expanded + .location-links-container {
+    display: flex;
+}
+
+    .circle-btn.expanded + .location-links-container .location-link {
+        display: flex;
+    }
+
+    .circle-btn.expanded + .location-links-container .location-link {
+        opacity: 1;
+    }
+
+.wrapper {
+    display: flex;
+    list-style: none;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    padding-top: 35px;
+    width: fit-content;
+    max-width: 100%;
+    flex-wrap: wrap; /* Allow icons to wrap on smaller screens */
+    box-sizing: border-box;
+}
+
+    .wrapper .icon {
+        position: relative;
+        margin: 10px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+        .wrapper .icon img {
+            width: 100%;
+            height: 100%;
+            mix-blend-mode: screen; /* Make background transparent */
+        }
+
+    .wrapper .tooltip {
+        position: absolute;
+        top: -45px;
+        font-size: 14px;
+        padding: 5px 8px;
+        background-color: #333;
+        color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease, top 0.3s ease;
+    }
+
+        .wrapper .tooltip::before {
+            position: absolute;
+            content: "";
+            height: 8px;
+            width: 8px;
+            background: #333;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+        }
+
+    .wrapper .icon:hover .tooltip {
+        top: -55px;
+        opacity: 1;
+    }
+
+    .wrapper .linkedin:hover .tooltip,
+    .wrapper .linkedin:hover .tooltip::before {
+        background-color: #0077b5; /* LinkedIn color */
+    }
+
+    .wrapper .email:hover .tooltip,
+    .wrapper .email:hover .tooltip::before {
+        background-color: #ea4335; /* Email color */
+    }
+
+    .wrapper .instagram:hover .tooltip,
+    .wrapper .instagram:hover .tooltip::before {
+        background-color: #bb538b; /* Instagram color */
+    }
+
+    .wrapper .icon:hover {
+        transform: scale(1.1);
+    }
+
+#upcoming {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+}
+
+#location1 {
+    margin-left: 5px;
+    margin-bottom: 30px;
+    margin-top: -20px;
+    text-decoration: none;
+    color: #522B5B;
+    font-weight: bold;
+    font-size: 24px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease-in-out;
+}
+
+#location10 {
+    margin-left: 5px;
+    text-decoration: none;
+    color: #522B5B;
+    font-weight: bold;
+    font-size: 24px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease-in-out;
+}
+
+    #location1:hover, #location10:hover {
+        color: white;
+        transform: scale(120%);
+        transition: all 0.3s ease-in-out;
+    }
+
+.spc {
+    display: flex;
+    flex-wrap: wrap; /* Allows content to wrap for smaller screens */
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#website {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.about-eventscape {
+    display: inline-block;
+    background-color: #BFACB5;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 1);
+    text-align: left;
+    max-width: 800px;
+    margin-top: 250px;
+}
+
+    .about-eventscape h1,
+    .about-eventscape h3 {
+        margin: 0.5rem 0;
+    }
+
+    .about-eventscape h1 {
+        font-size: 4rem;
+        color: #522B5B;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .about-eventscape h3 {
+        color: #fff5f5;
+    }

@@ -1,0 +1,819 @@
+﻿@page
+@model soft20181_starter.Pages.EventsModel
+@{
+    ViewData["Title"] = "Events";
+}
+
+<div class="head fixed-top">
+    <div class="settings">
+    <a>
+        <div class="logo2">
+            <img src="~/images/settings.png" id="icon2" alt="EventScape Logo">
+            <h1>Customise your website</h1>
+        </div>
+    </a>
+    <div id="div6">
+        <button id="btn1">increase the font</button>
+        <button id="btn2">decrease the font</button>
+        <button id="btn3">darker background</button>
+        <button id="btn4">lighter background</button>
+        </div>
+    </div>
+    <a asp-page="/Index">
+        <div class="logo">
+            <img src="~/images/ticket.png" class="icon" alt="EventScape Logo">
+            <h1>EventScape</h1>
+        </div>
+    </a>
+
+<div class="navbar">
+    <button class="toggle">☰</button>
+    <ul class="navigation">
+        <li><a asp-page="/Index">Home</a></li>
+            <li><a asp-page="/Events" class="active">Events</a></li>
+            <li><a asp-page="/EventDetail">Details</a></li>
+            <li><a asp-page="/Contact">Contact</a></li>
+            <li><a asp-page="/Admin/Index">Admin</a></li>
+    </ul>
+    </div>
+</div>
+
+<div class="auth-links">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <span class="welcome-user">Welcome, @User.Identity.Name!</span>
+        <a asp-page="/Account/Logout" class="auth-button logout-button">Logout</a>
+    }
+    else
+    {
+        <a asp-page="/Account/Login" class="auth-button login-button">Login</a>
+        <a asp-page="/Account/Register" class="auth-button register-button">Register</a>
+    }
+</div>
+
+<!-- Enhanced search and user actions section -->
+<div class="search-filter-container">
+    <div class="search-tabs">
+        <button id="generalSearchTab" class="search-tab active">Browse Events</button>
+        
+        <div class="search-by-title-wrapper">
+            <button id="exactSearchTab" class="search-tab">Search by Title</button>
+            <div id="titleSearchInputWrapper" class="title-search-input-wrapper">
+                <form method="post" asp-page-handler="QuickSearch" id="exactSearchForm" class="inline-form">
+                    <input type="text" name="QuickSearchInput" id="exactSearchInput" class="form-control" placeholder="Enter exact event title..." required />
+                    <button type="submit" class="search-button">Find</button>
+                </form>
+            </div>
+        </div>
+        
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="user-actions">
+                <a asp-page="/MyEvents" class="user-action-btn">View Attending List</a>
+                <a asp-page="/MyEvents" id="ticketBtn" class="user-action-btn">Generate Ticket</a>
+            </div>
+        }
+    </div>
+    
+    <!-- Regular search form -->
+    <form method="get" id="searchForm" class="tab-content active">
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <input type="text" name="SearchString" id="searchInput" value="@Model.SearchString" placeholder="Search for events by name..." autocomplete="off">
+                @if (!string.IsNullOrEmpty(Model.Location))
+                {
+                    <input type="hidden" name="location" value="@Model.Location">
+                }
+                <div class="search-buttons">
+                    <button type="submit" class="search-button">Search</button>
+                    <button type="button" id="resetButton" class="reset-button">Reset</button>
+                </div>
+            </div>
+            <div id="searchFeedback" class="search-feedback @(string.IsNullOrEmpty(Model.SearchString) ? "hidden" : "")">
+                @if (!string.IsNullOrEmpty(Model.SearchString))
+                {
+                    if (Model.Events.Count > 0)
+                    {
+                        <span class="search-results-count">Found @Model.Events.Count results for "@Model.SearchString"</span>
+                    }
+                    else
+                    {
+                        <span class="search-no-results">No events found matching "@Model.SearchString"</span>
+                    }
+                }
+            </div>
+        </div>
+    </form>
+    
+    @if (!string.IsNullOrEmpty(Model.QuickSearchErrorMessage))
+    {
+        <div class="search-feedback error-message">
+            <span class="search-no-results">@Model.QuickSearchErrorMessage</span>
+        </div>
+    }
+</div>
+
+<div class="similar-events">
+    <h3>Explore Events in Other Locations</h3>
+    <div class="location-list">
+        @foreach (var location in Model.AvailableLocations)
+        {
+            <a asp-page="/Events" asp-route-location="@location" class="location-item">
+                @(char.ToUpper(location[0]) + location.Substring(1))
+            </a>
+        }
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Location))
+{
+    <div class="location-heading">
+        <h2>Events in @(char.ToUpper(Model.Location[0]) + Model.Location.Substring(1))</h2>
+    </div>
+}
+
+@if (Model.Events.Count > 0)
+{
+    <div class="events-column">
+        @foreach (var theEvent in Model.Events.Take(12))
+        {
+            <div class="event-card">
+                <div class="event-image">
+                    @if (theEvent.images != null && theEvent.images.Count > 0)
+                    {
+                        <img src="@theEvent.images[0]" alt="@theEvent.title">
+                    }
+                    else
+                    {
+                        <img src="~/images/placeholder.png" alt="No image available">
+                    }
+                        </div>
+                <div class="event-content">
+                    <div class="event-title">@theEvent.title</div>
+                    <div class="event-date">@theEvent.date</div>
+                    <div class="event-info">
+                        <div class="event-location">@(char.ToUpper(theEvent.location[0]) + theEvent.location.Substring(1))</div>
+                        <div class="event-price">@theEvent.price</div>
+                    </div>
+                    <a asp-page="EventDetail" asp-route-location="@theEvent.location" asp-route-id="@theEvent.id" class="read-more-btn">Read More</a>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination controls -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="pagination-container">
+            <ul class="pagination">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-page="/Events" asp-route-location="@Model.Location" asp-route-searchString="@Model.SearchString" asp-route-currentPage="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}
+else
+{
+    <div class="no-events-message">
+        <h4>No events found</h4>
+        <p>
+            @if (!string.IsNullOrEmpty(Model.Location))
+            {
+                <span>No events found for location: @Model.Location</span>
+            }
+            else if (!string.IsNullOrEmpty(Model.SearchString))
+            {
+                <span>No events found matching: "@Model.SearchString"</span>
+            }
+            else
+            {
+                <span>There are no events in the database. Try adding some events or checking the database connection.</span>
+            }
+        </p>
+    </div>
+
+    @if (Model.AvailableLocations.Any())
+    {
+        <div class="available-locations">
+            <h5>Available Locations:</h5>
+            <div class="location-buttons">
+                @foreach (var location in Model.AvailableLocations)
+                {
+                    <a asp-page="/Events" asp-route-location="@location" class="location-button">
+                        @(char.ToUpper(location[0]) + location.Substring(1))
+                    </a>
+                }
+            </div>
+    </div>
+    }
+}
+
+<div class="back-to-home">
+    <a asp-page="/Index" class="back-button">Back to Home</a>
+</div>
+
+<footer>
+    <p><b>&copy; @DateTime.Now.Year EventScape</b></p>
+    <a asp-page="/Events" class="footerbutton"><b>Browse upcoming events</b></a>
+    <a asp-page="/Contact" class="footerbutton"><b>Contact us!</b></a>
+</footer>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/slides.css">
+    <link rel="stylesheet" href="~/css/contact.css">
+    <style>
+        body {
+            padding-top: 160px; /* Adjust based on header height */
+        }
+        
+        .head {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            z-index: 1050;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Search tab styling */
+        .search-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #E5D0CC;
+        }
+        
+        .search-tab {
+            padding: 10px 20px;
+            background-color: #E5D0CC;
+            color: #522B5B;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .search-tab.active {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .search-tab:hover {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        /* Search by title inline styling */
+        .search-by-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .title-search-input-wrapper {
+            display: none;
+            transition: all 0.3s ease;
+        }
+        
+        .title-search-input-wrapper.active {
+            display: block;
+        }
+        
+        .inline-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-control {
+            display: block;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #522B5B;
+            border-radius: 4px;
+            background-color: #ffffff;
+            color: #333;
+            box-sizing: border-box;
+            width: 250px;
+        }
+        
+        .form-control:focus {
+            border-color: #854F6C;
+            box-shadow: 0 0 8px rgba(82, 43, 91, 0.4);
+            outline: none;
+        }
+        
+        .user-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .user-action-btn {
+            padding: 12px 20px;
+            background-color: #522B5B;
+            color: white;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .user-action-btn:hover {
+            background-color: #854F6C;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-decoration: none;
+        }
+        
+        .search-filter-container {
+            margin: 30px auto;
+            max-width: 1200px;
+            padding: 25px;
+            background-color: #BFACB5;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            background-color: #BFACB5;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-input-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        #searchInput, #exactSearchInput {
+            padding: 12px 15px;
+            border: 2px solid #522B5B;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        #searchInput:focus, #exactSearchInput:focus {
+            border-color: #854F6C;
+            box-shadow: 0 0 8px rgba(82, 43, 91, 0.4);
+            outline: none;
+        }
+        
+        .search-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-button, .reset-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        
+        .search-button {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .search-button:hover {
+            background-color: #854F6C;
+        }
+        
+        .reset-button {
+            background-color: #E5D0CC;
+            color: #522B5B;
+            text-align: center;
+        }
+        
+        .reset-button:hover {
+            background-color: #d4bbb6;
+        }
+        
+        .search-feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .search-results-count {
+            color: #155724;
+        }
+        
+        .search-no-results {
+            color: #721c24;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .events-column {
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
+        
+        .event-card {
+            display: flex;
+            flex-direction: column;
+            background-color: #BFACB5;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 30px;
+            width: 100%;
+            opacity: 1;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .event-image {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .event-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            color: #522B5B;
+        }
+        
+        .event-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #522B5B;
+        }
+        
+        .event-date {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #522B5B;
+        }
+        
+        .event-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .event-location, .event-price {
+            font-size: 14px;
+            font-weight: bold;
+            color: #522B5B;
+        }
+        
+        .read-more-btn {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.3s;
+            margin-top: auto;
+        }
+        
+        .read-more-btn:hover {
+            background-color: #854F6C;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .similar-events {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #BFACB5;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .similar-events h3 {
+            color: #522B5B;
+            margin-bottom: 15px;
+        }
+        
+        .location-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .location-item {
+            padding: 8px 15px;
+            background-color: #fff;
+            color: #522B5B;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .location-item:hover {
+            background-color: #522B5B;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px) scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .no-events-message {
+            text-align: center;
+            padding: 30px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .back-to-home {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #522B5B;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-button:hover {
+            background-color: #854F6C;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .location-heading {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .location-heading h2 {
+            color: #522B5B;
+            font-size: 28px;
+        }
+        
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            gap: 5px;
+        }
+        
+        .page-item {
+            display: inline-block;
+        }
+        
+        .page-link {
+            padding: 8px 12px;
+            background-color: #f0f0f0;
+            color: #522B5B;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        
+        .page-item.active .page-link,
+        .page-link:hover {
+            background-color: #522B5B;
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* Authentication links styling */
+        .auth-links {
+            position: absolute;
+            top: 130px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 1000;
+            width: 150px;
+        }
+        
+        .auth-button {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .login-button {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .register-button {
+            background-color: #BFACB5;
+            color: #522B5B;
+            border: 1px solid #522B5B;
+        }
+        
+        .logout-button {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        .welcome-user {
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .search-tabs {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-by-title-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+            
+            .title-search-input-wrapper.active {
+                width: 100%;
+            }
+            
+            .inline-form {
+                width: 100%;
+            }
+            
+            .form-control {
+                width: 100%;
+            }
+            
+            .user-actions {
+                margin-left: 0;
+                margin-top: 15px;
+                justify-content: space-between;
+                width: 100%;
+                gap: 10px;
+            }
+            
+            .search-filter-container {
+                padding: 20px 15px;
+                max-width: 95%;
+            }
+            
+            .auth-links {
+                position: static;
+                width: auto;
+                margin: 20px 15px 0;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/javascript.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationList = document.querySelector('.location-list');
+            
+            if (locationList) {
+                // Add hover animation effect
+                locationList.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.02)';
+                });
+                
+                locationList.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+                
+                // Add animation to location items
+                const locationItems = document.querySelectorAll('.location-item');
+                locationItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.transition = 'all 0.3s ease';
+                    }, 100 * (index + 1));
+                });
+            }
+            
+            // Search functionality
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            const resetButton = document.getElementById('resetButton');
+            const searchFeedback = document.getElementById('searchFeedback');
+            
+            // Reset button functionality
+            resetButton.addEventListener('click', function() {
+                searchInput.value = '';
+                searchFeedback.classList.add('hidden');
+                
+                // Check if we have a location parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const location = urlParams.get('location');
+                
+                if (location) {
+                    // Redirect to the events page with only the location parameter
+                    window.location.href = `/Events?location=${location}`;
+                } else {
+                    // Redirect to the events page with no parameters
+                    window.location.href = '/Events';
+                }
+            });
+            
+            // Exact search functionality
+            const exactSearchTab = document.getElementById('exactSearchTab');
+            const titleSearchInputWrapper = document.getElementById('titleSearchInputWrapper');
+            
+            exactSearchTab.addEventListener('click', function() {
+                if (titleSearchInputWrapper.classList.contains('active')) {
+                    titleSearchInputWrapper.classList.remove('active');
+                } else {
+                    titleSearchInputWrapper.classList.add('active');
+                    document.getElementById('exactSearchInput').focus();
+                }
+            });
+            
+            // Animate search input on focus
+            searchInput.addEventListener('focus', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            searchInput.addEventListener('blur', function() {
+                this.style.transform = 'scale(1)';
+            });
+            
+            // Make ticket button open the ticket modal on MyEvents page
+            const ticketBtn = document.getElementById('ticketBtn');
+            if (ticketBtn) {
+                ticketBtn.addEventListener('click', function(e) {
+                    // Add a query parameter to indicate ticket generation
+                    e.preventDefault();
+                    window.location.href = '/MyEvents?generateTicket=true';
+                });
+            }
+        });
+    </script>
+}

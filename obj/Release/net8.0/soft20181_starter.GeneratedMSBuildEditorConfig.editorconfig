@@ -1,0 +1,185 @@
+is_global = true
+build_property.TargetFramework = net8.0
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = soft20181_starter
+build_property.RootNamespace = soft20181_starter
+build_property.ProjectDir = C:\Users\Geekzone\Desktop\soft2081-starter-code-main\soft2081-starter-code-main\soft20181_starter\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\Geekzone\Desktop\soft2081-starter-code-main\soft2081-starter-code-main\soft20181_starter
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 8.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Account/AccessDenied.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxBY2Nlc3NEZW5pZWQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Account/Logout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxMb2dvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Account/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/AddEvent.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRkRXZlbnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW4uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Events/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRXZlbnRzXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Events/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRXZlbnRzXERlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Events/DeleteSearchResults.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRXZlbnRzXERlbGV0ZVNlYXJjaFJlc3VsdHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Events/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRXZlbnRzXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Events/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRXZlbnRzXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Events/EditSearchResults.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRXZlbnRzXEVkaXRTZWFyY2hSZXN1bHRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Events/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRXZlbnRzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Events/SearchForDelete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRXZlbnRzXFNlYXJjaEZvckRlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Events/SearchForEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cRXZlbnRzXFNlYXJjaEZvckVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Users/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlcnNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Users/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlcnNcRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Users/DeleteSearchResults.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlcnNcRGVsZXRlU2VhcmNoUmVzdWx0cy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Users/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlcnNcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Users/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlcnNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Users/EditSearchResults.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlcnNcRWRpdFNlYXJjaFJlc3VsdHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Users/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlcnNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Users/SearchForDelete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlcnNcU2VhcmNoRm9yRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Admin/Users/SearchForEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVXNlcnNcU2VhcmNoRm9yRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Contact.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ29udGFjdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/EditEvent.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRWRpdEV2ZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/EventDetail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXZlbnREZXRhaWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Events.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXZlbnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/MyEvents.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTXlFdmVudHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Payment.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGF5bWVudC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/PaymentSuccess.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGF5bWVudFN1Y2Nlc3MuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Shared/_LoginPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9Mb2dpblBhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = X1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Geekzone/Desktop/soft2081-starter-code-main/soft2081-starter-code-main/soft20181_starter/Pages/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-46jnf59qn7

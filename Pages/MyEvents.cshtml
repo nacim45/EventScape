@@ -1,0 +1,719 @@
+@page
+@model soft20181_starter.Pages.MyEventsModel
+@{
+    ViewData["Title"] = "My Events";
+}
+
+<div class="head">
+    <a>
+        <div class="logo2">
+            <img src="~/images/settings.png" id="icon2" alt="EventScape Logo">
+            <h1>Customise your website</h1>
+        </div>
+    </a>
+    <div id="div6">
+        <button id="btn1">increase the font</button>
+        <button id="btn2">decrease the font</button>
+        <button id="btn3">darker background</button>
+        <button id="btn4">lighter background</button>
+    </div>
+    <a asp-page="/Index">
+        <div class="logo">
+            <img src="~/images/ticket.png" class="icon" alt="EventScape Logo">
+            <h1>EventScape</h1>
+        </div>
+    </a>
+</div>
+
+<div class="auth-links">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <span class="welcome-user">Welcome, @User.Identity.Name!</span>
+        <a asp-page="/Account/Logout" class="generate-ticket-button logout-myevents-button">Logout</a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Administrator"))
+        {
+            <a asp-page="/Admin/Index" class="generate-ticket-button">Admin Dashboard</a>
+        }
+        <a asp-page="/MyEvents" class="generate-ticket-button">My Events</a>
+    }
+    else
+    {
+        <a asp-page="/Account/Login" class="auth-button login-button">Login</a>
+        <a asp-page="/Account/Register" class="auth-button register-button">Register</a>
+    }
+</div>
+
+<div class="navbar">
+    <button class="toggle">☰</button>
+    <ul class="navigation">
+        <li><a asp-page="/Index">Home</a></li>
+        <li><a asp-page="/Events">Events</a></li>
+        <li><a asp-page="/EventDetail">Details</a></li>
+        <li><a asp-page="/Contact">Contact</a></li>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <li><a asp-page="/MyEvents" class="active">My Events</a></li>
+        }
+        @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Administrator")))
+        {
+            <li><a asp-page="/Admin">Admin</a></li>
+        }
+    </ul>
+</div>
+
+<div class="my-events-container">
+    <div class="featured-events-header">
+        <h2 class="featured-title">My Attending Events</h2>
+        @if (Model.UserAttendingEvents.Count > 0)
+        {
+            <div class="header-buttons">
+                <a href="#" id="generateTicketBtn" class="generate-ticket-button">Generate Ticket</a>
+                <a asp-page="/Payment" class="generate-ticket-button">Pay Now</a>
+            </div>
+        }
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>@TempData["ErrorMessage"]</p>
+        </div>
+    }
+
+    @if (!User.Identity?.IsAuthenticated ?? false)
+    {
+        <div class="auth-required-message">
+            <p>Please <a asp-page="/Account/Login">login</a> to view your attending events.</p>
+        </div>
+    }
+    else if (Model.UserAttendingEvents.Count == 0)
+    {
+        <div class="no-events-message">
+            <p>You are not attending any events yet.</p>
+            <a asp-page="/Events" class="browse-events-button">Browse Events</a>
+        </div>
+    }
+    else
+    {
+        <div class="my-events-list-container">
+            @foreach (var attendance in Model.UserAttendingEvents)
+            {
+                var theEvent = attendance.Event;
+                <div class="event-detail-container">
+                    <div class="event-detail-wrapper">
+                        <div class="event-image-container">
+                            <img src="@(theEvent.images?.FirstOrDefault() ?? "/images/event-placeholder.jpg")" alt="@theEvent.title" class="event-main-image">
+                        </div>
+                        <div class="event-info">
+                            <h1 class="event-title">@theEvent.title</h1>
+                            <div class="event-location">
+                                <i class="fa fa-map-marker"></i> Location: @theEvent.location
+                            </div>
+                            <div class="event-date">
+                                <span><i class="fa fa-calendar"></i> @theEvent.date</span>
+                            </div>
+                            <div class="event-price">
+                                <span class="price-tag"><i class="fa fa-tag"></i> @(String.IsNullOrEmpty(theEvent.price) ? "Free" : theEvent.price)</span>
+                            </div>
+                            
+                            <div class="event-buttons-container">
+                                <div class="navigation-row">
+                                    <a asp-page="EventDetail" asp-route-location="@theEvent.location" asp-route-id="@theEvent.id" class="event-register-button">View Details</a>
+                                    <form method="post" asp-page-handler="CancelAttendance" onsubmit="return confirm('Are you sure you want to cancel your attendance for this event?');">
+                                        <input type="hidden" name="attendanceId" value="@attendance.Id" />
+                                        <button type="submit" class="event-register-button">Cancel Attendance</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Ticket Modal -->
+<div id="ticketModal" class="ticket-modal">
+    <div class="ticket-modal-content">
+        <span class="close-modal">&times;</span>
+        <div id="ticketContent" class="ticket-content">
+            <div class="ticket-header">
+                <img src="~/images/ticket.png" class="ticket-logo" alt="EventScape Logo">
+                <h2>EventScape Ticket</h2>
+            </div>
+            <div class="ticket-user-info">
+                <p><strong>Name:</strong> @Model.UserName</p>
+                <p><strong>Email:</strong> @Model.UserEmail</p>
+                <p><strong>Generated:</strong> @DateTime.Now.ToString("dd MMM yyyy HH:mm")</p>
+            </div>
+            <div class="ticket-events-list">
+                <h3>Events Attending:</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Ticket #</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attendance in Model.UserAttendingEvents)
+                        {
+                            <tr>
+                                <td>@attendance.Event.title</td>
+                                <td>@attendance.Event.date</td>
+                                <td>@(char.ToUpper(attendance.Event.location[0]) + attendance.Event.location.Substring(1))</td>
+                                <td>@attendance.TicketNumber</td>
+                                <td>@attendance.PaymentStatus</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="ticket-footer">
+                <p>Thank you for using EventScape! Enjoy your events.</p>
+                <div class="qr-code">
+                    <!-- Placeholder for QR code -->
+                    <div class="qr-placeholder"></div>
+                    <p>Scan to verify</p>
+                </div>
+            </div>
+        </div>
+        <div class="ticket-actions">
+            <button id="printTicketBtn" class="print-ticket-btn">Print Ticket</button>
+        </div>
+    </div>
+</div>
+
+<div class="back-to-home" style="margin-bottom: 50px;">
+    <a asp-page="/Index" class="back-button">Back to Home</a>
+</div>
+
+<footer>
+    <p><b>&copy; @DateTime.Now.Year EventScape</b></p>
+    <a asp-page="/Events" class="footerbutton"><b>Browse upcoming events</b></a>
+    <a asp-page="/Contact" class="footerbutton"><b>Contact us!</b></a>
+</footer>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/slides.css">
+    <link rel="stylesheet" href="~/css/contact.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .my-events-container {
+            max-width: 1200px;
+            margin: 150px auto 50px;
+            padding: 0 20px;
+        }
+        
+        .featured-events-header {
+            margin-top: 80px;
+            text-align: center;
+            margin-left: 0;
+        }
+        
+        .featured-title {
+            display: inline-block;
+            background-color: #BFACB5;
+            color: #522B5B;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 28px;
+            margin: 40px auto;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .generate-ticket-button {
+            background-color: #522B5B;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: inline-block;
+        }
+        
+        .generate-ticket-button:hover {
+            background-color: #854F6C;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .events-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .event-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .event-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .event-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        
+        .event-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #522B5B;
+            margin-bottom: 10px;
+        }
+        
+        .event-date {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .event-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .event-location {
+            color: #666;
+        }
+        
+        .event-price {
+            color: #522B5B;
+            font-weight: bold;
+        }
+        
+        .read-more-btn, .cancel-attendance-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: auto;
+            margin-right: 10px;
+        }
+        
+        .read-more-btn {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .cancel-attendance-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .read-more-btn:hover, .cancel-attendance-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .auth-required-message, .no-events-message {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        }
+        
+        .browse-events-button {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .browse-events-button:hover {
+            background-color: #854F6C;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .error-message i {
+            font-size: 1.2em;
+        }
+        
+        .auth-links .generate-ticket-button {
+            margin-bottom: 5px; /* Add some spacing between buttons */
+        }
+
+        @@media (max-width: 768px) {
+            .events-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .ticket-modal-content {
+                width: 95%;
+                margin: 20px auto;
+            }
+            
+            .ticket-events-list {
+                overflow-x: auto;
+            }
+        }
+        
+        /* Ticket Modal Styles */
+        .ticket-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .ticket-modal-content {
+            position: relative;
+            background-color: white;
+            margin: 50px auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .ticket-content {
+            padding: 20px;
+        }
+        
+        .ticket-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .ticket-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+        
+        .ticket-user-info {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        
+        .ticket-events-list {
+            margin-bottom: 30px;
+        }
+        
+        .ticket-events-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .ticket-events-list th, .ticket-events-list td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .ticket-events-list th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        
+        .ticket-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .qr-code {
+            margin-top: 20px;
+        }
+        
+        .qr-placeholder {
+            width: 100px;
+            height: 100px;
+            background: #f5f5f5;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+        }
+        
+        .ticket-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .print-ticket-btn {
+            background-color: #522B5B;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .print-ticket-btn:hover {
+            background-color: #854F6C;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        @@media print {
+            body * {
+                visibility: hidden;
+            }
+            .ticket-modal-content, .ticket-modal-content * {
+                visibility: visible;
+            }
+            .ticket-modal-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+            .ticket-actions {
+                display: none;
+            }
+        }
+
+        /* Specific styles for auth-links buttons */
+        .auth-links {
+            position: absolute;
+            top: 130px; /* Adjust as needed for spacing from header */
+            left: 20px;
+            display: flex;
+            flex-direction: column; /* Stack buttons vertically */
+            gap: 10px; /* Space between buttons */
+            z-index: 1000;
+            width: 150px; /* Adjust as needed */
+        }
+
+        .auth-links .generate-ticket-button { /* Apply generate-ticket-button style to MyEvents and Admin Dashboard */
+            margin-bottom: 5px; /* Add some spacing between buttons */
+        }
+        
+        .logout-myevents-button { /* Apply generate-ticket-button style to logout */
+            background-color: #854F6C; /* Use generate-ticket-button hover color as base for consistency */
+            color: white;
+            padding: 10px 20px; /* Matched generate-ticket-button padding */
+            border-radius: 5px; /* Matched generate-ticket-button border-radius */
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block; /* Ensure it behaves like the generate-ticket-button */
+            margin-bottom: 5px; /* Spacing below logout */
+        }
+
+        .my-events-list-container { /* New container for vertical stacking of detailed events */
+            display: flex;
+            flex-direction: column;
+            gap: 30px; /* Space between event detail cards */
+            max-width: 1200px;
+            margin: 40px auto; /* Centered with top/bottom margin */
+            padding: 0 20px;
+        }
+        
+        /* Event Detail Card Styles (copied/adapted from EventDetail.cshtml) */        
+        .event-detail-container {
+            margin: 0; /* Remove extra margin, handled by my-events-list-container gap */
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background-color: #522B5B; /* Background as seen in EventDetail */
+        }
+        
+        .event-detail-wrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+        }
+        
+        .event-image-container {
+            flex: 0 0 35%;
+            max-width: 350px;
+        }
+        
+        .event-main-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .event-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            color: white;
+        }
+        
+        .event-info h1.event-title {
+            font-size: 24px;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .event-location, .event-date, .event-price {
+            color: white; /* Text color in event info */
+        }
+        
+        .event-location {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .event-date span i, .event-location i, .event-price span i {
+            margin-right: 8px;
+            color: #E5D0CC; /* Lighter color for icons */
+            width: 16px;
+            text-align: center;
+        }
+
+        /* Event Buttons in EventDetail style */
+        .event-buttons-container {
+            margin-top: 1.5rem;
+        }
+        
+        .navigation-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .event-register-button {
+            background-color: #522B5B;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%; /* Take full width of its container */
+            text-align: center;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .event-register-button:hover {
+            background-color: #854F6C;
+            text-decoration: none;
+            color: white;
+        }
+        
+        /* Responsive adjustments for new structure */
+        @@media (max-width: 992px) {
+            .event-detail-wrapper {
+                flex-direction: column;
+            }
+            .event-image-container {
+                max-width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Old event-card related styles removed */
+        .events-column { display: none; } /* Hide old event column */
+        .event-card { display: none; } /* Hide old event card styles */
+        .read-more-btn, .payment-button, .cancel-attendance-btn { display: none; } /* Hide old buttons */
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('ticketModal');
+            const generateBtn = document.getElementById('generateTicketBtn');
+            const closeBtn = document.querySelector('.close-modal');
+            const printBtn = document.getElementById('printTicketBtn');
+            
+            if (generateBtn) {
+                generateBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    modal.style.display = 'block';
+                });
+            }
+            
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+            }
+            
+            if (printBtn) {
+                printBtn.addEventListener('click', function() {
+                    window.print();
+                });
+            }
+            
+            if (modal) {
+                window.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+} 

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "1",
+    "title": "Edinburgh Tech Innovations Summit",
+    "image": "images/json81.png",
+    "description": "Join top innovators and entrepreneurs for an immersive summit exploring groundbreaking technologies, including AI, IoT, and blockchain, with keynote speakers, panel discussions, and networking opportunities.",
+    "date": "Jan 15-17",
+    "price": "£20",
+    "link": "/EventDetail?location=edinburgh?id=1",
+    "location": "edinburgh"
+  },
+  {
+    "id": "2",
+    "title": "Startup Ecosystem Networking Event",
+    "image": "images/json82.png",
+    "description": "Connect with Edinburgh’s thriving startup ecosystem, from founders to investors, and explore opportunities to collaborate and scale your business in a dynamic environment.",
+    "date": "Jan 21-22",
+    "price": "Free",
+    "link": "/EventDetail?location=edinburgh?id=2",
+    "location": "edinburgh"
+  },
+  {
+    "id": "3",
+    "title": "Women in Science Conference",
+    "image": "images/json83.png",
+    "description": "Celebrate women in STEM fields with inspiring talks, networking sessions, and panel discussions led by leading scientists and academics, aimed at empowering the next generation of women innovators.",
+    "date": "Feb 10-12",
+    "price": "£25",
+    "link": "/EventDetail?location=edinburgh?id=3",
+    "location": "edinburgh"
+  },
+  {
+    "id": "4",
+    "title": "Artificial Intelligence and Ethics Symposium",
+    "image": "images/json84.png",
+    "description": "Delve into the ethical implications of AI with experts from academia and industry, exploring the latest debates, research, and the future of AI in society.",
+    "date": "Feb 17-19",
+    "price": "£18",
+    "link": "/EventDetail?location=edinburgh?id=4",
+    "location": "edinburgh"
+  },
+  {
+    "id": "5",
+    "title": "Public Speaking for Professionals",
+    "image": "images/json85.png",
+    "description": "Enhance your public speaking and presentation skills in this interactive workshop, designed to help you communicate effectively and confidently in business and leadership settings.",
+    "date": "Jan 28-30",
+    "price": "£30",
+    "link": "/EventDetail?location=edinburgh?id=5",
+    "location": "edinburgh"
+  },
+  {
+    "id": "6",
+    "title": "Edinburgh Digital Marketing Bootcamp",
+    "image": "images/json86.png",
+    "description": "Dive deep into digital marketing strategies with hands-on sessions and expert advice, covering social media, SEO, and content marketing to help grow your online presence and business.",
+    "date": "Feb 24-26",
+    "price": "£20",
+    "link": "/EventDetail?location=edinburgh?id=6",
+    "location": "edinburgh"
+  },
+  {
+    "id": "7",
+    "title": "Science and Innovation Forum",
+    "image": "images/json87.png",
+    "description": "Engage with cutting-edge research and innovative projects at this exciting forum that brings together scientists, innovators, and entrepreneurs to discuss the future of science and technology.",
+    "date": "Mar 5-7",
+    "price": "£22",
+    "link": "/EventDetail?location=edinburgh?id=7",
+    "location": "edinburgh"
+  },
+  {
+    "id": "8",
+    "title": "Creative Art and Design Expo",
+    "image": "images/json88.png",
+    "description": "Experience the latest trends in art and design with interactive workshops, art installations, and networking opportunities for artists and designers to showcase their work and collaborate.",
+    "date": "Mar 12-14",
+    "price": "£15",
+    "link": "/EventDetail?location=edinburgh?id=8",
+    "location": "edinburgh"
+  },
+  {
+    "id": "9",
+    "title": "Blockchain for Business Workshop",
+    "image": "images/json89.png",
+    "description": "Learn how blockchain can revolutionize business models, improve transparency, and drive efficiencies in this hands-on workshop, with real-world case studies and expert guidance.",
+    "date": "Jan 10-12",
+    "price": "£25",
+    "link": "/EventDetail?location=edinburgh?id=9",
+    "location": "edinburgh"
+  },
+  {
+    "id": "10",
+    "title": "Data Science and Machine Learning Bootcamp",
+    "image": "images/json810.png",
+    "description": "Get practical experience in data science and machine learning techniques, including data analysis, modeling, and the use of machine learning algorithms, with guidance from industry experts.",
+    "date": "Mar 8-10",
+    "price": "£28",
+    "link": "/EventDetail?location=edinburgh?id=10",
+    "location": "edinburgh"
+  },
+  {
+    "id": "11",
+    "title": "Financial Technology Innovations Conference",
+    "image": "images/json811.png",
+    "description": "Explore the latest trends in fintech, from blockchain-based financial services to AI-powered investment platforms, with sessions from top innovators and business leaders in the sector.",
+    "date": "Feb 8-10",
+    "price": "£30",
+    "link": "/EventDetail?location=edinburgh?id=11",
+    "location": "edinburgh"
+  },
+  {
+    "id": "12",
+    "title": "Future of Tech and Sustainability Forum",
+    "image": "images/json812.png",
+    "description": "Join experts from across the tech industry to discuss the future of technology and its role in creating sustainable solutions for businesses and the planet, with practical insights and networking opportunities.",
+    "date": "Mar 15-17",
+    "price": "£20",
+    "link": "/EventDetail?location=edinburgh?id=12",
+    "location": "edinburgh"
+  },
+  {
+    "id": "13",
+    "title": "Creative Entrepreneurs Networking Event",
+    "image": "images/json813.png",
+    "description": "Meet other creative entrepreneurs, share your ideas, and find new opportunities for collaboration and growth in this free networking event that brings together a vibrant community of creative professionals.",
+    "date": "Feb 5",
+    "price": "Free",
+    "link": "/EventDetail?location=edinburgh?id=13",
+    "location": "edinburgh"
+  },
+  {
+    "id": "14",
+    "title": "Social Media Strategies for Business Growth",
+    "image": "images/json814.png",
+    "description": "Learn how to leverage social media to boost your business growth, drive engagement, and optimize your marketing strategies with actionable insights from experienced professionals.",
+    "date": "Jan 18-20",
+    "price": "£18",
+    "link": "/EventDetail?location=edinburgh?id=14",
+    "location": "edinburgh"
+  },
+  {
+    "id": "15",
+    "title": "Health and Wellness Conference",
+    "image": "images/json815.png",
+    "description": "Join experts in health and wellness for discussions on mental health, fitness, nutrition, and mindfulness practices that can improve your overall well-being and productivity.",
+    "date": "Mar 2-4",
+    "price": "£20",
+    "link": "/EventDetail?location=edinburgh?id=15",
+    "location": "edinburgh"
+  }
+]

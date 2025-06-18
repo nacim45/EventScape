@@ -1,0 +1,210 @@
+@page
+@model EditSearchResultsModel
+@{
+    ViewData["Title"] = "Edit Event Results - EventScape";
+    Layout = "_Layout";
+}
+
+<div class="main-container my-5">
+    <div class="featured-events-header">
+        <h2 class="featured-title">Edit Event Results</h2>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col text-center">
+            <div class="admin-navigation-links">
+                <a href="/Admin" class="admin-nav-link">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/Admin/Events" class="admin-nav-link">
+                    <i class="fas fa-calendar-alt"></i> All Events
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="user-form-container">
+        <div class="section-header">
+            <h3 id="txt">Search Results</h3>
+        </div>
+        
+        <div class="admin-form-wrapper">
+            @if (!Model.HasSearchResults)
+            {
+                <div class="alert alert-info search-no-results">
+                    <i class="fas fa-info-circle"></i>
+                    <span>No events found matching your search criteria. Please try a different search.</span>
+                </div>
+                <div class="text-center mt-4">
+                    <a asp-page="SearchForEdit" class="btn admin-action-btn admin-cancel-btn">
+                        <i class="fas fa-arrow-left"></i> Back to Search
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="events-list-container">
+                    @foreach (var eventItem in Model.Events)
+                    {
+                        <div class="event-card">
+                            <div class="event-image">
+                                @if (eventItem.images != null && eventItem.images.Any())
+                                {
+                                    <img src="/@eventItem.images.First()" alt="@eventItem.title" class="event-thumbnail">
+                                }
+                                else
+                                {
+                                    <div class="event-placeholder">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="event-details">
+                                <h3 class="event-title">@eventItem.title</h3>
+                                <div class="event-info">
+                                    <p><i class="fas fa-map-marker-alt"></i> @eventItem.location</p>
+                                    <p><i class="fas fa-calendar-day"></i> @eventItem.date</p>
+                                    <p><i class="fas fa-pound-sign"></i> @eventItem.price</p>
+                                </div>
+                            </div>
+                            <div class="event-actions">
+                                <a asp-page="Edit" asp-route-id="@eventItem.id" class="btn btn-primary admin-submit-btn">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="text-center mt-4">
+                    <a asp-page="SearchForEdit" class="btn admin-action-btn admin-cancel-btn">
+                        <i class="fas fa-arrow-left"></i> Back to Search
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Add styles consistent with other admin pages */
+        .events-list-container {
+            margin-bottom: 30px;
+        }
+
+        .event-card {
+            display: flex;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            transition: transform 0.2s, box-shadow 0.2s;
+            align-items: center;
+        }
+
+        .event-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .event-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .event-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #adb5bd;
+            font-size: 24px;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-title {
+            color: #522B5B;
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .event-info p {
+            margin: 5px 0;
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        .event-info i {
+            width: 20px;
+            color: #854F6C;
+            margin-right: 8px;
+        }
+
+        .event-actions {
+            margin-left: 15px;
+        }
+
+        .search-no-results {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background-color: #e2f3fd;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-no-results i {
+            font-size: 24px;
+            color: #007bff;
+            margin-right: 15px;
+        }
+
+        .mt-4 {
+            margin-top: 20px;
+        }
+
+        /* Responsive styles */
+        @@media (max-width: 768px) {
+            .event-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .event-image {
+                margin-right: 0;
+                margin-bottom: 15px;
+                width: 100%;
+                height: 150px;
+            }
+
+            .event-actions {
+                margin-left: 0;
+                margin-top: 15px;
+                align-self: stretch;
+                display: flex;
+                justify-content: center;
+            }
+        }
+    </style>
+} 

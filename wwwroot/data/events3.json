@@ -1,0 +1,152 @@
+[
+  {
+    "id": "1",
+    "title": "Manchester Science Festival",
+    "image": "images/json31.png",
+    "description": "Delve into the wonders of science with interactive exhibits, engaging workshops, and thought-provoking talks. This festival offers a hands-on experience for all ages, making complex scientific concepts accessible and entertaining.",
+    "date": "January 15-21, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=manchester?id=1",
+    "location": "manchester"
+  },
+  {
+    "id": "2",
+    "title": "Digital Marketing Bootcamp",
+    "image": "images/json32.png",
+    "description": "Enhance your online presence with this intensive bootcamp covering SEO, social media strategies, and content marketing. Ideal for entrepreneurs and marketing professionals aiming to boost their digital skills.",
+    "date": "January 25-26, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=manchester?id=2",
+    "location": "manchester"
+  },
+  {
+    "id": "3",
+    "title": "Manchester Literature Festival",
+    "image": "images/json33.png",
+    "description": "Celebrate the written word with renowned authors, poets, and storytellers. Participate in readings, workshops, and discussions that explore diverse literary genres and themes.",
+    "date": "February 10-14, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=manchester?id=3",
+    "location": "manchester"
+  },
+  {
+    "id": "4",
+    "title": "Public Speaking Masterclass",
+    "image": "images/json34.png",
+    "description": "Build confidence and learn techniques to engage any audience. This masterclass offers personalized coaching, practical exercises, and feedback to enhance your public speaking abilities.",
+    "date": "February 20-21, 2025",
+    "price": "£30",
+    "link": "/EventDetail?location=manchester?id=4",
+    "location": "manchester"
+  },
+  {
+    "id": "5",
+    "title": "Manchester Art Exhibition",
+    "image": "images/json35.png",
+    "description": "Explore contemporary artworks from local and international artists. The exhibition features paintings, sculptures, and multimedia installations that challenge perceptions and inspire creativity.",
+    "date": "March 5-10, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=manchester?id=5",
+    "location": "manchester"
+  },
+  {
+    "id": "6",
+    "title": "Startup Bootcamp",
+    "image": "images/json36.png",
+    "description": "Turn your business idea into reality with guidance from successful entrepreneurs. This bootcamp covers business planning, funding strategies, and market analysis to equip you for the startup journey.",
+    "date": "March 15-17, 2025",
+    "price": "£30",
+    "link": "/EventDetail?location=manchester?id=6",
+    "location": "manchester"
+  },
+  {
+    "id": "7",
+    "title": "Fitness Bootcamp at Heaton Park",
+    "image": "images/json37.png",
+    "description": "Kickstart your fitness journey with high-energy workouts in the scenic Heaton Park. Suitable for all fitness levels, this bootcamp combines cardio, strength training, and flexibility exercises.",
+    "date": "March 20-22, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=manchester?id=7",
+    "location": "manchester"
+  },
+  {
+    "id": "8",
+    "title": "Digital Design Talks",
+    "image": "images/json38.png",
+    "description": "Stay ahead of the curve with insights into the latest trends in digital design. Featuring expert speakers, case studies, and networking opportunities for designers and creative professionals.",
+    "date": "March 25, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=manchester?id=8",
+    "location": "manchester"
+  },
+  {
+    "id": "9",
+    "title": "Tech Innovators Meetup",
+    "image": "images/json39.png",
+    "description": "Connect with tech enthusiasts, share ideas, and explore potential collaborations. This meetup is perfect for those passionate about technology and innovation.",
+    "date": "January 18, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=manchester?id=9",
+    "location": "manchester"
+  },
+  {
+    "id": "10",
+    "title": "Winter Photography Workshop",
+    "image": "images/json310.png",
+    "description": "Learn photography techniques while capturing the beauty of winter in Manchester. This workshop is suitable for beginners and advanced photographers alike.",
+    "date": "January 28, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=manchester?id=10",
+    "location": "manchester"
+  },
+  {
+    "id": "11",
+    "title": "Healthy Living Fair",
+    "image": "images/json311.png",
+    "description": "Discover tips, products, and resources for a healthier lifestyle. This fair includes fitness demos, nutrition talks, and wellness product showcases.",
+    "date": "February 5, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=manchester?id=11",
+    "location": "manchester"
+  },
+  {
+    "id": "12",
+    "title": "Blockchain for Beginners Workshop",
+    "image": "images/json312.png",
+    "description": "Learn the fundamentals of blockchain technology, including cryptocurrencies and smart contracts. This workshop simplifies complex concepts for beginners.",
+    "date": "February 25, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=manchester?id=12",
+    "location": "manchester"
+  },
+  {
+    "id": "13",
+    "title": "Foodie Festival Manchester",
+    "image": "images/json313.png",
+    "description": "Taste culinary delights from local chefs and international cuisines. This festival offers live cooking demos, food stalls, and plenty of samples.",
+    "date": "March 3-4, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=manchester?id=13",
+    "location": "manchester"
+  },
+  {
+    "id": "14",
+    "title": "AI and Ethics Panel Discussion",
+    "image": "images/json314.png",
+    "description": "Join experts in AI and ethics as they explore the implications of artificial intelligence on society. A must-attend for those interested in tech and philosophy.",
+    "date": "March 12, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=manchester?id=14",
+    "location": "manchester"
+  },
+  {
+    "id": "15",
+    "title": "Green Energy Conference",
+    "image": "images/json315.png",
+    "description": "Explore the latest innovations in sustainable energy. This conference features expert talks, panel discussions, and exhibitions on renewable technologies.",
+    "date": "March 27-28, 2025",
+    "price": "£30",
+    "link": "/EventDetail?location=manchester?id=15",
+    "location": "manchester"
+  }
+]
