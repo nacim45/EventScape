@@ -13,6 +13,10 @@
         <p>Thank you for your payment. Your transaction has been completed successfully.</p>
         <div class="transaction-details">
             <p><strong>Transaction ID:</strong> @Model.PaymentIntentId</p>
+            @if (!string.IsNullOrEmpty(Model.PaymentMethod))
+            {
+                <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+            }
             <p><strong>Amount Paid:</strong> £@Model.Amount.ToString("0.00")</p>
             <p><strong>Date:</strong> @Model.PaymentDate.ToString("dd MMM yyyy HH:mm")</p>
         </div>

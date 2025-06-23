@@ -2,9 +2,11 @@
 const toggleButton = document.querySelector('.toggle');
 const navigation = document.querySelector('.navigation');
 
-toggleButton.addEventListener('click', function() {
-    navigation.classList.toggle('active');
-});
+if (toggleButton && navigation) {
+    toggleButton.addEventListener('click', function() {
+        navigation.classList.toggle('active');
+    });
+}
 
 //this is the javascript for the customised presentation
 //we are using the local storage for the background color but not for the text size
@@ -90,10 +92,10 @@ function darkBackground() {
     localStorage.setItem('textColor', "white");
 }
 
-button1.addEventListener("click", increaseFontSize);
-button2.addEventListener("click", decreaseFontSize);
-button3.addEventListener("click", darkBackground);
-button4.addEventListener("click", lightBackground);
+if (button1) button1.addEventListener("click", increaseFontSize);
+if (button2) button2.addEventListener("click", decreaseFontSize);
+if (button3) button3.addEventListener("click", darkBackground);
+if (button4) button4.addEventListener("click", lightBackground);
 
 
 //this is the javascript to apply chnages in case of reloaded page using the DOMContentLoaded
@@ -124,19 +126,21 @@ window.addEventListener('DOMContentLoaded', () => {
 const setting = document.querySelector('.logo2');
 const settingbutton = document.getElementById('div6');
 
-setting.addEventListener('click', function() {
-    if (settingbutton.style.display === "none" || settingbutton.style.display === "") {
-        settingbutton.style.display = "flex"; 
-    } else {
-        settingbutton.style.display = "none";
-    }
-});
+if (setting && settingbutton) {
+    setting.addEventListener('click', function() {
+        if (settingbutton.style.display === "none" || settingbutton.style.display === "") {
+            settingbutton.style.display = "flex"; 
+        } else {
+            settingbutton.style.display = "none";
+        }
+    });
 
-document.addEventListener('click', function(event) {
-    if (!setting.contains(event.target) && !settingbutton.contains(event.target)) {
-        settingbutton.style.display = "none"; 
-    }
-});
+    document.addEventListener('click', function(event) {
+        if (!setting.contains(event.target) && !settingbutton.contains(event.target)) {
+            settingbutton.style.display = "none"; 
+        }
+    });
+}
 
 //this is for the location button part: 
 // Location Button Toggle

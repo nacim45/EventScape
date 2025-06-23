@@ -67,6 +67,8 @@ builder.Services.AddRazorPages(options =>
     // options.Conventions.AuthorizePage("/Admin/ManageContacts", "ContactManager");
 });
 
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

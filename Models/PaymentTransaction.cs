@@ -12,6 +12,8 @@ namespace soft20181_starter.Models
         [Required]
         public string PaymentIntentId { get; set; }
 
+        public string? PayPalOrderId { get; set; }
+
         [Required]
         public string UserId { get; set; }
 

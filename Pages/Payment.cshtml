@@ -18,9 +18,9 @@
     </div>
 
     <div class="payment-form">
+        <h3><i class="fas fa-credit-card"></i> Pay with Card (Stripe)</h3>
         <form id="payment-form">
             <div class="form-section">
-                <h3><i class="fas fa-credit-card"></i> Payment Details</h3>
                 <div class="form-group">
                     <label for="cardholder-name">
                         <i class="fas fa-user"></i> Cardholder Name
@@ -122,6 +122,28 @@
                 <p>Your payment is secured by Stripe's 256-bit SSL encryption</p>
             </div>
         </form>
+        <hr style="margin: 40px 0; border-top: 2px solid #BFACB5;">
+        <h3><i class="fab fa-paypal"></i> Or Pay with PayPal</h3>
+        <div class="paypal-section">
+            <div class="paypal-info">
+                <p><i class="fas fa-shield-alt"></i> Secure payment powered by PayPal</p>
+                <p><i class="fas fa-globe"></i> Accepted worldwide</p>
+            </div>
+            <div id="paypal-button-container" style="margin-top: 2rem;">
+                <div id="paypal-loading" style="text-align: center; color: #666; font-style: italic;">
+                    <i class="fas fa-spinner fa-spin"></i> Loading PayPal button...
+                </div>
+            </div>
+            <!-- Fallback PayPal button for when SDK fails -->
+            <div id="paypal-fallback" style="display: none; margin-top: 1rem;">
+                <button id="paypal-fallback-btn" class="paypal-fallback-button" style="width: 100%; padding: 15px; background-color: #0070ba; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                    <i class="fab fa-paypal"></i> Pay with PayPal (Alternative Method)
+                </button>
+                <p style="text-align: center; color: #666; font-size: 12px; margin-top: 5px;">
+                    This will redirect you to PayPal's secure payment page
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -452,6 +474,79 @@
             font-weight: bold;
         }
 
+        /* PayPal Section Styling */
+        .paypal-section {
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .paypal-section:hover {
+            transform: translateY(-2px);
+        }
+
+        .paypal-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .paypal-info p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .paypal-info i {
+            color: #522B5B;
+        }
+
+        #paypal-button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 50px;
+        }
+
+        /* PayPal Button Custom Styling */
+        .paypal-button {
+            background-color: #0070ba !important;
+            border-radius: 8px !important;
+            font-family: inherit !important;
+        }
+
+        .paypal-button:hover {
+            background-color: #005ea6 !important;
+        }
+
+        /* PayPal Success Message */
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #c3e6cb;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .success-message i {
+            color: #28a745;
+            margin-right: 8px;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* Responsive Design */
         @@media (max-width: 768px) {
             .payment-container {
@@ -486,12 +581,141 @@
                 gap: 15px;
             }
         }
+
+        /* PayPal Fallback Button */
+        .paypal-fallback-button {
+            background-color: #0070ba !important;
+            border-radius: 8px !important;
+            font-family: inherit !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .paypal-fallback-button:hover {
+            background-color: #005ea6 !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(0, 112, 186, 0.3) !important;
+        }
+
+        .paypal-fallback-button:disabled {
+            background-color: #6c757d !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
     </style>
 }
 
 @section Scripts {
     <script src="https://js.stripe.com/v3/"></script>
     <script>
+        // PayPal Integration with Multiple Fallback Methods
+        let paypalLoaded = false;
+        let paypalLoadAttempts = 0;
+        const maxLoadAttempts = 3;
+
+        // Method 1: Try loading PayPal SDK with multiple CDNs
+        function loadPayPalSDK() {
+            const clientId = '@Model.PayPalClientId';
+            console.log("Attempting to load PayPal SDK with Client ID:", clientId);
+
+            if (!clientId || clientId.trim() === '') {
+                console.error("PayPal Client ID is missing");
+                showPayPalError("PayPal configuration is missing. Please contact support.");
+                return;
+            }
+
+            // Try multiple CDN sources
+            const paypalSources = [
+                `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=GBP&intent=capture`,
+                `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=GBP`,
+                `https://www.paypalobjects.com/api/checkout.js?client-id=${clientId}&currency=GBP`
+            ];
+
+            tryLoadPayPal(paypalSources, 0);
+        }
+
+        function tryLoadPayPal(sources, index) {
+            if (index >= sources.length || paypalLoadAttempts >= maxLoadAttempts) {
+                console.error("All PayPal loading attempts failed");
+                showPayPalError("Unable to load PayPal. Please try using the card payment option above.");
+                return;
+            }
+
+            paypalLoadAttempts++;
+            console.log(`Attempt ${paypalLoadAttempts}: Loading PayPal from ${sources[index]}`);
+
+            const script = document.createElement('script');
+            script.src = sources[index];
+            script.async = true;
+            
+            script.onload = function() {
+                console.log('PayPal SDK loaded successfully from:', sources[index]);
+                paypalLoaded = true;
+                initializePayPal();
+            };
+            
+            script.onerror = function() {
+                console.warn(`Failed to load PayPal from ${sources[index]}, trying next source...`);
+                setTimeout(() => tryLoadPayPal(sources, index + 1), 1000);
+            };
+
+            document.head.appendChild(script);
+        }
+
+        function showPayPalError(message) {
+            const container = document.getElementById('paypal-button-container');
+            if (container) {
+                container.innerHTML = `
+                    <div style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; text-align: center;">
+                        <i class="fas fa-exclamation-triangle"></i> ${message}
+                    </div>
+                `;
+            }
+            // Show fallback button
+            showFallbackPayPal();
+        }
+
+        function showFallbackPayPal() {
+            const fallback = document.getElementById('paypal-fallback');
+            if (fallback) {
+                fallback.style.display = 'block';
+            }
+        }
+
+        // Fallback PayPal button handler
+        function handleFallbackPayPal() {
+            const fallbackBtn = document.getElementById('paypal-fallback-btn');
+            if (fallbackBtn) {
+                fallbackBtn.disabled = true;
+                fallbackBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting to PayPal...';
+                
+                fetch('/api/paypal/redirect-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify({
+                        amount: @Model.TotalAmount
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirectUrl) {
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        throw new Error('No redirect URL received');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fallback PayPal error:', error);
+                    fallbackBtn.disabled = false;
+                    fallbackBtn.innerHTML = '<i class="fab fa-paypal"></i> Pay with PayPal (Alternative Method)';
+                    alert('Unable to redirect to PayPal. Please try the card payment option.');
+                });
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const stripe = Stripe('@Model.StripePublicKey');
             const elements = stripe.elements();
@@ -643,6 +867,230 @@
                     buttonText.textContent = 'Pay Now';
                 }
             });
+
+            // Initialize PayPal after Stripe is set up
+            loadPayPalSDK();
+
+            // Add event listener for fallback PayPal button
+            const fallbackBtn = document.getElementById('paypal-fallback-btn');
+            if (fallbackBtn) {
+                fallbackBtn.addEventListener('click', handleFallbackPayPal);
+            }
         });
+
+        // PayPal Integration Function
+        function initializePayPal() {
+            console.log('Initializing PayPal integration...');
+            console.log('PayPal Client ID:', '@Model.PayPalClientId');
+            
+            // Clear loading indicator
+            const loadingElement = document.getElementById('paypal-loading');
+            if (loadingElement) {
+                loadingElement.remove();
+            }
+            
+            // Check which PayPal API is available
+            if (typeof paypal !== 'undefined') {
+                if (paypal.Buttons) {
+                    // New PayPal Buttons API
+                    console.log('Using PayPal Buttons API');
+                    createPayPalButtons();
+                } else if (paypal.Button) {
+                    // Old PayPal Checkout API
+                    console.log('Using PayPal Checkout API');
+                    createPayPalCheckout();
+                } else {
+                    console.error('PayPal API not recognized');
+                    showPayPalError("PayPal integration error. Please try the alternative payment method.");
+                    showFallbackPayPal();
+                }
+            } else {
+                console.error('PayPal object not found');
+                showPayPalError("PayPal not available. Please try the alternative payment method.");
+                showFallbackPayPal();
+            }
+        }
+        
+        function createPayPalButtons() {
+            // Set a timeout to check if the button renders
+            setTimeout(function() {
+                const container = document.getElementById('paypal-button-container');
+                if (container && container.innerHTML.trim() === '') {
+                    console.error('PayPal button failed to render');
+                    container.innerHTML = '<div style="color: red; padding: 20px; text-align: center;">PayPal button failed to load. Please try the alternative payment method.</div>';
+                    showFallbackPayPal();
+                }
+            }, 5000);
+            
+            paypal.Buttons({
+                // Sets up the transaction when a payment button is clicked
+                createOrder: function(data, actions) {
+                    console.log('Creating PayPal order for amount: @Model.TotalAmount.ToString("0.00")');
+                    
+                    return fetch('/api/paypal/create-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: JSON.stringify({
+                            amount: Number(@Model.TotalAmount).toFixed(2),
+                            currency: 'GBP'
+                        })
+                    })
+                    .then(function(response) {
+                        console.log('PayPal create order response status:', response.status);
+                        
+                        if (!response.ok) {
+                            return response.json().then(function(errorData) {
+                                console.error('PayPal create order error:', errorData);
+                                throw new Error('Failed to create PayPal order: ' + (errorData.error || response.statusText));
+                            });
+                        }
+                        
+                        return response.json();
+                    })
+                    .then(function(orderData) {
+                        console.log('PayPal order created successfully:', orderData);
+                        
+                        if (!orderData.id) {
+                            throw new Error('PayPal order ID not found in response');
+                        }
+                        
+                        return orderData.id;
+                    })
+                    .catch(function(error) {
+                        console.error('PayPal create order exception:', error);
+                        alert('Error creating PayPal order: ' + error.message);
+                        throw error;
+                    });
+                },
+
+                // Finalize the transaction after payer approval
+                onApprove: function(data, actions) {
+                    console.log('PayPal order approved:', data);
+                    
+                    return fetch('/api/paypal/capture-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: JSON.stringify({
+                            orderId: data.orderID
+                        })
+                    })
+                    .then(function(response) {
+                        console.log('PayPal capture response status:', response.status);
+                        
+                        if (!response.ok) {
+                            return response.json().then(function(errorData) {
+                                console.error('PayPal capture error:', errorData);
+                                throw new Error('Failed to capture PayPal payment: ' + (errorData.error || response.statusText));
+                            });
+                        }
+                        
+                        return response.json();
+                    })
+                    .then(function(captureData) {
+                        console.log('PayPal payment captured successfully:', captureData);
+                        
+                        if (captureData.status === "COMPLETED") {
+                            // Show success message
+                            const buttonContainer = document.getElementById('paypal-button-container');
+                            buttonContainer.innerHTML = '<div class="success-message"><i class="fas fa-check-circle"></i> Payment Successful!</div>';
+                            
+                            // Redirect to success page after a short delay
+                            setTimeout(function() {
+                                window.location.href = '/PaymentSuccess?paymentMethod=paypal&orderId=' + data.orderID;
+                            }, 2000);
+                        } else {
+                            console.error('PayPal payment not completed. Status:', captureData.status);
+                            alert('Payment not completed. Status: ' + captureData.status);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('PayPal capture exception:', error);
+                        alert('Error processing PayPal payment: ' + error.message);
+                    });
+                },
+
+                // Handle errors during the payment process
+                onError: function(err) {
+                    console.error('PayPal button error:', err);
+                    alert('PayPal error: ' + err.message);
+                },
+
+                // Handle cancellation
+                onCancel: function(data) {
+                    console.log('PayPal payment cancelled:', data);
+                    alert('Payment was cancelled. You can try again or use a different payment method.');
+                },
+
+                // Handle when the payment window is closed
+                onClick: function(data, actions) {
+                    console.log('PayPal button clicked');
+                }
+            }).render('#paypal-button-container')
+            .then(function() {
+                console.log('PayPal button rendered successfully');
+                const container = document.getElementById('paypal-button-container');
+                // Clear any loading message
+                if (container.innerHTML.includes('Loading PayPal button')) {
+                    container.innerHTML = '';
+                }
+            })
+            .catch(function(error) {
+                console.error('PayPal button render error:', error);
+                document.getElementById('paypal-button-container').innerHTML = 
+                    '<div style="color: red; padding: 20px; text-align: center;">Error loading PayPal button: ' + error.message + '</div>';
+                showFallbackPayPal();
+            });
+        }
+        
+        function createPayPalCheckout() {
+            // Old PayPal Checkout API implementation
+            console.log('Creating PayPal Checkout button');
+            
+            paypal.Button.render({
+                env: 'sandbox', // Change to 'production' for live
+                client: {
+                    sandbox: '@Model.PayPalClientId'
+                },
+                payment: function(data, actions) {
+                    return actions.payment.create({
+                        transactions: [{
+                            amount: {
+                                total: '@Model.TotalAmount.ToString("0.00")',
+                                currency: 'GBP'
+                            },
+                            description: 'EventScape Event Payment'
+                        }]
+                    });
+                },
+                onAuthorize: function(data, actions) {
+                    return actions.payment.execute().then(function(payment) {
+                        console.log('PayPal payment completed:', payment);
+                        
+                        // Show success message
+                        const buttonContainer = document.getElementById('paypal-button-container');
+                        buttonContainer.innerHTML = '<div class="success-message"><i class="fas fa-check-circle"></i> Payment Successful!</div>';
+                        
+                        // Redirect to success page after a short delay
+                        setTimeout(function() {
+                            window.location.href = '/PaymentSuccess?paymentMethod=paypal&orderId=' + payment.id;
+                        }, 2000);
+                    });
+                },
+                onCancel: function(data) {
+                    console.log('PayPal payment cancelled');
+                    alert('Payment was cancelled. You can try again or use a different payment method.');
+                },
+                onError: function(err) {
+                    console.error('PayPal error:', err);
+                    alert('PayPal error: ' + err.message);
+                }
+            }, '#paypal-button-container');
+        }
     </script>
 } 

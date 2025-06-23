@@ -17,25 +17,30 @@ namespace soft20181_starter.Pages
         }
 
         public string PaymentIntentId { get; private set; }
+        public string PaymentMethod { get; private set; }
         public decimal Amount { get; private set; }
         public DateTime PaymentDate { get; private set; }
 
-        public async Task<IActionResult> OnGetAsync(string paymentIntentId)
+        public async Task<IActionResult> OnGetAsync(string paymentIntentId, string orderId)
         {
-            if (string.IsNullOrEmpty(paymentIntentId))
+            // Handle both Stripe payment intent IDs and PayPal order IDs
+            var transactionId = paymentIntentId ?? orderId;
+            
+            if (string.IsNullOrEmpty(transactionId))
             {
                 return RedirectToPage("/MyEvents");
             }
 
             var transaction = await _context.PaymentTransactions
-                .FirstOrDefaultAsync(t => t.PaymentIntentId == paymentIntentId);
+                .FirstOrDefaultAsync(t => t.PaymentIntentId == transactionId || t.PayPalOrderId == transactionId);
 
             if (transaction == null)
             {
                 return RedirectToPage("/MyEvents");
             }
 
-            PaymentIntentId = transaction.PaymentIntentId;
+            PaymentIntentId = transaction.PaymentIntentId ?? transaction.PayPalOrderId;
+            PaymentMethod = !string.IsNullOrEmpty(transaction.PayPalOrderId) ? "PayPal" : "Stripe";
             Amount = transaction.Amount;
             PaymentDate = transaction.CreatedAt;
 

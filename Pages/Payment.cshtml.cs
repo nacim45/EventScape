@@ -32,9 +32,11 @@ namespace soft20181_starter.Pages
             StripePublicKey = _configuration["Stripe:PublicKey"];
             _stripeSecretKey = _configuration["Stripe:SecretKey"];
             StripeConfiguration.ApiKey = _stripeSecretKey;
+            PayPalClientId = _configuration["PayPal:ClientId"];
         }
 
         public string StripePublicKey { get; }
+        public string PayPalClientId { get; }
         public decimal TotalAmount { get; private set; }
         public string UserName { get; private set; } = string.Empty;
         public string UserSurname { get; private set; } = string.Empty;
