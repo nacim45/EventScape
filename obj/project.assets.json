@@ -7366,8 +7366,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Geekzone\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Geekzone\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
@@ -7378,19 +7377,13 @@
       "packagesPath": "C:\\Users\\Geekzone\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Geekzone\\Desktop\\soft2081-starter-code-main\\soft2081-starter-code-main\\soft20181_starter\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Geekzone\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Geekzone\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
