@@ -1,0 +1,71 @@
+trigger:
+  branches:
+    include:
+      - main  # Or your default deployment branch
+
+variables:
+  acrName: 'EventContainerTest'               # ACR name (without .azurecr.io)
+  imageName: 'nacimeventscape'                # Image repo in ACR
+  imageTag: '7'                               # Use $(Build.BuildId) for dynamic tagging
+  resourceGroup: 'EventBooking'              # Azure Resource Group
+  appServiceName: 'EventScape'               # Azure Web App name
+  dockerfilePath: 'EventScape/Dockerfile'    # Relative path to Dockerfile
+  buildContext: 'EventScape'                 # Context path for Docker build
+  serviceConnection: 'event booking'         # Azure RM service connection name
+
+stages:
+
+- stage: BuildAndPush
+  displayName: Build and Push Docker Image
+  jobs:
+    - job: BuildAndPushJob
+      displayName: Build and Push to ACR
+      pool:
+        vmImage: 'ubuntu-latest'
+
+      steps:
+        - task: AzureCLI@2
+          name: ACRLogin
+          displayName: 'Login to Azure and ACR'
+          inputs:
+            azureSubscription: '$(serviceConnection)'
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              echo "Logging into ACR: $(acrName)"
+              az acr login --name $(acrName)
+
+        - task: Docker@2
+          name: DockerBuildPush
+          displayName: 'Build and Push Image to ACR'
+          inputs:
+            containerRegistry: '$(serviceConnection)'
+            repository: '$(imageName)'
+            command: 'buildAndPush'
+            Dockerfile: '$(dockerfilePath)'
+            buildContext: '$(buildContext)'
+            tags: |
+              $(imageTag)
+
+- stage: Deploy
+  displayName: Deploy to Azure App Service
+  dependsOn: BuildAndPush
+  condition: succeeded()
+  jobs:
+    - deployment: DeployWebApp
+      displayName: Deploy ACR Image to Web App
+      environment: 'production'
+      pool:
+        vmImage: 'ubuntu-latest'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: AzureWebAppContainer@2
+                displayName: 'Deploy Container to Azure Web App'
+                inputs:
+                  azureSubscription: '$(serviceConnection)'
+                  appName: '$(appServiceName)'
+                  resourceGroupName: '$(resourceGroup)'
+                  containers: |
+                    $(acrName).azurecr.io/$(imageName):$(imageTag)
