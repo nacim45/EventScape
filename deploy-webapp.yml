@@ -9,14 +9,14 @@ resources:
 
 variables:
   # Azure Resources
-  acrName: 'eventcontainertest'  # Must be lowercase
+  acrName: 'EventBookingContainer'  # Must be lowercase
   imageName: 'nacimeventscape'
   resourceGroup: 'EventBooking'
   appServiceName: 'EventScapeApp'
 
   # Service Connections
   azureServiceConnection: 'eventbooking'  # ARM service connection
-  acrServiceConnection: 'eventbookingdockerregistry'  # Docker Registry service connection
+  acrServiceConnection: 'EventBookingContainer'  # Docker Registry service connection
 
 stages:
 - stage: Deploy
