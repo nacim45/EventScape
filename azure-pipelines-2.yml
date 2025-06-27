@@ -1,45 +1,33 @@
 trigger:
   branches:
     include:
-      - main  # Or your default deployment branch
+      - main
 
 variables:
-  acrName: 'EventContainerTest'               # ACR name (without .azurecr.io)
-  imageName: 'nacimeventscape'                # Image repo in ACR
-  imageTag: '7'                               # Use $(Build.BuildId) for dynamic tagging
-  resourceGroup: 'EventBooking'              # Azure Resource Group
-  appServiceName: 'EventScape'               # Azure Web App name
-  dockerfilePath: 'EventScape/Dockerfile'    # Relative path to Dockerfile
-  buildContext: 'EventScape'                 # Context path for Docker build
-  serviceConnection: 'event booking'         # Azure RM service connection name
+  acrName: 'EventContainerTest'
+  imageName: 'nacimeventscape'
+  imageTag: '7'
+  resourceGroup: 'EventBooking'
+  appServiceName: 'EventScape'
+  dockerfilePath: 'EventScape/Dockerfile'
+  buildContext: 'EventScape'
+  azureServiceConnection: 'eventbooking'       # ARM type
+  acrServiceConnection: 'eventbookingdockerregistry'         # Docker Registry type
 
 stages:
 
 - stage: BuildAndPush
-  displayName: Build and Push Docker Image
+  displayName: 'Build and Push Docker Image'
   jobs:
-    - job: BuildAndPushJob
-      displayName: Build and Push to ACR
+    - job: Build
+      displayName: 'Build and Push'
       pool:
         vmImage: 'ubuntu-latest'
-
       steps:
-        - task: AzureCLI@2
-          name: ACRLogin
-          displayName: 'Login to Azure and ACR'
-          inputs:
-            azureSubscription: '$(serviceConnection)'
-            scriptType: 'bash'
-            scriptLocation: 'inlineScript'
-            inlineScript: |
-              echo "Logging into ACR: $(acrName)"
-              az acr login --name $(acrName)
-
         - task: Docker@2
-          name: DockerBuildPush
-          displayName: 'Build and Push Image to ACR'
+          displayName: 'Build and Push to ACR'
           inputs:
-            containerRegistry: '$(serviceConnection)'
+            containerRegistry: '$(acrServiceConnection)'   # Docker Registry type
             repository: '$(imageName)'
             command: 'buildAndPush'
             Dockerfile: '$(dockerfilePath)'
@@ -48,24 +36,20 @@ stages:
               $(imageTag)
 
 - stage: Deploy
-  displayName: Deploy to Azure App Service
+  displayName: 'Deploy to Azure Web App'
   dependsOn: BuildAndPush
-  condition: succeeded()
   jobs:
-    - deployment: DeployWebApp
-      displayName: Deploy ACR Image to Web App
-      environment: 'production'
+    - job: DeployJob
+      displayName: 'Deploy to Web App'
       pool:
         vmImage: 'ubuntu-latest'
-      strategy:
-        runOnce:
-          deploy:
-            steps:
-              - task: AzureWebAppContainer@2
-                displayName: 'Deploy Container to Azure Web App'
-                inputs:
-                  azureSubscription: '$(serviceConnection)'
-                  appName: '$(appServiceName)'
-                  resourceGroupName: '$(resourceGroup)'
-                  containers: |
-                    $(acrName).azurecr.io/$(imageName):$(imageTag)
+      steps:
+        - task: AzureWebApp@1
+          displayName: 'Deploy Container Image to Web App'
+          inputs:
+            azureSubscription: '$(azureServiceConnection)'
+            appName: '$(appServiceName)'
+            resourceGroupName: '$(resourceGroup)'
+            deployToSlotOrASE: false
+            appSettings: |
+              -DOCKER_CUSTOM_IMAGE_NAME=$(acrName).azurecr.io/$(imageName):$(imageTag)
