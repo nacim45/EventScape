@@ -1,0 +1,61 @@
+# deploy-webapp.yml
+trigger: none  # We'll trigger manually or via pipeline completion
+
+resources:
+  pipelines:
+  - pipeline: build_pipeline  # References your 2nd pipeline (ACR push)
+    source: "Name_of_Your_Second_Pipeline"  # Replace with your 2nd pipeline name
+    trigger: true  # Auto-trigger when the 2nd pipeline succeeds
+
+variables:
+  # Azure Resources
+  acrName: 'eventcontainertest'  # Must be lowercase
+  imageName: 'nacimeventscape'
+  resourceGroup: 'EventBooking'
+  appServiceName: 'EventScape'
+
+  # Service Connections
+  azureServiceConnection: 'eventbooking'  # ARM service connection
+  acrServiceConnection: 'eventbookingdockerregistry'  # Docker Registry service connection
+
+stages:
+- stage: Deploy
+  displayName: Deploy to Web App
+  jobs:
+  - job: Deploy
+    displayName: Update Web App Container
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    # Fetch the latest image tag from ACR
+    - bash: |
+        latestTag=$(az acr repository show-tags \
+          --name $(acrName) \
+          --repository $(imageName) \
+          --orderby time_desc \
+          --query '[0]' \
+          --output tsv)
+        echo "Latest ACR image tag: $latestTag"
+        echo "##vso[task.setvariable variable=imageTag]$latestTag"
+      displayName: Get Latest ACR Image Tag
+
+    # Deploy to Web App
+    - task: AzureWebAppContainer@1
+      displayName: Update Web App Container
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        appName: $(appServiceName)
+        containers: $(acrName).azurecr.io/$(imageName):$(imageTag)
+        appSettings: |
+          -DOCKER_ENABLE_CI true  # Force Azure to pull the latest image
+
+    # Restart Web App (ensures changes apply)
+    - task: AzureCLI@2
+      displayName: Restart Web App
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az webapp restart --name $(appServiceName) --resource-group $(resourceGroup)
+          echo "Web App restarted successfully."
