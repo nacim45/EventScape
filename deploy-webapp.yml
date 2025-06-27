@@ -1,4 +1,3 @@
-# deploy-webapp.yml
 trigger: none
 
 resources:
@@ -8,12 +7,11 @@ resources:
     trigger: true
 
 variables:
-  acrName: 'eventbookingcontainer'  # Changed to lowercase
+  acrName: 'eventbookingcontainer'
   imageName: 'nacimeventscape'
   resourceGroup: 'EventBooking'
-  appServiceName: 'EventScapeApp'  # Verify this matches exactly in Azure Portal
+  appServiceName: 'EventScapeApp'
   azureServiceConnection: 'eventbooking'
-  acrServiceConnection: 'EventBookingContainer'
 
 stages:
 - stage: Deploy
@@ -24,17 +22,24 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    # Verify Web App exists first
+    # Step 1: Verify all resources exist
     - task: AzureCLI@2
-      displayName: Verify Web App Exists
+      displayName: Validate Azure Resources
       inputs:
         azureSubscription: $(azureServiceConnection)
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          echo "Checking Web App exists..."
           az webapp show --name $(appServiceName) --resource-group $(resourceGroup)
+          
+          echo "Checking ACR exists..."
+          az acr show --name $(acrName) --resource-group $(resourceGroup)
+          
+          echo "Checking image exists..."
+          az acr repository show --name $(acrName) --repository $(imageName)
 
-    # Get latest tag
+    # Step 2: Get the latest image tag
     - bash: |
         latestTag=$(az acr repository show-tags \
           --name $(acrName) \
@@ -46,22 +51,30 @@ stages:
         echo "Using tag: $latestTag"
       displayName: Get Latest ACR Image Tag
 
-    # Deploy with proper appSettings format
-    - task: AzureWebAppContainer@1
-      displayName: Update Web App Container
-      inputs:
-        azureSubscription: $(azureServiceConnection)
-        appName: $(appServiceName)
-        containers: $(acrName).azurecr.io/$(imageName):$(imageTag)
-        appSettings: '[{"name": "DOCKER_ENABLE_CI", "value": "true"}]'
-
-    # Restart Web App
+    # Step 3: Deploy using Azure CLI (more reliable than AzureWebAppContainer)
     - task: AzureCLI@2
-      displayName: Restart Web App
+      displayName: Deploy Container to Web App
       inputs:
         azureSubscription: $(azureServiceConnection)
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          # First update container configuration
+          echo "Updating container settings..."
+          az webapp config container set \
+            --name $(appServiceName) \
+            --resource-group $(resourceGroup) \
+            --docker-custom-image-name $(acrName).azurecr.io/$(imageName):$(imageTag) \
+            --docker-registry-server-url https://$(acrName).azurecr.io
+          
+          # Then update app settings separately
+          echo "Updating application settings..."
+          az webapp config appsettings set \
+            --name $(appServiceName) \
+            --resource-group $(resourceGroup) \
+            --settings DOCKER_ENABLE_CI=true
+          
+          # Force restart
+          echo "Restarting web app..."
           az webapp restart --name $(appServiceName) --resource-group $(resourceGroup)
-          echo "Web App restarted successfully."
+          echo "Deployment completed successfully!"
