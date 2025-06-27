@@ -1,22 +1,19 @@
 # deploy-webapp.yml
-trigger: none  # We'll trigger manually or via pipeline completion
+trigger: none
 
 resources:
   pipelines:
-  - pipeline: build_pipeline  # References your 2nd pipeline (ACR push)
-    source: "nacim45.EventScape (10)"  # Replace with your 2nd pipeline name
-    trigger: true  # Auto-trigger when the 2nd pipeline succeeds
+  - pipeline: build_pipeline
+    source: "nacim45.EventScape (10)"
+    trigger: true
 
 variables:
-  # Azure Resources
-  acrName: 'EventBookingContainer'  # Must be lowercase
+  acrName: 'eventbookingcontainer'  # Changed to lowercase
   imageName: 'nacimeventscape'
   resourceGroup: 'EventBooking'
-  appServiceName: 'EventScapeApp'
-
-  # Service Connections
-  azureServiceConnection: 'eventbooking'  # ARM service connection
-  acrServiceConnection: 'EventBookingContainer'  # Docker Registry service connection
+  appServiceName: 'EventScapeApp'  # Verify this matches exactly in Azure Portal
+  azureServiceConnection: 'eventbooking'
+  acrServiceConnection: 'EventBookingContainer'
 
 stages:
 - stage: Deploy
@@ -27,7 +24,17 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    # Fetch the latest image tag from ACR
+    # Verify Web App exists first
+    - task: AzureCLI@2
+      displayName: Verify Web App Exists
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az webapp show --name $(appServiceName) --resource-group $(resourceGroup)
+
+    # Get latest tag
     - bash: |
         latestTag=$(az acr repository show-tags \
           --name $(acrName) \
@@ -35,11 +42,11 @@ stages:
           --orderby time_desc \
           --query '[0]' \
           --output tsv)
-        echo "Latest ACR image tag: $latestTag"
         echo "##vso[task.setvariable variable=imageTag]$latestTag"
+        echo "Using tag: $latestTag"
       displayName: Get Latest ACR Image Tag
 
-    # Deploy to Web App
+    # Deploy with proper appSettings format
     - task: AzureWebAppContainer@1
       displayName: Update Web App Container
       inputs:
@@ -48,7 +55,7 @@ stages:
         containers: $(acrName).azurecr.io/$(imageName):$(imageTag)
         appSettings: '[{"name": "DOCKER_ENABLE_CI", "value": "true"}]'
 
-    # Restart Web App (ensures changes apply)
+    # Restart Web App
     - task: AzureCLI@2
       displayName: Restart Web App
       inputs:
