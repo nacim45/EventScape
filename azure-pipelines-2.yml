@@ -4,49 +4,58 @@ trigger:
       - main
 
 variables:
+  # Azure Resources
   acrName: 'EventContainerTest'
   imageName: 'nacimeventscape'
-  imageTag: '7'
+  imageTag: '7'  # Static tag (update manually or use $(Build.BuildId) for dynamic)
   resourceGroup: 'EventBooking'
   appServiceName: 'EventScape'
-  # Use absolute paths for reliability
-  dockerfilePath: '$(Build.SourcesDirectory)/EventScape-main/Dockerfile'  # Double-check spelling of "EventScape" vs "EventScape"
-  buildContext: '$(Build.SourcesDirectory)/EventScape'
-  azureServiceConnection: 'eventbooking'
-  acrServiceConnection: 'eventbookingdockerregistry'
+
+  # Docker Configuration (Option 1: Dockerfile in ROOT)
+  dockerfilePath: 'Dockerfile'  # Assumes Dockerfile is in the root of your repo
+  buildContext: '.'             # Build context = root directory
+
+  # Service Connections
+  azureServiceConnection: 'eventbooking'               # ARM service connection
+  acrServiceConnection: 'eventbookingdockerregistry'   # Docker Registry service connection
 
 stages:
 
+### STAGE 1: Build and Push to ACR
 - stage: BuildAndPush
   displayName: 'Build and Push Docker Image'
   jobs:
     - job: Build
       displayName: 'Build and Push'
       pool:
-        vmImage: 'ubuntu-latest'
+        vmImage: 'ubuntu-latest'  # Linux agent (recommended for Docker)
       steps:
-        # ===== DEBUGGING: Verify repository structure =====
+
+        # ===== DEBUGGING: Verify Repository Structure =====
         - script: |
             echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"
-            ls -R $(Build.SourcesDirectory)
-            echo "Checking for Dockerfile at $(dockerfilePath)"
-            test -f $(dockerfilePath) && echo "✅ Dockerfile FOUND" || echo "❌ Dockerfile MISSING"
+            echo "Files in repo root:"
+            ls -la $(Build.SourcesDirectory)
+            echo "Checking for Dockerfile at: $(Build.SourcesDirectory)/$(dockerfilePath)"
+            test -f $(Build.SourcesDirectory)/$(dockerfilePath) && echo "✅ Dockerfile FOUND" || echo "❌ Dockerfile MISSING"
           displayName: 'Debug: Check Dockerfile Exists'
 
-        # ===== BUILD AND PUSH =====
+        # ===== Build and Push to ACR =====
         - task: Docker@2
           displayName: 'Build and Push to ACR'
           inputs:
             containerRegistry: $(acrServiceConnection)
             repository: $(imageName)
             command: buildAndPush
-            Dockerfile: $(dockerfilePath)  # Now using absolute path
-            buildContext: $(buildContext)
+            Dockerfile: $(dockerfilePath)  # Path relative to repo root
+            buildContext: $(buildContext)   # Build from repo root
             tags: $(imageTag)
 
+### STAGE 2: Deploy to Azure Web App
 - stage: Deploy
   displayName: 'Deploy to Azure Web App'
   dependsOn: BuildAndPush
+  condition: succeeded()  # Only deploy if build succeeds
   jobs:
     - job: DeployJob
       displayName: 'Deploy Container'
@@ -60,4 +69,4 @@ stages:
             appName: $(appServiceName)
             containers: $(acrName).azurecr.io/$(imageName):$(imageTag)
             appSettings: |
-              -DOCKER_ENABLE_CI true
+              -DOCKER_ENABLE_CI true  # Force Azure to pull the latest image
