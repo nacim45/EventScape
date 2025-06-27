@@ -46,8 +46,7 @@ stages:
         azureSubscription: $(azureServiceConnection)
         appName: $(appServiceName)
         containers: $(acrName).azurecr.io/$(imageName):$(imageTag)
-        appSettings: |
-          -DOCKER_ENABLE_CI true  # Force Azure to pull the latest image
+        appSettings: '[{"name": "DOCKER_ENABLE_CI", "value": "true"}]'
 
     # Restart Web App (ensures changes apply)
     - task: AzureCLI@2
