@@ -6,11 +6,12 @@ trigger:
 variables:
   acrName: 'EventContainerTest'
   imageName: 'nacimeventscape'
-  imageTag: '7'  # Fixed tag (update manually or parameterize)
+  imageTag: '7'
   resourceGroup: 'EventBooking'
   appServiceName: 'EventScape'
-  dockerfilePath: '**/Dockerfile'  # Updated to search recursively
-  buildContext: '$(Build.SourcesDirectory)/EventScape'  # Full path
+  # Use absolute paths for reliability
+  dockerfilePath: '$(Build.SourcesDirectory)/EventScape-main/Dockerfile'  # Double-check spelling of "EventScape" vs "EventScape"
+  buildContext: '$(Build.SourcesDirectory)/EventScape'
   azureServiceConnection: 'eventbooking'
   acrServiceConnection: 'eventbookingdockerregistry'
 
@@ -24,38 +25,39 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
-        # Verify Dockerfile exists (debugging)
+        # ===== DEBUGGING: Verify repository structure =====
         - script: |
+            echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"
             ls -R $(Build.SourcesDirectory)
-            test -f $(Build.SourcesDirectory)/EventScape/Dockerfile && echo "Dockerfile found" || echo "Dockerfile missing"
-          displayName: 'Verify Dockerfile Location'
+            echo "Checking for Dockerfile at $(dockerfilePath)"
+            test -f $(dockerfilePath) && echo "✅ Dockerfile FOUND" || echo "❌ Dockerfile MISSING"
+          displayName: 'Debug: Check Dockerfile Exists'
 
-        # Build and push
+        # ===== BUILD AND PUSH =====
         - task: Docker@2
           displayName: 'Build and Push to ACR'
           inputs:
             containerRegistry: $(acrServiceConnection)
             repository: $(imageName)
             command: buildAndPush
-            Dockerfile: $(Build.SourcesDirectory)/EventScape/Dockerfile  # Absolute path
-            buildContext: $(Build.SourcesDirectory)/EventScape
+            Dockerfile: $(dockerfilePath)  # Now using absolute path
+            buildContext: $(buildContext)
             tags: $(imageTag)
 
 - stage: Deploy
   displayName: 'Deploy to Azure Web App'
   dependsOn: BuildAndPush
-  condition: succeeded('BuildAndPush')  # Explicit condition
   jobs:
     - job: DeployJob
       displayName: 'Deploy Container'
       pool:
         vmImage: 'ubuntu-latest'
       steps:
-        - task: AzureWebAppContainer@1  # Updated to container-specific task
+        - task: AzureWebAppContainer@1
           displayName: 'Update Web App Container'
           inputs:
             azureSubscription: $(azureServiceConnection)
             appName: $(appServiceName)
             containers: $(acrName).azurecr.io/$(imageName):$(imageTag)
             appSettings: |
-              -DOCKER_ENABLE_CI true  # Force image pull
+              -DOCKER_ENABLE_CI true
