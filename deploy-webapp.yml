@@ -12,7 +12,7 @@ variables:
   acrName: 'eventcontainertest'  # Must be lowercase
   imageName: 'nacimeventscape'
   resourceGroup: 'EventBooking'
-  appServiceName: 'EventScape'
+  appServiceName: 'EventScapeApp'
 
   # Service Connections
   azureServiceConnection: 'eventbooking'  # ARM service connection
