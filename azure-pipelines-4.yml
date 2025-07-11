@@ -14,7 +14,7 @@ variables:
   imageRepository: 'nacimeventscape'
   containerRegistry: 'eventbookingcontainer.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/dockerfile.yml'
-  tag: '$(Build.BuildId)'
+  tag: 'EventScape'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
