@@ -1,0 +1,152 @@
+[
+  {
+    "id": "1",
+    "title": "London Tech Expo 2025",
+    "image": "images/json21.png",
+    "description": "Join innovators and experts at the London Tech Expo to explore the latest breakthroughs in AI, VR, and IoT. Engage in workshops and listen to keynote speakers from top tech companies.",
+    "date": "Jan 10-12",
+    "price": "£20",
+    "link": "/EventDetail?location=london?id=1",
+    "location": "london"
+  },
+  {
+    "id": "2",
+    "title": "Startup Growth Summit 2025",
+    "image": "images/json22.png",
+    "description": "Discover how to scale your startup with insights from successful entrepreneurs and investors. This summit provides practical strategies for business growth and networking.",
+    "date": "Jan 13-15",
+    "price": "£15",
+    "link": "/EventDetail?location=london?id=2",
+    "location": "london"
+  },
+  {
+    "id": "3",
+    "title": "Art and Innovation Forum",
+    "image": "images/json23.png",
+    "description": "Explore the intersection of art and technology in this forum. Learn how digital tools are reshaping creative practices and join panel discussions with leading artists and innovators.",
+    "date": "Jan 14-16",
+    "price": "Free",
+    "link": "/EventDetail?location=london?id=3",
+    "location": "london"
+  },
+  {
+    "id": "4",
+    "title": "Science in Society Symposium",
+    "image": "images/json24.png",
+    "description": "Aimed at bridging the gap between science and society, this symposium will discuss topics like climate change, sustainability, and scientific advancements in healthcare.",
+    "date": "Jan 17-19",
+    "price": "£10",
+    "link": "/EventDetail?location=london?id=4",
+    "location": "london"
+  },
+  {
+    "id": "5",
+    "title": "Creative Entrepreneurship Workshop",
+    "image": "images/json25.png",
+    "description": "This workshop offers aspiring entrepreneurs valuable insights into turning creative ideas into profitable businesses. Learn from experts about funding, marketing, and scaling.",
+    "date": "Jan 20-22",
+    "price": "Free",
+    "link": "/EventDetail?location=london?id=5",
+    "location": "london"
+  },
+  {
+    "id": "6",
+    "title": "Future of Business Technology Talk",
+    "image": "images/json26.png",
+    "description": "Gain an understanding of emerging business technologies that are revolutionizing industries. This talk will focus on automation, AI, and blockchain in business operations.",
+    "date": "Jan 21-23",
+    "price": "£25",
+    "link": "/EventDetail?location=london?id=6",
+    "location": "london"
+  },
+  {
+    "id": "7",
+    "title": "Digital Marketing Masterclass",
+    "image": "images/json27.png",
+    "description": "Learn how to leverage digital marketing strategies for business success. The masterclass covers SEO, social media marketing, content creation, and digital analytics.",
+    "date": "Jan 24-26",
+    "price": "£20",
+    "link": "/EventDetail?location=london?id=7",
+    "location": "london"
+  },
+  {
+    "id": "8",
+    "title": "AI for Beginners Workshop",
+    "image": "images/json28.png",
+    "description": "A hands-on workshop designed for beginners, focusing on the basics of artificial intelligence and machine learning. Ideal for those looking to break into the AI industry.",
+    "date": "Jan 27-29",
+    "price": "Free",
+    "link": "/EventDetail?location=london?id=8",
+    "location": "london"
+  },
+  {
+    "id": "9",
+    "title": "Business Ethics and Sustainability Conference",
+    "image": "images/json29.png",
+    "description": "This conference will explore the role of ethics in business and how companies can adopt sustainable practices to benefit both society and the environment.",
+    "date": "Feb 1-3",
+    "price": "£15",
+    "link": "/EventDetail?location=london?id=9",
+    "location": "london"
+  },
+  {
+    "id": "10",
+    "title": "Tech Innovators Networking Event",
+    "image": "images/json210.png",
+    "description": "A networking event for tech professionals and entrepreneurs. Connect with like-minded individuals, share ideas, and explore potential collaborations in the tech industry.",
+    "date": "Feb 4-6",
+    "price": "£10",
+    "link": "/EventDetail?location=london?id=10",
+    "location": "london"
+  },
+  {
+    "id": "11",
+    "title": "London Design and Architecture Exhibition",
+    "image": "images/json211.png",
+    "description": "Explore groundbreaking architectural designs and creative concepts at the London Design and Architecture Exhibition. Discover innovative projects transforming urban landscapes.",
+    "date": "Feb 7-9",
+    "price": "£20",
+    "link": "/EventDetail?location=london?id=11",
+    "location": "london"
+  },
+  {
+    "id": "12",
+    "title": "Social Media for Business Conference",
+    "image": "images/json212.png",
+    "description": "Learn how to use social media platforms to grow your business. This conference will cover strategies for Facebook, Instagram, LinkedIn, and more, with real-world case studies.",
+    "date": "Feb 10-12",
+    "price": "£15",
+    "link": "/EventDetail?location=london?id=12",
+    "location": "london"
+  },
+  {
+    "id": "13",
+    "title": "Quantum Computing and Tech Symposium",
+    "image": "images/json213.png",
+    "description": "Dive into the future of computing with a symposium focused on quantum computing and its implications for technology, business, and science.",
+    "date": "Feb 13-15",
+    "price": "£25",
+    "link": "/EventDetail?location=london?id=13",
+    "location": "london"
+  },
+  {
+    "id": "14",
+    "title": "Interactive Art Showcase",
+    "image": "images/json214.png",
+    "description": "Experience art in a new way with this interactive showcase. Artists will present digital, VR, and multimedia art installations that invite audience participation and engagement.",
+    "date": "Feb 16-18",
+    "price": "Free",
+    "link": "/EventDetail?location=london?id=14",
+    "location": "london"
+  },
+  {
+    "id": "15",
+    "title": "Blockchain for Beginners Workshop",
+    "image": "images/json215.png",
+    "description": "Learn the fundamentals of blockchain technology in this beginner-friendly workshop. Topics include cryptocurrency, smart contracts, and how blockchain is transforming industries.",
+    "date": "Feb 19-21",
+    "price": "£15",
+    "link": "/EventDetail?location=london?id=15",
+    "location": "london"
+  }
+]

@@ -1,0 +1,445 @@
+﻿@page
+@model soft20181_starter.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home - EventScape";
+}
+
+<div class="head fixed-top">
+    <div class="settings">
+        <a>
+            <div class="logo2">
+                <img src="~/images/settings.png" id="icon2" alt="EventScape Logo">
+                <h1>Customise your website</h1>
+            </div>
+        </a>
+        <div id="div6">
+            <button id="btn1">increase the font</button>
+            <button id="btn2">decrease the font</button>
+            <button id="btn3">darker background</button>
+            <button id="btn4">lighter background</button>
+        </div>
+    </div>
+
+    <a asp-page="/Index">
+        <div class="logo">
+            <img src="~/images/ticket.png" class="icon" alt="EventScape Logo">
+            <h1>EventScape</h1>
+        </div>
+    </a>
+    
+    <div class="navbar">
+        <button class="toggle">☰</button>
+        <ul class="navigation">
+            <li><a asp-page="/Index" class="active">Home</a></li>
+            <li><a asp-page="/Events">Events</a></li>
+            <li><a asp-page="/EventDetail">Details</a></li>
+            <li><a asp-page="/Contact">Contact</a></li>
+            <li><a asp-page="/Admin/Index">Admin</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="auth-links">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <span class="welcome-user">Welcome, @User.Identity.Name!</span>
+        <a asp-page="/Account/Logout" class="auth-button logout-button">Logout</a>
+    }
+    else
+    {
+        <a asp-page="/Account/Login" class="auth-button login-button">Login</a>
+        <a asp-page="/Account/Register" class="auth-button register-button">Register</a>
+    }
+</div>
+
+@if (TempData["AdminAccessDenied"] != null)
+{
+    <div class="admin-access-denied">
+        @TempData["AdminAccessDenied"]
+    </div>
+}
+
+<div id="website">
+    <section class="about-eventscape">
+        <h1>Welcome to EventScape</h1>
+        <h3>
+            Discover the best events across the UK in one place.<br> EventScape connects you to a wide variety of upcoming experiences, from tech conferences and business expos to art shows and music festivals, in top locations like London, Manchester, and Edinburgh. Our user-friendly interface makes finding, exploring, and booking events seamless and enjoyable.<br> Stay ahead of the crowd with personalized recommendations, browse events by location, and never miss an opportunity to make memories. EventScape is your gateway to vibrant experiences – where adventure begins with a click!
+        </h3>
+    </section>
+</div>
+
+<div class="location-container">
+    <div class="location-button1">
+        <button class="circle-btn">
+            <img src="~/images/loc1.png" alt="Location Pin" class="location-icon">
+        </button>
+        <div class="location-links-container">
+            <div class="left">
+                <a asp-page="/Events" asp-route-location="london" class="location-link">London</a>
+                <a asp-page="/Events" asp-route-location="birmingham" class="location-link">Birmingham</a>
+                <a asp-page="/Events" asp-route-location="manchester" class="location-link">Manchester</a>
+                <a asp-page="/Events" asp-route-location="liverpool" class="location-link">Liverpool</a>
+            </div>
+            <div class="right">
+                <a asp-page="/Events" asp-route-location="nottingham" class="location-link">Nottingham</a>
+                <a asp-page="/Events" asp-route-location="edinburgh" class="location-link">Edinburgh</a>
+                <a asp-page="/Events" asp-route-location="glasgow" class="location-link">Glasgow</a>
+                <a asp-page="/Events" asp-route-location="dublin" class="location-link">Dublin</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="section1">
+    <div class="top-trending">
+        <div id="upcoming">
+            <h1>Don't Miss Out on Events in</h1>
+            <a asp-page="/Events" asp-route-location="nottingham" id="location1">Nottingham</a>
+        </div>
+        <div class="event-list">
+            @if (Model.NottinghamEvents != null && Model.NottinghamEvents.Any())
+            {
+                @foreach (var eventItem in Model.NottinghamEvents.Take(3))
+                {
+                    <div class="event-item" style="background-image: url('@(eventItem.images.Any() ? eventItem.images[0] : "/images/placeholder.png")'); background-size: cover; background-position: center;">
+                        <div class="event-item-content">
+                            <h3>@eventItem.title</h3>
+                            <p>@(eventItem.description.Length > 100 ? eventItem.description.Substring(0, 100) + "..." : eventItem.description)</p>
+                            <p><strong>Date:</strong> @eventItem.date</p>
+                            <p><strong>Location:</strong> @(char.ToUpper(eventItem.location[0]) + eventItem.location.Substring(1))</p>
+                            <a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id" class="event-details-link">More Details</a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No events currently scheduled in Nottingham.</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div id="section2">
+    <div class="top-trending2">
+        <div id="upcoming">
+            <h1>Discover Exciting Events in</h1>
+            <a asp-page="/Events" asp-route-location="london" id="location10">London</a>
+        </div>
+        <section class="spc">
+            <div class="wrapper1">
+                <div class="container10">
+                    @if (Model.LondonEvents != null && Model.LondonEvents.Any())
+                    {
+                        @for (int i = 0; i < Math.Min(3, Model.LondonEvents.Count); i++)
+                        {
+                            var eventItem = Model.LondonEvents[i];
+                            string bgImage = eventItem.images.Any() ? eventItem.images[0] : "/images/placeholder.png";
+                            <input type="radio" name="slide" id="f@(i+1)" @(i == 0 ? "checked" : "")>
+                            <label for="f@(i+1)" class="card" style="background-image: url('@bgImage'); background-size: cover; background-position: center;">
+                                <div class="row">
+                                    <div class="icon1">@(i+1)</div>
+                                    <div class="description" class="event-item">
+                                        <h3>@eventItem.title</h3>
+                                        <p>@(eventItem.description.Length > 100 ? eventItem.description.Substring(0, 100) + "..." : eventItem.description)</p>
+                                        <p><a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id">See details</a></p>
+                                    </div>
+                                </div>
+                            </label>
+                        }
+                    }
+                    else
+                    {
+                        <p>No events currently scheduled in London.</p>
+                    }
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div id="section3">
+    <div class="top-trending3">
+        <div id="upcoming">
+            <h1>From Insights to Action - Explore, Engage, and Experience Unforgettable Events</h1>
+            <div class="container">
+                <div class="card_container">
+                    @if (Model.FeaturedEvents != null && Model.FeaturedEvents.Any())
+                    {
+                        @foreach (var featuredEvent in Model.FeaturedEvents.Take(4))
+                        {
+                            string cardBgImage = featuredEvent.images.Any() ? featuredEvent.images[0] : "/images/placeholder.png";
+                            <article class="card_article" id="card_article@(Array.IndexOf(Model.FeaturedEvents.Take(4).ToArray(), featuredEvent) + 1)" 
+                                     style="background-image: url('@cardBgImage'); background-size: cover; background-position: center;">
+                                <div class="card_data">
+                                    <h3 class="card_title">@featuredEvent.title</h3>
+                                    <p class="event_details">@featuredEvent.date</p>
+                                    <p class="event_details">@(char.ToUpper(featuredEvent.location[0]) + featuredEvent.location.Substring(1))</p>
+                                </div>
+                                <a asp-page="/EventDetail" asp-route-location="@featuredEvent.location" asp-route-id="@featuredEvent.id" class="card_button">
+                                    More Information
+                                </a>
+                            </article>
+                        }
+                    }
+                    else
+                    {
+                        <p>No featured events available at this time.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p><b>&copy; @DateTime.Now.Year EventScape, All rights reserved</b></p>
+    <a asp-page="/Events" class="footerbutton"><b>Browse upcoming events</b></a>
+    <a asp-page="/Contact" class="footerbutton"><b>Contact us!</b></a>
+</footer>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/contact.css">
+    <link rel="stylesheet" href="~/css/slides.css">
+    <link rel="stylesheet" href="~/css/style.css">
+    <style>
+        body {
+            padding-top: 160px; /* Adjust based on header height */
+        }
+        
+        .head {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            z-index: 1050;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-access-denied {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .event-item {
+            position: relative;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+        
+        .event-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+        
+        .event-item-content {
+            position: relative;
+            z-index: 1;
+            padding: 15px;
+        }
+        
+        .event-details-link {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .event-details-link:hover {
+            background-color: #854F6C;
+            text-decoration: none;
+            color: white;
+        }
+        
+        /* Authentication links styling */
+        .auth-links {
+            position: absolute;
+            top: 130px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 1000;
+            width: 150px;
+        }
+        
+        .auth-button {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .login-button {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .register-button {
+            background-color: #BFACB5;
+            color: #522B5B;
+            border: 1px solid #522B5B;
+        }
+        
+        .logout-button {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        .welcome-user {
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Location container styling */
+        .location-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 50px;
+            position: relative;
+        }
+        
+        .location-button1 {
+            position: relative;
+            display: inline-block;
+            text-align: center;
+            transition: all 1s ease;
+            cursor: pointer;
+            margin: 0 auto;
+            top: auto;
+            margin-top: 0;
+        }
+        
+        /* Make the section containers consistently sized and centered */
+        #section1, #section2, #section3 {
+            width: 95%;
+            max-width: 1600px;
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 10px;
+        }
+        
+        #section1 {
+            margin-top: 100px;
+        }
+        
+        /* Styling for the 4 events in the third container */
+        #section3 .card_container {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(450px, 1fr));
+            grid-gap: 50px;
+            margin: 0 100px 0 8%;
+            margin-left: 200px;
+            max-width: 1400px;
+            padding: 20px 0;
+            justify-content: center;
+        }
+        
+        #section3 .card_article {
+            height: 380px;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .about-eventscape {
+            text-align: center;
+            padding: 20px;
+            margin-top: 0; /* Move to the top */
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-eventscape h1 {
+            color: #522B5B;
+            margin-bottom: 15px;
+            font-size: 32px;
+        }
+
+        .about-eventscape h3 {
+            color: #522B5B;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .admin-button {
+            background-color: #522B5B;
+            color: white;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+
+        .login-button:hover, .logout-button:hover, .admin-button:hover {
+            background-color: #854F6C;
+            color: white;
+        }
+
+        .register-button:hover {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        /* Media queries */
+        @@media (max-width: 1200px) {
+            #section1, #section2, #section3 {
+                width: 95%;
+                padding: 30px;
+            }
+            
+            #section3 .card_container {
+                grid-gap: 40px;
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            #section1, #section2, #section3 {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            #section3 .card_container {
+                grid-template-columns: 1fr;
+                grid-gap: 30px;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/javascript.js"></script>
+}

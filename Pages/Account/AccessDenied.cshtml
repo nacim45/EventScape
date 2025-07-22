@@ -1,0 +1,133 @@
+@page
+@model soft20181_starter.Pages.Account.AccessDeniedModel
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="head">
+    <a asp-page="/Index">
+        <div class="logo">
+            <img src="~/images/ticket.png" class="icon" alt="EventScape Logo">
+            <h1>EventScape</h1>
+        </div>
+    </a>
+</div>
+
+<div class="navbar">
+    <button class="toggle">☰</button>
+    <ul class="navigation">
+        <li><a asp-page="/Index">Home</a></li>
+        <li><a asp-page="/Events">Events</a></li>
+        <li><a asp-page="/EventDetail">Details</a></li>
+        <li><a asp-page="/Contact">Contact</a></li>
+        <li><a asp-page="/Admin/Index">Admin</a></li>
+    </ul>
+</div>
+
+<div class="access-denied-container">
+    <div class="access-denied-box">
+        <h2>Access Denied</h2>
+        <div class="access-denied-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+        <p>Sorry, you don't have permission to access this page.</p>
+        <p>This area is restricted to administrators only.</p>
+        
+        <div class="actions">
+            <a asp-page="/Index" class="btn-primary">Go to Homepage</a>
+            <a asp-page="/Account/Login" class="btn-secondary">Log in with a different account</a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p><b>&copy; @DateTime.Now.Year EventScape</b></p>
+    <a asp-page="/Events" class="footerbutton"><b>Browse upcoming events</b></a>
+    <a asp-page="/Contact" class="footerbutton"><b>Contact us!</b></a>
+</footer>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/slides.css">
+    <link rel="stylesheet" href="~/css/contact.css">
+    <style>
+        .access-denied-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+            padding: 20px;
+        }
+        
+        .access-denied-box {
+            background-color: #BFACB5;
+            border-radius: 10px;
+            padding: 30px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        
+        .access-denied-box h2 {
+            color: #522B5B;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .access-denied-icon {
+            font-size: 64px;
+            color: #522B5B;
+            margin: 20px 0;
+        }
+        
+        .access-denied-box p {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .btn-primary, .btn-secondary {
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: #522B5B;
+            border: 1px solid #522B5B;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f0f0f0;
+            color: #522B5B;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/javascript.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+} 

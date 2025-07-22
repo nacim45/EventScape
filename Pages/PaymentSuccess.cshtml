@@ -1,0 +1,120 @@
+@page
+@model soft20181_starter.Pages.PaymentSuccessModel
+@{
+    ViewData["Title"] = "Payment Successful";
+}
+
+<div class="success-container">
+    <div class="success-content">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your payment. Your transaction has been completed successfully.</p>
+        <div class="transaction-details">
+            <p><strong>Transaction ID:</strong> @Model.PaymentIntentId</p>
+            @if (!string.IsNullOrEmpty(Model.PaymentMethod))
+            {
+                <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+            }
+            <p><strong>Amount Paid:</strong> £@Model.Amount.ToString("0.00")</p>
+            <p><strong>Date:</strong> @Model.PaymentDate.ToString("dd MMM yyyy HH:mm")</p>
+        </div>
+        <div class="success-actions">
+            <a asp-page="/MyEvents" class="view-events-btn">View My Events</a>
+            <a asp-page="/Index" class="home-btn">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <style>
+        .success-container {
+            max-width: 800px;
+            margin: 150px auto 50px;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .success-content {
+            padding: 20px;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .success-content h1 {
+            color: #522B5B;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .success-content p {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .transaction-details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .transaction-details p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .success-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .view-events-btn, .home-btn {
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .view-events-btn {
+            background-color: #522B5B;
+            color: white;
+        }
+
+        .home-btn {
+            background-color: #BFACB5;
+            color: #522B5B;
+            border: 1px solid #522B5B;
+        }
+
+        .view-events-btn:hover, .home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-decoration: none;
+        }
+
+        .view-events-btn:hover {
+            background-color: #854F6C;
+            color: white;
+        }
+
+        .home-btn:hover {
+            background-color: #522B5B;
+            color: white;
+        }
+    </style>
+} 

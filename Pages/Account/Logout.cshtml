@@ -1,0 +1,9 @@
+@page
+@model soft20181_starter.Pages.Account.LogoutModel
+@{
+    ViewData["Title"] = "Logout";
+    Layout = null;
+}
+
+<!-- This page is just a redirect, no content needed as everything happens in the OnGet method -->
+<meta http-equiv="refresh" content="0;url=@Url.Page("/Index")" /> 
