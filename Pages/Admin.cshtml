@@ -38,11 +38,6 @@
     }
 </div>
 
-@if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Administrator")))
-{
-    <a asp-page="/Admin/Index" class="admin-button">Admin Dashboard</a>
-}
-
 <div class="navbar">
     <button class="toggle">☰</button>
     <ul class="navigation">

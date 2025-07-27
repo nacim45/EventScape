@@ -54,11 +54,6 @@
     }
 </div>
 
-@if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Administrator")))
-{
-    <a asp-page="/Admin/Index" class="admin-button">Admin Dashboard</a>
-}
-
 <div class="samerow">
     <div class="samecolumn">
         <div class="presentation contact-title">
@@ -171,7 +166,7 @@
         .samerow {
             display: flex;
             justify-content: space-between;
-            margin-top: 150px;
+            margin-top: 250px;
             margin-bottom: 100px;
             padding: 0 20px;
         }
