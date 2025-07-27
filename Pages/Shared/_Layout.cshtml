@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - soft20181_starter</title>
+    <!--
+    @*  Section for CSS Start *@
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/soft20181_starter.styles.css" asp-append-version="true" /> -->
+    <!-- Other meta tags and title -->
+    <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="stylesheet" href="~/css/slides.css" />
+    <link rel="stylesheet" href="~/css/contact.css" />
+    @*  Section for CSS Start *@
+    @RenderSection("Styles", required: false)
+    
+    <style>
+        .admin-floating-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-floating-button:hover {
+            background-color: #0056b3;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .admin-button {
+            background-color: #522B5B;
+            color: white;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .admin-button:hover {
+            background-color: #854F6C;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!--
+   @*  Header Section Start *@
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">LOGO</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Contact">Contact</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    @*  Header Section End *@
+     -->
+    
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    
+    <!-- Admin Floating Button -->
+    @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Administrator")))
+    {
+        <a href="/Admin" class="admin-floating-button">Admin Access</a>
+    }
+    
+    <!--
+    @*  Footer Section Start *@
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - SOFT20181 Starter Code
+        </div>
+    </footer>
+    @*  Header Section End *@
+    -->
+
+
+    @*  Add Site Wide JavaScript Start *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/javascript.js"></script>
+    @*  Add Site Wide JavaScript End *@
+
+
+    @*  Section for Scripts Start *@
+    @await RenderSectionAsync("Scripts", required: false)
+    @*  Section for Scripts End *@
+
+    
+</body>
+</html>

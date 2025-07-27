@@ -1,0 +1,19 @@
+# Ignore configuration files containing secrets
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+bin/
+obj/
+# Ignore environment-specific config
+*.user
+*.secret.json
+# Ignore sensitive files
+*.env
+.env
+.env.local
+.env.production
+# Ignore any files that might contain secrets
+*secret*
+*key*
+*password*
+*credential* 

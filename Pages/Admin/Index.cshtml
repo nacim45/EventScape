@@ -1,0 +1,534 @@
+@page
+@model soft20181_starter.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="head fixed-top">
+    <div class="settings">
+        <a>
+            <div class="logo2">
+                <img src="~/images/settings.png" id="icon2" alt="EventScape Logo">
+                <h1>Customise your website</h1>
+            </div>
+        </a>
+        <div id="div6">
+            <button id="btn1">increase the font</button>
+            <button id="btn2">decrease the font</button>
+            <button id="btn3">darker background</button>
+            <button id="btn4">lighter background</button>
+        </div>
+    </div>
+
+    <a asp-page="/Index">
+        <div class="logo">
+            <img src="~/images/ticket.png" class="icon" alt="EventScape Logo">
+            <h1>EventScape</h1>
+        </div>
+    </a>
+    
+    <div class="navbar">
+        <button class="toggle">☰</button>
+        <ul class="navigation">
+            <li><a asp-page="/Index">Home</a></li>
+            <li><a asp-page="/Events">Events</a></li>
+            <li><a asp-page="/EventDetail">Details</a></li>
+            <li><a asp-page="/Contact">Contact</a></li>
+            <li><a asp-page="/Admin/Index" class="active">Admin</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="auth-links">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <span class="welcome-user">Welcome, @User.Identity.Name!</span>
+        <a asp-page="/Account/Logout" class="auth-button logout-button">Logout</a>
+    }
+    else
+    {
+        <a asp-page="/Account/Login" class="auth-button login-button">Login</a>
+        <a asp-page="/Account/Register" class="auth-button register-button">Register</a>
+    }
+</div>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <p class="admin-subtitle">Manage your events and users in one place</p>
+    </div>
+    
+    <div class="admin-stats">
+        <div class="stat-card">
+            <div class="stat-header">
+                <h3>Total Events</h3>
+            </div>
+            <div class="stat-body">
+                <p class="stat-number">@Model.TotalEvents</p>
+                <p class="stat-description">Events available on the platform</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <h3>Total Users</h3>
+            </div>
+            <div class="stat-body">
+                <p class="stat-number">@Model.TotalUsers</p>
+                <p class="stat-description">Registered users</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <h3>Recent Registrations</h3>
+            </div>
+            <div class="stat-body">
+                <p class="stat-number">@Model.RecentRegistrations</p>
+                <p class="stat-description">New event registrations in the last 7 days</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="admin-panels">
+        <div class="admin-panel">
+            <div class="panel-header">
+                <h2>Event Management</h2>
+            </div>
+            <div class="panel-body">
+                <div class="panel-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="panel-content">
+                    <h3>Event Management</h3>
+                    <p>Create, edit, and delete events. Manage event details, dates, and locations.</p>
+                    <ul class="admin-list">
+                        <li>
+                            <i class="fas fa-list"></i>
+                            <a asp-page="/Admin/Events/Index">View All Events</a>
+                            <span class="count-badge">@Model.TotalEvents</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-plus-circle"></i>
+                            <a asp-page="/Admin/Events/Create">Create New Event</a>
+                        </li>
+                    </ul>
+                </div>
+                <a asp-page="/Admin/Events/Index" class="auth-button logout-button full-width-btn">Manage Events</a>
+            </div>
+        </div>
+        
+        <div class="admin-panel">
+            <div class="panel-header">
+                <h2>User Management</h2>
+            </div>
+            <div class="panel-body">
+                <div class="panel-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="panel-content">
+                    <h3>User Management</h3>
+                    <p>Manage user accounts, roles, and permissions. View user event registrations.</p>
+                    <ul class="admin-list">
+                        <li>
+                            <i class="fas fa-user-friends"></i>
+                            <a asp-page="/Admin/Users/Index">View All Users</a>
+                            <span class="count-badge">@Model.TotalUsers</span>
+                        </li>
+                    </ul>
+                </div>
+                <a asp-page="/Admin/Users/Index" class="auth-button logout-button full-width-btn">Manage Users</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p><b>&copy; @DateTime.Now.Year EventScape</b></p>
+    <a asp-page="/Events" class="footerbutton"><b>Browse upcoming events</b></a>
+    <a asp-page="/Contact" class="footerbutton"><b>Contact us!</b></a>
+</footer>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/slides.css">
+    <link rel="stylesheet" href="~/css/contact.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            padding-top: 160px; /* Adjust based on header height */
+        }
+        
+        .head.fixed-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            z-index: 1050;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            margin-bottom: 200px; /* Increased spacing before footer */
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #522B5B 0%, #854F6C 100%);
+            padding: 40px 30px;
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+        }
+        
+        .admin-header h1 {
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .admin-subtitle {
+            font-size: 20px;
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .admin-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            background: linear-gradient(to bottom, #BFACB5, #F5F5F5);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-header {
+            background: linear-gradient(135deg, #522B5B 0%, #854F6C 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .stat-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        
+        .stat-body {
+            padding: 35px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 52px;
+            font-weight: bold;
+            color: #522B5B;
+            margin: 0 0 15px 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .stat-description {
+            color: #522B5B;
+            font-size: 18px;
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        .admin-panels {
+            display: flex;
+            gap: 50px;
+            margin-bottom: 200px; /* Increased bottom margin */
+        }
+        
+        .admin-panel {
+            flex: 1;
+            background: linear-gradient(to bottom, #BFACB5, #F5F5F5);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        
+        .admin-panel:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .panel-header {
+            background: linear-gradient(135deg, #522B5B 0%, #854F6C 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .panel-header h2 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: bold;
+        }
+        
+        .panel-body {
+            padding: 35px;
+            position: relative;
+        }
+        
+        .panel-icon {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .panel-icon i {
+            font-size: 60px;
+            color: #522B5B;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .panel-content {
+            margin-bottom: 35px;
+        }
+        
+        .panel-body h3 {
+            color: #522B5B;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .panel-body p {
+            color: #522B5B;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 18px;
+        }
+        
+        .admin-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 35px 0;
+        }
+        
+        .admin-list li {
+            margin-bottom: 15px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+        
+        .admin-list li:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translateX(10px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        
+        .admin-list li i {
+            margin-right: 18px;
+            color: #522B5B;
+            font-size: 22px;
+            width: 25px;
+            text-align: center;
+        }
+        
+        .admin-list a {
+            color: #522B5B;
+            text-decoration: none;
+            font-weight: bold;
+            flex: 1;
+            font-size: 18px;
+        }
+        
+        .admin-list a:hover {
+            text-decoration: none;
+            color: #854F6C;
+        }
+        
+        .count-badge {
+            background: linear-gradient(135deg, #522B5B 0%, #854F6C 100%);
+            color: white;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .auth-button {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .login-button {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .register-button {
+            background-color: #BFACB5;
+            color: #522B5B;
+            border: 1px solid #522B5B;
+        }
+        
+        .logout-button {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+        
+        .login-button:hover, .logout-button:hover {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        .register-button:hover {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .full-width-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 16px;
+            padding: 12px 0;
+        }
+        
+        .logout-button.full-width-btn {
+            background-color: #854F6C;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .logout-button.full-width-btn:hover {
+            background-color: #522B5B;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            color: white;
+            text-decoration: none;
+        }
+        
+        @@media (max-width: 992px) {
+            .admin-stats, .admin-panels {
+                flex-direction: column;
+            }
+            
+            .stat-card, .admin-panel {
+                margin-bottom: 30px;
+            }
+            
+            .admin-header h1 {
+                font-size: 38px;
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            .admin-header h1 {
+                font-size: 32px;
+            }
+            
+            .admin-subtitle {
+                font-size: 16px;
+            }
+            
+            .stat-number {
+                font-size: 40px;
+            }
+            
+            .panel-header h2 {
+                font-size: 22px;
+            }
+            
+            .panel-body h3 {
+                font-size: 20px;
+            }
+            
+            .auth-button {
+                padding: 15px 25px;
+                font-size: 16px;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .admin-list li {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px;
+            }
+            
+            .admin-list li i {
+                margin-bottom: 10px;
+            }
+            
+            .count-badge {
+                margin-top: 10px;
+                align-self: flex-start;
+            }
+            
+            .admin-header h1 {
+                font-size: 28px;
+            }
+            
+            .stat-number {
+                font-size: 36px;
+            }
+        }
+        
+        /* Auth links styling to match Index.cshtml */
+        .auth-links {
+            position: absolute;
+            top: 130px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Added spacing between welcome and logout */
+            z-index: 1000;
+            width: 150px;
+        }
+        
+        .welcome-user {
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/javascript.js"></script>
+} 

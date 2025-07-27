@@ -1,0 +1,152 @@
+[
+  {
+    "id": "1",
+    "title": "Glasgow Innovation and Tech Summit",
+    "image": "images/json71.png",
+    "description": "Join a community of innovators, entrepreneurs, and tech enthusiasts to explore emerging technologies, AI advancements, and smart solutions shaping the future.",
+    "date": "January 15-17, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=glasgow?id=1",
+    "location": "glasgow"
+  },
+  {
+    "id": "2",
+    "title": "Digital Marketing Bootcamp Glasgow",
+    "image": "images/json72.png",
+    "description": "A hands-on workshop designed for marketers, where you will learn to master SEO, content strategy, and paid advertising campaigns to elevate your brand.",
+    "date": "February 12-14, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=glasgow?id=2",
+    "location": "glasgow"
+  },
+  {
+    "id": "3",
+    "title": "Art and Culture Showcase",
+    "image": "images/json73.png",
+    "description": "Discover Glasgow's vibrant art scene with exhibitions, live performances, and workshops featuring local artists and cultural pioneers. Perfect for all art lovers.",
+    "date": "March 10-12, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=glasgow?id=3",
+    "location": "glasgow"
+  },
+  {
+    "id": "4",
+    "title": "Public Speaking Masterclass",
+    "image": "images/json74.png",
+    "description": "Build your confidence and improve your presentation skills with this dynamic masterclass led by renowned communication experts.",
+    "date": "February 8-9, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=glasgow?id=4",
+    "location": "glasgow"
+  },
+  {
+    "id": "5",
+    "title": "Startup Growth Accelerator Workshop",
+    "image": "images/json75.png",
+    "description": "Get insights and mentorship from successful entrepreneurs in this intensive workshop designed to take your startup to the next level.",
+    "date": "March 5-7, 2025",
+    "price": "£30",
+    "link": "/EventDetail?location=glasgow?id=5",
+    "location": "glasgow"
+  },
+  {
+    "id": "6",
+    "title": "Science and Discovery Talks",
+    "image": "images/json76.png",
+    "description": "Immerse yourself in the wonders of science with engaging talks on space exploration, sustainability, and cutting-edge research from industry experts.",
+    "date": "January 20-22, 2025",
+    "price": "£10",
+    "link": "/EventDetail?location=glasgow?id=6",
+    "location": "glasgow"
+  },
+  {
+    "id": "7",
+    "title": "Blockchain and Web3 Conference",
+    "image": "images/json77.png",
+    "description": "Explore the potential of blockchain technology and its impact on industries with insightful discussions and networking opportunities.",
+    "date": "February 18-20, 2025",
+    "price": "£30",
+    "link": "/EventDetail?location=glasgow?id=7",
+    "location": "glasgow"
+  },
+  {
+    "id": "8",
+    "title": "Health and Wellness Festival",
+    "image": "images/json78.png",
+    "description": "Join this inspiring festival featuring fitness classes, mindfulness workshops, and health talks by wellness experts to boost your mind and body.",
+    "date": "January 25-27, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=glasgow?id=8",
+    "location": "glasgow"
+  },
+  {
+    "id": "9",
+    "title": "Design Thinking Workshop",
+    "image": "images/json79.png",
+    "description": "Learn how to solve complex problems and innovate creatively with practical techniques and case studies in this interactive workshop.",
+    "date": "March 15-16, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=glasgow?id=9",
+    "location": "glasgow"
+  },
+  {
+    "id": "10",
+    "title": "Leadership Summit Glasgow",
+    "image": "images/json710.png",
+    "description": "Empower yourself with leadership strategies and personal growth insights shared by top executives and motivational speakers.",
+    "date": "February 10-11, 2025",
+    "price": "£25",
+    "link": "/EventDetail?location=glasgow?id=10",
+    "location": "glasgow"
+  },
+  {
+    "id": "11",
+    "title": "EdTech Innovations Forum",
+    "image": "images/json711.png",
+    "description": "Dive into cutting-edge educational technologies and discuss the future of learning with pioneers in the EdTech industry.",
+    "date": "March 8-10, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=glasgow?id=11",
+    "location": "glasgow"
+  },
+  {
+    "id": "12",
+    "title": "Social Media Marketing Strategies",
+    "image": "images/json712.png",
+    "description": "Master the art of leveraging social media to grow your audience and boost your brand with actionable strategies and expert guidance.",
+    "date": "February 22-24, 2025",
+    "price": "£20",
+    "link": "/EventDetail?location=glasgow?id=12",
+    "location": "glasgow"
+  },
+  {
+    "id": "13",
+    "title": "Yoga and Mindfulness Retreat",
+    "image": "images/json713.png",
+    "description": "Relax and rejuvenate at this retreat featuring yoga sessions, meditation practices, and holistic wellness workshops.",
+    "date": "January 28-29, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=glasgow?id=13",
+    "location": "glasgow"
+  },
+  {
+    "id": "14",
+    "title": "Creative Entrepreneurs Networking Event",
+    "image": "images/json714.png",
+    "description": "Connect with Glasgow's creative minds, share ideas, and discover collaboration opportunities at this free networking event.",
+    "date": "March 12-13, 2025",
+    "price": "Free",
+    "link": "/EventDetail?location=glasgow?id=14",
+    "location": "glasgow"
+  },
+  {
+    "id": "15",
+    "title": "Creative Writing for Beginners",
+    "image": "images/json715.png",
+    "description": "Discover your inner writer and learn to craft compelling stories in this interactive seminar designed for aspiring authors.",
+    "date": "March 20-22, 2025",
+    "price": "£15",
+    "link": "/EventDetail?location=glasgow?id=15",
+    "location": "glasgow"
+  }
+]

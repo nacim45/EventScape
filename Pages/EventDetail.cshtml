@@ -1,0 +1,1095 @@
+﻿@page
+@model soft20181_starter.Pages.EventDetailsModel
+@{
+    ViewData["Title"] = "Event Details";
+    var registrationSuccess = Request.Query.ContainsKey("registrationSuccess");
+    var alreadyRegistered = Request.Query.ContainsKey("alreadyRegistered");
+    var error = Request.Query["error"].ToString();
+}
+
+<div class="head fixed-top">
+    <div class="settings">
+    <a>
+        <div class="logo2">
+            <img src="~/images/settings.png" id="icon2" alt="EventScape Logo">
+            <h1>Customise your website</h1>
+        </div>
+    </a>
+    <div id="div6">
+        <button id="btn1">increase the font</button>
+        <button id="btn2">decrease the font</button>
+        <button id="btn3">darker background</button>
+        <button id="btn4">lighter background</button>
+    </div>
+    </div>
+
+    <a asp-page="/Index">
+        <div class="logo">
+            <img src="~/images/ticket.png" class="icon" alt="EventScape Logo">
+            <h1>EventScape</h1>
+        </div>
+    </a>
+
+<div class="navbar">
+    <button class="toggle">☰</button>
+    <ul class="navigation">
+        <li><a asp-page="/Index">Home</a></li>
+            <li><a asp-page="/Events">Events</a></li>
+            <li><a asp-page="/EventDetail" class="active">Details</a></li>
+            <li><a asp-page="/Contact">Contact</a></li>
+            @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Administrator")))
+            {
+                <li><a asp-page="/Admin/Index">Admin</a></li>
+            }
+    </ul>
+    </div>
+</div>
+
+<div class="auth-links">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <span class="welcome-user">Welcome, @User.Identity.Name!</span>
+        <a asp-page="/Account/Logout" class="auth-button logout-button">Logout</a>
+    }
+    else
+    {
+        <a asp-page="/Account/Login" class="auth-button login-button">Login</a>
+        <a asp-page="/Account/Register" class="auth-button register-button">Register</a>
+    }
+</div>
+
+<div class="main-content">
+    @if (Model.Event == null && string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="featured-events-header">
+            <h2 class="featured-title">Featured Events</h2>
+        </div>
+
+        <div class="events-section">
+            <div class="events-container">
+                @if (Model.RelatedEvents != null && Model.RelatedEvents.Any())
+                {
+                    var displayLimit = 15;
+                    var count = Math.Min(displayLimit, Model.RelatedEvents.Count);
+                    
+                    for (int i = 0; i < count; i++)
+                    {
+                        var evt = Model.RelatedEvents[i];
+                        <div class="event-card">
+                            <div class="event-image">
+                                <img src="@evt.ImageUrl" alt="@evt.Title">
+                            </div>
+                            <div class="event-content">
+                                <div class="event-title">@evt.Title</div>
+                                <div class="event-date">@evt.Date.ToString("dd MMM yyyy")</div>
+                                <div class="event-info">
+                                    <div class="event-location">@evt.Location</div>
+                                    <div class="event-price">@evt.Price.ToString("C")</div>
+                                </div>
+                                <a asp-page="EventDetail" asp-route-id="@evt.Id" class="read-more-btn">Read More</a>
+                            </div>
+                    </div>
+                }
+                }
+            </div>
+        </div>
+        
+        <div class="navigation-buttons">
+            <a asp-page="/Events" class="nav-button">Browse All Events</a>
+            <a asp-page="/Index" class="nav-button">Back to Home</a>
+        </div>
+            }
+            else
+            {
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert-box">
+                <p>@Model.ErrorMessage</p>
+                <a href="/Events" class="button-primary">Back to Events</a>
+                </div>
+            }
+
+        @if (Model.Event != null)
+        {
+            <div class="event-detail-container">
+                <div class="event-detail-wrapper">
+                    <div class="event-image-container">
+                        <img src="@(Model.Event.images?.FirstOrDefault() ?? "/images/event-placeholder.jpg")" alt="@Model.Event.title" class="event-main-image">
+                    </div>
+
+                    <div class="event-info">
+                        <h1 class="event-title">@Model.Event.title</h1>
+                        <div class="event-location">
+                            <i class="fa fa-map-marker"></i> Location: @Model.Event.location
+                        </div>
+                        <div class="event-date">
+                            <span><i class="fa fa-calendar"></i> @Model.Event.date</span>
+                        </div>
+                        <div class="event-price">
+                            <span class="price-tag"><i class="fa fa-tag"></i> @(String.IsNullOrEmpty(Model.Event.price) ? "Free" : Model.Event.price)</span>
+                        </div>
+                        
+                        <div class="event-description">
+                            @Model.Event.description
+                        </div>
+                        
+                        <div class="event-buttons-container">
+                            <div class="navigation-row">
+                                <a asp-page="/Events" class="register-button-style">Browse Other Events</a>
+                                <a asp-page="/Index" class="register-button-style">Back to Home</a>
+                            </div>
+                            
+                            <div class="register-row">
+                                @if (!string.IsNullOrEmpty(error))
+                                {
+                                    <div class="registration-error">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <p>
+                                            @switch(error)
+                                            {
+                                                case "user-not-found":
+                                                    <span>Your user account was not found. Please try logging out and back in.</span>
+                                                    break;
+                                                case "foreign-key-constraint":
+                                                    <span>Unable to register for this event due to a database constraint. The event may have been removed.</span>
+                                                    break;
+                                                case "database-fixed":
+                                                    <span>The database has been updated. Please try registering again.</span>
+                                                    <script>
+                                                        // Auto-refresh after 3 seconds
+                                                        setTimeout(function() {
+                                                            window.location.href = '@Url.Page("EventDetail", new { id = Model.Event.id })';
+                                                        }, 3000);
+                                                    </script>
+                                                    break;
+                                                default:
+                                                    <span>An error occurred while processing your registration. Please try again later.</span>
+                                                    break;
+                                            }
+                                        </p>
+                                    </div>
+                                }
+                                else if (User.Identity != null && User.Identity.IsAuthenticated)
+                                {
+                                    @if (registrationSuccess)
+                                    {
+                                        <div class="registration-success">
+                                            <i class="fas fa-check-circle"></i>
+                                            <p>You have successfully registered for this event! <a asp-page="/MyEvents">View your tickets</a></p>
+                                        </div>
+                                    }
+                                    else if (alreadyRegistered || Model.IsAlreadyRegistered)
+                                    {
+                                        <div class="already-registered">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <p>You are already registered for this event! <a asp-page="/MyEvents">View your tickets</a></p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-page-handler="RegisterForEvent">
+                                            <input type="hidden" name="eventId" value="@Model.Event.id" />
+                                            <button type="submit" class="register-button-style">
+                                                <i class="fas fa-calendar-check"></i> Register for this Event
+                                            </button>
+                                        </form>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="login-to-register">
+                                        <p>Want to attend this event?</p>
+                                        <a href="/Account/Login" class="register-button-style">Log in to register</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            @if (Model.Event.images != null && Model.Event.images.Count > 1)
+            {
+                <div style="margin-top: 80px;">
+                    <div class="section-header" id="txt">
+                        <h3>More Images</h3>
+                    </div>
+                </div>
+            }
+            
+            @if (Model.Event.images != null && Model.Event.images.Count > 1)
+            {
+                <div class="additional-images">
+                    <div class="image-gallery">
+                        @for (int i = 1; i < Model.Event.images.Count; i++)
+                        {
+                            <div class="gallery-image">
+                                <img src="@Model.Event.images[i]" alt="@Model.Event.title - Image @i">
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+                
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                @if (Model.RelatedEvents != null && Model.RelatedEvents.Any())
+                {
+                    <div class="section-header related-events-header register-page-header">
+                        <h3 class="related-events-title" id="txt">Related Events</h3>
+                    </div>
+                    
+                    <div class="similar-events">
+                        <div class="related-events-container">
+                            @foreach (var relatedEvent in Model.RelatedEvents.Take(3))
+                            {
+                                <div class="related-event-card">
+                                    <div class="related-event-image">
+                                        <img src="@relatedEvent.ImageUrl" alt="@relatedEvent.Title">
+                                    </div>
+                                    <div class="related-event-content">
+                                        <div class="related-event-title">@relatedEvent.Title</div>
+                                        <div class="related-event-date">
+                                            <i class="far fa-calendar-alt"></i>
+                                            @relatedEvent.Date.ToString("dd MMM yyyy")
+                                        </div>
+                                        <div class="related-event-info">
+                                            <div class="related-event-location">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                                @relatedEvent.Location
+                                            </div>
+                                            <div class="related-event-price">
+                                                <i class="fas fa-tag"></i>
+                                                @relatedEvent.Price.ToString("C")
+                                            </div>
+                                        </div>
+                                        <a asp-page="EventDetail" asp-route-id="@relatedEvent.Id" class="related-event-btn">View Event</a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        }
+    }
+</div>
+
+<footer>
+    <p><b>&copy; @DateTime.Now.Year EventScape</b></p>
+    <a asp-page="/Events" class="footerbutton"><b>Browse upcoming events</b></a>
+    <a asp-page="/Contact" class="footerbutton"><b>Contact us!</b></a>
+</footer>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/slides.css">
+    <link rel="stylesheet" href="~/css/contact.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            padding-top: 160px; /* Adjust based on header height */
+        }
+        
+        #id{
+            color: #BFACB5;
+            font-weight: bold;
+        }
+
+        /* Fixed navbar styling */
+        .head.fixed-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Spacing between header and content */
+        .main-content {
+            margin-top: 100px; /* Adjusted for fixed navbar */
+            padding-top: 20px;
+            margin-bottom: 60px; /* Added space before footer */
+        }
+        
+        /* Featured Events title styling (like login button but bigger) */
+        .featured-title {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 28px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        
+        .featured-events-header {
+            margin-top: 80px;
+            text-align: center;
+            margin-left: 0;
+        }
+        
+        /* Navbar styling */
+        .navbar {
+            background-color: #BFACB5;
+            padding: 10px 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .navigation li {
+            margin: 0 15px;
+        }
+        
+        .navigation li a {
+            color: #522B5B;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .navigation li a:hover,
+        .navigation li a.active {
+            color: #854F6C;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        
+        .toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #522B5B;
+            cursor: pointer;
+        }
+        
+        .events-column {
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 15px;
+            margin-bottom: 100px; /* Increased space at bottom */
+        }
+        
+        .event-card {
+            display: flex;
+            flex-direction: column;
+            background-color: #BFACB5;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            margin-bottom: 30px;
+            width: 100%;
+            opacity: 1;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .event-image {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .event-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            color: #522B5B;
+        }
+        
+        .event-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #522B5B;
+        }
+        
+        .event-date, .event-price, .event-location {
+            color: #522B5B;
+        }
+        
+        .event-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .event-location {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .read-more-btn {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.3s;
+            margin-top: auto;
+        }
+        
+        .read-more-btn:hover {
+            background-color: #854F6C;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            margin-bottom: 100px; /* Added much more space before footer */
+        }
+        
+        .nav-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #522B5B;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        
+        .nav-button:hover {
+            background-color: #854F6C;
+            text-decoration: none;
+            color: white;
+        }
+        
+        /* Event detail styling */        
+        .event-detail-container {
+            margin: 2rem auto;
+            padding: 1.5rem;
+            max-width: 1200px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background-color: #522B5B;
+            margin-bottom: 150px; /* Added significant space before footer */
+        }
+        
+        .event-detail-wrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+        }
+        
+        .event-image-container {
+            flex: 0 0 35%;
+            max-width: 350px;
+        }
+        
+        .event-main-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .event-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            color: white;
+        }
+        
+        .event-info h1.event-title {
+            font-size: 24px;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .event-description {
+            margin: 1rem 0;
+            line-height: 1.6;
+            color: white;
+        }
+        
+        .event-location, .event-date, .event-price {
+            color: white;
+        }
+        
+        /* Section headers - Updated to match featured events style */
+        .section-header {
+            padding: 10px 0;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* More Images header styling to match Featured Events */
+        #txt {
+            display: inline-block;
+            background-color: #BFACB5;
+            color: #522B5B;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 24px;
+            margin: 40px auto;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* More Images section with added top margin */
+        .additional-images {
+            margin: 30px auto 8rem; /* Increased space before footer */
+            max-width: 1200px;
+            padding: 0 1.5rem;
+        }
+        
+        /* Related events section - Enhanced */
+        .related-events-header {
+            background-color: transparent; /* Changed to transparent since we're using the #txt id style */
+            color: #BFACB5;
+            padding: 15px 0;
+            margin-top: 80px; /* Increased for more separation */
+            margin-bottom: 30px;
+            max-width: 400px; /* Made much smaller */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .related-events-title {
+            /* Styles moved to #txt */
+            margin-bottom: 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .similar-events {
+            margin: 0 auto 5rem; /* Added more bottom margin */
+            max-width: 1000px;
+        }
+        
+        .related-events-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+        }
+        
+        .related-event-card {
+            flex: 0 0 calc(33.33% - 25px);
+            min-width: 230px; /* Smaller minimum width */
+            background-color: #522B5B; /* Changed to match header background */
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .related-event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .related-event-image {
+            height: 180px; /* Slightly smaller height */
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .related-event-image::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+        }
+        
+        .related-event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .related-event-card:hover .related-event-image img {
+            transform: scale(1.1);
+        }
+        
+        .related-event-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px; /* Shorter height */
+            color: #BFACB5; /* Added to ensure text color is consistent */
+        }
+        
+        .related-event-title {
+            font-size: 18px; /* Smaller font */
+            font-weight: bold;
+            color: #BFACB5; /* Changed to match requested color */
+            margin-bottom: 15px;
+            line-height: 1.3;
+            height: 45px; /* Fixed height for title */
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .related-event-date {
+            color: #BFACB5; /* Changed to match requested color */
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .related-event-date i, 
+        .related-event-location i, 
+        .related-event-price i {
+            margin-right: 8px;
+            color: #E5D0CC; /* Made lighter for better contrast */
+            width: 16px;
+            text-align: center;
+        }
+        
+        .related-event-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .related-event-location,
+        .related-event-price {
+            font-weight: 500;
+            color: #BFACB5; /* Changed to match requested color */
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .related-event-btn {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-top: auto;
+            font-size: 14px;
+        }
+        
+        .related-event-btn:hover {
+            background-color: #854F6C;
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .see-all-events-btn {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px; /* Added space below button */
+        }
+        
+        .see-all-events-btn:hover {
+            background-color: #854F6C;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Button styling - Updated for consistent styling */
+        .event-buttons-container {
+            margin-top: 1.5rem;
+        }
+        
+        .navigation-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Make all buttons look exactly like the reset button from Events page */
+        .navigation-row .register-button-style,
+        .register-button-style,
+        .login-to-register .register-button-style {
+            padding: 15px 25px; /* Increased padding for taller height */
+            background-color: #E5D0CC;
+            color: #522B5B;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            height: 50px; /* Fixed height for all buttons */
+            line-height: 20px; /* Center text vertically */
+            box-sizing: border-box;
+        }
+        
+        .navigation-row .register-button-style {
+            flex: 1; /* Equal width for navigation buttons */
+        }
+        
+        .register-button-style {
+            width: 100%;
+        }
+        
+        .login-to-register .register-button-style {
+            width: auto; /* Auto width instead of full width */
+            height: 50px; /* Same height as navigation buttons */
+            padding: 15px 25px; /* Keep the same padding */
+        }
+        
+        .navigation-row .register-button-style:hover,
+        .register-button-style:hover,
+        .login-to-register .register-button-style:hover {
+            background-color: #d4bbb6;
+            text-decoration: none;
+            color: #522B5B;
+        }
+        
+        .register-row {
+            margin-top: 1rem;
+        }
+        
+        /* More Images section with added space before footer */
+        .additional-images {
+            margin: 30px auto 8rem; /* Increased space before footer */
+            max-width: 1200px;
+            padding: 0 1.5rem;
+        }
+        
+        /* Image gallery styling - updated to match main event image */
+        .image-gallery {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 20px; /* Increased space between images */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .gallery-image {
+            flex: 0 0 calc(33.33% - 20px);
+            max-width: 350px; /* Match main image max-width */
+            height: auto;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Match main image shadow */
+        }
+        
+        .gallery-image img {
+            width: 100%;
+            height: auto; /* Changed from fixed height to auto for proper aspect ratio */
+            object-fit: cover;
+            border-radius: 8px; /* Match main image border-radius */
+        }
+        
+        .alert-box {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        
+        .alert-box p {
+            margin-bottom: 1rem;
+        }
+        
+        .button-primary {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #522B5B;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        
+        .button-primary:hover {
+            background-color: #854F6C;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .login-to-register {
+            width: 100%;
+            background-color: transparent; /* Removed background for non-logged-in users */
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .login-to-register p {
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: white; /* Ensure text is visible on dark background */
+        }
+        
+        /* Authentication links styling */
+        .auth-links {
+            position: absolute;
+            top: 130px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 1000;
+            width: 150px;
+        }
+        
+        .auth-button {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .login-button {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .register-button {
+            background-color: #BFACB5;
+            color: #522B5B;
+            border: 1px solid #522B5B;
+        }
+        
+        .logout-button {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+        
+        .login-button:hover, .logout-button:hover {
+            background-color: #854F6C;
+            color: white;
+        }
+        
+        .register-button:hover {
+            background-color: #522B5B;
+            color: white;
+        }
+        
+        .welcome-user {
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Make footer space from content */
+        footer {
+            margin-top: 200px; /* Increased spacing */
+        }
+        
+        /* Responsive styles */
+        @@media (max-width: 992px) {
+            .event-detail-wrapper {
+                flex-direction: column;
+            }
+            
+            .event-image-container {
+                max-width: 100%;
+                margin-bottom: 20px;
+            }
+            
+            .related-event-card {
+                flex: 0 0 calc(50% - 25px);
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            .related-event-card {
+                flex: 0 0 100%;
+            }
+            
+            .gallery-image {
+                flex: 0 0 calc(50% - 1rem);
+            }
+        }
+        
+        .register-page-header {
+            margin-top: 30px;
+        }
+        
+        /* Featured events container when accessed from a specific event */
+        .featured-events-header {
+            margin-top: 80px;
+            text-align: center;
+            margin-left: 0;
+        }
+        
+        .featured-title {
+            display: inline-block;
+            background-color: #BFACB5;
+            color: #522B5B;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 28px;
+            margin: 40px auto;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Registration status styling */
+        .registration-success,
+        .already-registered,
+        .registration-error {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .registration-success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .already-registered {
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .registration-error {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .registration-success i,
+        .already-registered i,
+        .registration-error i {
+            font-size: 24px;
+        }
+        
+        .registration-success i {
+            color: #28a745;
+        }
+        
+        .already-registered i {
+            color: #17a2b8;
+        }
+        
+        .registration-error i {
+            color: #dc3545;
+        }
+        
+        .registration-success p,
+        .already-registered p,
+        .registration-error p {
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .registration-success a,
+        .already-registered a,
+        .registration-error a {
+            color: #007bff;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/javascript.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar toggle functionality
+            const toggleButton = document.querySelector('.toggle');
+            const navMenu = document.querySelector('.navigation');
+            
+            if (toggleButton && navMenu) {
+                toggleButton.addEventListener('click', function() {
+                    navMenu.classList.toggle('active');
+                });
+            }
+            
+            // Add animation to event cards
+            const eventCards = document.querySelectorAll('.event-card');
+            if (eventCards.length > 0) {
+                eventCards.forEach((card, index) => {
+                    card.style.transition = 'all 0.3s ease';
+                });
+            }
+            
+            // Add animation to related event cards
+            const relatedEventCards = document.querySelectorAll('.related-event-card');
+            if (relatedEventCards.length > 0) {
+                relatedEventCards.forEach((card, index) => {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.transitionDelay = `${index * 0.1}s`;
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                    }, 100);
+                });
+            }
+        });
+    </script>
+}
