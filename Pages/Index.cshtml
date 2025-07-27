@@ -44,6 +44,10 @@
     {
         <span class="welcome-user">Welcome, @User.Identity.Name!</span>
         <a asp-page="/Account/Logout" class="auth-button logout-button">Logout</a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Administrator"))
+        {
+            <a asp-page="/Admin/Index" class="auth-button admin-button">Admin Dashboard</a>
+        }
     }
     else
     {
@@ -452,8 +456,17 @@
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
+            transition: all 0.3s ease;
             font-size: 16px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        #section3 .card_button:hover {
+            background-color: #854F6C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            text-decoration: none;
+            color: white;
         }
 
         .about-eventscape {

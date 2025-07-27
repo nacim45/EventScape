@@ -46,6 +46,10 @@
     {
         <span class="welcome-user">Welcome, @User.Identity.Name!</span>
         <a asp-page="/Account/Logout" class="auth-button logout-button">Logout</a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Administrator"))
+        {
+            <a asp-page="/Admin/Index" class="auth-button admin-button">Admin Dashboard</a>
+        }
     }
     else
     {
