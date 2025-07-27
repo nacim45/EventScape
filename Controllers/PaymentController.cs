@@ -10,6 +10,7 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace soft20181_starter.Controllers
 {
@@ -30,8 +31,32 @@ namespace soft20181_starter.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _stripeSecretKey = _configuration["Stripe:SecretKey"] ?? throw new InvalidOperationException("Stripe secret key is not configured");
-            StripeConfiguration.ApiKey = _stripeSecretKey;
+            
+            // Robust configuration validation with detailed logging
+            _stripeSecretKey = _configuration["Stripe:SecretKey"];
+            var stripePublicKey = _configuration["Stripe:PublicKey"];
+            var stripeWebhookSecret = _configuration["Stripe:WebhookSecret"];
+            
+            // Log configuration status
+            _logger.LogInformation("Payment Controller Initialization:");
+            _logger.LogInformation("Stripe Public Key: {Configured} (Length: {Length})", 
+                !string.IsNullOrEmpty(stripePublicKey), stripePublicKey?.Length ?? 0);
+            _logger.LogInformation("Stripe Secret Key: {Configured} (Length: {Length})", 
+                !string.IsNullOrEmpty(_stripeSecretKey), _stripeSecretKey?.Length ?? 0);
+            _logger.LogInformation("Stripe Webhook Secret: {Configured} (Length: {Length})", 
+                !string.IsNullOrEmpty(stripeWebhookSecret), stripeWebhookSecret?.Length ?? 0);
+            
+            // Validate Stripe configuration
+            if (string.IsNullOrEmpty(_stripeSecretKey))
+            {
+                _logger.LogError("Stripe secret key is not configured. Payment processing will be disabled.");
+                _stripeSecretKey = null; // Disable Stripe functionality
+            }
+            else
+            {
+                StripeConfiguration.ApiKey = _stripeSecretKey;
+                _logger.LogInformation("Stripe configuration loaded successfully.");
+            }
         }
 
         [HttpPost("create-payment-intent")]
@@ -40,6 +65,13 @@ namespace soft20181_starter.Controllers
         {
             try
             {
+                // Check if Stripe is configured
+                if (string.IsNullOrEmpty(_stripeSecretKey))
+                {
+                    _logger.LogWarning("Payment attempt with unconfigured Stripe");
+                    return StatusCode(503, new { error = "Payment system is not configured. Please contact support." });
+                }
+
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId))
                 {
@@ -224,6 +256,62 @@ namespace soft20181_starter.Controllers
                 _logger.LogError(ex, "Error processing refund for payment {PaymentIntentId}", request.PaymentIntentId);
                 return StatusCode(500, new { error = "Error processing refund" });
             }
+        }
+
+        [HttpGet("health")]
+        public IActionResult HealthCheck()
+        {
+            var healthInfo = new
+            {
+                timestamp = DateTime.UtcNow,
+                stripe = new
+                {
+                    publicKeyConfigured = !string.IsNullOrEmpty(_configuration["Stripe:PublicKey"]) && _configuration["Stripe:PublicKey"] != "REPLACE_WITH_ENV_VAR",
+                    secretKeyConfigured = !string.IsNullOrEmpty(_configuration["Stripe:SecretKey"]) && _configuration["Stripe:SecretKey"] != "REPLACE_WITH_ENV_VAR",
+                    webhookSecretConfigured = !string.IsNullOrEmpty(_configuration["Stripe:WebhookSecret"]) && _configuration["Stripe:WebhookSecret"] != "REPLACE_WITH_ENV_VAR",
+                    publicKeyLength = _configuration["Stripe:PublicKey"]?.Length ?? 0,
+                    secretKeyLength = _configuration["Stripe:SecretKey"]?.Length ?? 0
+                },
+                paypal = new
+                {
+                    clientIdConfigured = !string.IsNullOrEmpty(_configuration["PayPal:ClientId"]) && _configuration["PayPal:ClientId"] != "REPLACE_WITH_ENV_VAR",
+                    secretConfigured = !string.IsNullOrEmpty(_configuration["PayPal:Secret"]) && _configuration["PayPal:Secret"] != "REPLACE_WITH_ENV_VAR",
+                    clientIdLength = _configuration["PayPal:ClientId"]?.Length ?? 0,
+                    secretLength = _configuration["PayPal:Secret"]?.Length ?? 0
+                }
+            };
+
+            var isHealthy = healthInfo.stripe.publicKeyConfigured && 
+                           healthInfo.stripe.secretKeyConfigured && 
+                           healthInfo.paypal.clientIdConfigured && 
+                           healthInfo.paypal.secretConfigured;
+
+            if (isHealthy)
+            {
+                _logger.LogInformation("Payment system health check passed");
+                return Ok(new { status = "healthy", message = "All payment configurations are properly loaded", details = healthInfo });
+            }
+            else
+            {
+                _logger.LogWarning("Payment system health check failed: {HealthInfo}", healthInfo);
+                return StatusCode(500, new { status = "unhealthy", message = "Some payment configurations are missing", details = healthInfo });
+            }
+        }
+
+        [HttpGet("test-config")]
+        public IActionResult TestConfiguration()
+        {
+            var config = new
+            {
+                StripePublicKey = _configuration["Stripe:PublicKey"] ?? "NULL",
+                StripeSecretKey = _configuration["Stripe:SecretKey"]?.Substring(0, 10) + "..." ?? "NULL",
+                StripeWebhookSecret = _configuration["Stripe:WebhookSecret"]?.Substring(0, 10) + "..." ?? "NULL",
+                PayPalClientId = _configuration["PayPal:ClientId"] ?? "NULL",
+                PayPalSecret = _configuration["PayPal:Secret"]?.Substring(0, 10) + "..." ?? "NULL",
+                Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown"
+            };
+
+            return Ok(config);
         }
 
         private async Task HandleSuccessfulPayment(PaymentIntent paymentIntent)

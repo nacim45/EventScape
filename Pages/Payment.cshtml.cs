@@ -29,10 +29,29 @@ namespace soft20181_starter.Pages
             _context = context;
             _configuration = configuration;
             _logger = logger;
+            
+            // Robust configuration validation with detailed logging
             StripePublicKey = _configuration["Stripe:PublicKey"];
             _stripeSecretKey = _configuration["Stripe:SecretKey"];
-            StripeConfiguration.ApiKey = _stripeSecretKey;
             PayPalClientId = _configuration["PayPal:ClientId"];
+            
+            // Log configuration status
+            _logger.LogInformation("Payment Page Initialization:");
+            _logger.LogInformation("Stripe Public Key: {Configured} (Length: {Length})", 
+                !string.IsNullOrEmpty(StripePublicKey), StripePublicKey?.Length ?? 0);
+            _logger.LogInformation("PayPal Client ID: {Configured} (Length: {Length})", 
+                !string.IsNullOrEmpty(PayPalClientId), PayPalClientId?.Length ?? 0);
+            
+            // Set Stripe configuration if available
+            if (!string.IsNullOrEmpty(_stripeSecretKey))
+            {
+                StripeConfiguration.ApiKey = _stripeSecretKey;
+                _logger.LogInformation("Stripe configuration set successfully.");
+            }
+            else
+            {
+                _logger.LogWarning("Stripe secret key not configured.");
+            }
         }
 
         public string StripePublicKey { get; }

@@ -619,8 +619,9 @@
             console.log("Attempting to load PayPal SDK with Client ID:", clientId);
 
             if (!clientId || clientId.trim() === '') {
-                console.error("PayPal Client ID is missing");
-                showPayPalError("PayPal configuration is missing. Please contact support.");
+                console.error("PayPal Client ID is missing or not configured");
+                const container = document.getElementById('paypal-button-container');
+                container.innerHTML = '<div style="color: red; padding: 20px; text-align: center; border: 1px solid red; border-radius: 8px; margin: 20px 0;"><h3>⚠️ PayPal Payment Unavailable</h3><p>PayPal payment is not configured. Please use the card payment option above.</p></div>';
                 return;
             }
 
@@ -716,8 +717,45 @@
             }
         }
 
+        // Add payment system status check
+        function checkPaymentSystemStatus() {
+            const stripePublicKey = '@Model.StripePublicKey';
+            const paypalClientId = '@Model.PayPalClientId';
+            
+            console.log('Payment System Status Check:');
+            console.log('- Stripe Public Key:', stripePublicKey ? 'Configured' : 'Not Configured');
+            console.log('- PayPal Client ID:', paypalClientId ? 'Configured' : 'Not Configured');
+            
+            // Show loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'payment-loading';
+            loadingDiv.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Initializing payment systems...</div>';
+            document.body.appendChild(loadingDiv);
+            
+            // Remove loading indicator after 2 seconds
+            setTimeout(() => {
+                const loadingElement = document.getElementById('payment-loading');
+                if (loadingElement) {
+                    loadingElement.remove();
+                }
+            }, 2000);
+        }
+        
+        // Call status check on page load
+        checkPaymentSystemStatus();
+
         document.addEventListener('DOMContentLoaded', function() {
-            const stripe = Stripe('@Model.StripePublicKey');
+            // Validate that Stripe public key is configured
+            const stripePublicKey = '@Model.StripePublicKey';
+            console.log('Stripe Public Key:', stripePublicKey);
+            
+            if (!stripePublicKey || stripePublicKey.trim() === '') {
+                console.error('Stripe public key is not configured');
+                document.getElementById('payment-form').innerHTML = '<div style="color: red; padding: 20px; text-align: center; border: 1px solid red; border-radius: 8px; margin: 20px 0;"><h3>⚠️ Stripe Payment Unavailable</h3><p>Stripe payment is not configured. Please contact support or try PayPal below.</p></div>';
+                return;
+            }
+            
+            const stripe = Stripe(stripePublicKey);
             const elements = stripe.elements();
             
             // Custom styling for the card elements

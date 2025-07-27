@@ -25,6 +25,26 @@ namespace soft20181_starter.Controllers
             _httpClientFactory = httpClientFactory;
             _context = context;
             _logger = logger;
+            
+            // Validate PayPal configuration on startup
+            var clientId = _config["PayPal:ClientId"];
+            var secret = _config["PayPal:Secret"];
+            
+            // Log configuration status
+            _logger.LogInformation("PayPal Controller Initialization:");
+            _logger.LogInformation("PayPal Client ID: {Configured} (Length: {Length})", 
+                !string.IsNullOrEmpty(clientId), clientId?.Length ?? 0);
+            _logger.LogInformation("PayPal Secret: {Configured} (Length: {Length})", 
+                !string.IsNullOrEmpty(secret), secret?.Length ?? 0);
+            
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(secret))
+            {
+                _logger.LogWarning("PayPal credentials not configured. PayPal payment processing will be disabled.");
+            }
+            else
+            {
+                _logger.LogInformation("PayPal configuration loaded successfully.");
+            }
         }
 
         /// <summary>
@@ -36,6 +56,16 @@ namespace soft20181_starter.Controllers
         {
             try
             {
+                // Check if PayPal is configured
+                var clientId = _config["PayPal:ClientId"];
+                var secret = _config["PayPal:Secret"];
+                
+                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(secret))
+                {
+                    _logger.LogWarning("PayPal order creation attempt with unconfigured PayPal");
+                    return StatusCode(503, new { error = "PayPal payment system is not configured. Please contact support." });
+                }
+
                 _logger.LogInformation("Creating PayPal order for user {UserId} with amount {Amount}", 
                     User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, request.Amount);
 
@@ -47,19 +77,6 @@ namespace soft20181_starter.Controllers
                 }
 
                 // Check if PayPal credentials are configured
-                var clientId = _config["PayPal:ClientId"];
-                var secret = _config["PayPal:Secret"];
-                
-                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(secret))
-                {
-                    _logger.LogError("PayPal credentials not configured. ClientId: {ClientId}, Secret: {Secret}", 
-                        string.IsNullOrEmpty(clientId) ? "MISSING" : "CONFIGURED", 
-                        string.IsNullOrEmpty(secret) ? "MISSING" : "CONFIGURED");
-                    return StatusCode(500, new { error = "PayPal configuration error" });
-                }
-
-                _logger.LogInformation("PayPal credentials found. Proceeding with order creation.");
-
                 var client = _httpClientFactory.CreateClient();
                 
                 try
