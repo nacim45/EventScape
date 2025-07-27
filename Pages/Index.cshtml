@@ -44,6 +44,10 @@
     {
         <span class="welcome-user">Welcome, @User.Identity.Name!</span>
         <a asp-page="/Account/Logout" class="auth-button logout-button">Logout</a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Administrator"))
+        {
+            <a asp-page="/Admin/Index" class="auth-button admin-button">Admin Dashboard</a>
+        }
     }
     else
     {
@@ -142,7 +146,7 @@
                                     <div class="description" class="event-item">
                                         <h3>@eventItem.title</h3>
                                         <p>@(eventItem.description.Length > 100 ? eventItem.description.Substring(0, 100) + "..." : eventItem.description)</p>
-                                        <p><a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id">See details</a></p>
+                                        <p><a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id" class="card_button">See details</a></p>
                                     </div>
                                 </div>
                             </label>
@@ -367,6 +371,109 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Enhanced styling for the second section circles and buttons */
+        #section2 .icon1 {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #522B5B;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        #section2 .card_button {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        #section2 .card_button:hover {
+            background-color: #854F6C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            text-decoration: none;
+            color: white;
+        }
+
+        /* Enhanced styling for the third section cards */
+        #section3 .card_article {
+            height: 380px;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        #section3 .card_article::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%);
+            z-index: 1;
+        }
+
+        #section3 .card_data {
+            position: relative;
+            z-index: 2;
+            padding: 25px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        #section3 .card_title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        #section3 .event_details {
+            font-size: 14px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        #section3 .card_button {
+            position: absolute;
+            bottom: 20px;
+            left: 25px;
+            z-index: 2;
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        #section3 .card_button:hover {
+            background-color: #854F6C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            text-decoration: none;
+            color: white;
         }
 
         .about-eventscape {

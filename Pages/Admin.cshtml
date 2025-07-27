@@ -38,6 +38,11 @@
     }
 </div>
 
+@if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Administrator")))
+{
+    <a asp-page="/Admin/Index" class="admin-button">Admin Dashboard</a>
+}
+
 <div class="navbar">
     <button class="toggle">☰</button>
     <ul class="navigation">
@@ -522,6 +527,29 @@
         #events .card:last-child,
         #users .card:last-child {
             margin-bottom: 300px !important;
+        }
+
+        .admin-button {
+            background-color: #522B5B;
+            color: white;
+            font-weight: bold;
+            display: block;
+            width: 180px;
+            text-align: center;
+            padding: 10px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin: 100px auto 15px auto;
+        }
+        
+        .admin-button:hover {
+            background-color: #854F6C;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
         }
     </style>
 }
