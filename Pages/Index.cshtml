@@ -398,12 +398,35 @@
             text-decoration: none;
             margin-top: 10px;
             transition: background-color 0.3s ease;
+            position: relative;
+            z-index: 10;
         }
 
         #section2 .card_button:hover {
             background-color: #854F6C;
             text-decoration: none;
             color: white;
+        }
+
+        #section2 .description {
+            position: relative;
+            z-index: 5;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            margin: 10px;
+        }
+
+        #section2 .description h3 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        #section2 .description p {
+            color: white;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
 
         /* Enhanced styling for the third section cards */
@@ -423,7 +446,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%);
+            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.9) 100%);
             z-index: 1;
         }
 
@@ -454,18 +477,22 @@
             left: 25px;
             z-index: 2;
             display: inline-block;
-            background-color: #522B5B;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 4px;
+            background-color: white;
+            color: #522B5B;
+            padding: 12px 24px;
+            border-radius: 6px;
             text-decoration: none;
-            transition: background-color 0.3s ease;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         #section3 .card_button:hover {
-            background-color: #854F6C;
-            text-decoration: none;
+            background-color: #522B5B;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            text-decoration: none;
         }
 
         .about-eventscape {
