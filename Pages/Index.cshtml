@@ -146,7 +146,7 @@
                                     <div class="description event-item london-slide-bg">
                                         <h3>@eventItem.title</h3>
                                         <p>@(eventItem.description.Length > 100 ? eventItem.description.Substring(0, 100) + "..." : eventItem.description)</p>
-                                        <a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id" class="slide-white-btn">See details</a>
+                                        <p><a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id" class="see-details-link">See details</a></p>
                                     </div>
                                 </div>
                             </label>
@@ -175,12 +175,12 @@
                             string cardBgImage = featuredEvent.images.Any() ? featuredEvent.images[0] : "/images/placeholder.png";
                             <article class="card_article" id="card_article@(Array.IndexOf(Model.FeaturedEvents.Take(4).ToArray(), featuredEvent) + 1)" 
                                      style="background-image: url('@cardBgImage'); background-size: cover; background-position: center;">
-                                <div class="card_data card_data_bg">
+                                <div class="card_data card-details-bg">
                                     <h3 class="card_title">@featuredEvent.title</h3>
                                     <p class="event_details">@featuredEvent.date</p>
                                     <p class="event_details">@(char.ToUpper(featuredEvent.location[0]) + featuredEvent.location.Substring(1))</p>
-                                    <a asp-page="/EventDetail" asp-route-location="@featuredEvent.location" asp-route-id="@featuredEvent.id" class="slide-white-btn">More Information</a>
                                 </div>
+                                <a asp-page="/EventDetail" asp-route-location="@featuredEvent.location" asp-route-id="@featuredEvent.id" class="more-info-btn">More Information</a>
                             </article>
                         }
                     }
