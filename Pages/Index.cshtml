@@ -143,10 +143,12 @@
                             <label for="f@(i+1)" class="card" style="background-image: url('@bgImage'); background-size: cover; background-position: center;">
                                 <div class="row">
                                     <div class="icon1">@(i+1)</div>
-                                    <div class="description event-item london-slide-bg">
+                                    <div class="description event-item london-slide-content">
                                         <h3>@eventItem.title</h3>
                                         <p>@(eventItem.description.Length > 100 ? eventItem.description.Substring(0, 100) + "..." : eventItem.description)</p>
-                                        <p><a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id" class="see-details-link">See details</a></p>
+                                        <div class="see-details-center">
+                                            <a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id" class="see-details-btn">See details</a>
+                                        </div>
                                     </div>
                                 </div>
                             </label>
@@ -179,8 +181,8 @@
                                     <h3 class="card_title">@featuredEvent.title</h3>
                                     <p class="event_details">@featuredEvent.date</p>
                                     <p class="event_details">@(char.ToUpper(featuredEvent.location[0]) + featuredEvent.location.Substring(1))</p>
+                                    <a asp-page="/EventDetail" asp-route-location="@featuredEvent.location" asp-route-id="@featuredEvent.id" class="more-info-btn">More Information</a>
                                 </div>
-                                <a asp-page="/EventDetail" asp-route-location="@featuredEvent.location" asp-route-id="@featuredEvent.id" class="more-info-btn">More Information</a>
                             </article>
                         }
                     }
@@ -595,6 +597,75 @@
         .admin-button:hover {
             background-color: #854F6C;
             color: white;
+        }
+        .london-slide-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px 0 10px;
+        }
+        .see-details-center {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .see-details-btn {
+            background: #522B5B;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 6px;
+            padding: 10px 28px;
+            border: none;
+            font-size: 16px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            transition: background 0.2s, color 0.2s;
+            display: inline-block;
+        }
+        .see-details-btn:hover {
+            background: #854F6C;
+            color: #fff;
+        }
+        .card-details-bg {
+            background: rgba(30,30,30,0.88);
+            border-radius: 10px;
+            padding: 22px 18px 18px 18px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+        .more-info-btn {
+            background: #fff;
+            color: #222;
+            font-weight: bold;
+            border-radius: 6px;
+            padding: 12px 24px;
+            border: none;
+            font-size: 16px;
+            margin-top: 18px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            transition: background 0.2s, color 0.2s, opacity 0.2s;
+            display: inline-block;
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 18px;
+        }
+        .card-details-bg:hover .more-info-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .more-info-btn:hover {
+            background: #222;
+            color: #fff;
         }
     </style>
 }
