@@ -177,12 +177,12 @@
                             string cardBgImage = featuredEvent.images.Any() ? featuredEvent.images[0] : "/images/placeholder.png";
                             <article class="card_article" id="card_article@(Array.IndexOf(Model.FeaturedEvents.Take(4).ToArray(), featuredEvent) + 1)" 
                                      style="background-image: url('@cardBgImage'); background-size: cover; background-position: center;">
-                                <div class="card_data card-details-bg">
+                                <div class="card_data">
                                     <h3 class="card_title">@featuredEvent.title</h3>
                                     <p class="event_details">@featuredEvent.date</p>
                                     <p class="event_details">@(char.ToUpper(featuredEvent.location[0]) + featuredEvent.location.Substring(1))</p>
-                                    <a asp-page="/EventDetail" asp-route-location="@featuredEvent.location" asp-route-id="@featuredEvent.id" class="more-info-btn">More Information</a>
                                 </div>
+                                <a asp-page="/EventDetail" asp-route-location="@featuredEvent.location" asp-route-id="@featuredEvent.id" class="more-info-btn">More Information</a>
                             </article>
                         }
                     }
@@ -658,8 +658,9 @@
             left: 50%;
             transform: translateX(-50%);
             bottom: 18px;
+            z-index: 10;
         }
-        .card-details-bg:hover .more-info-btn {
+        .card_article:hover .more-info-btn {
             opacity: 1;
             pointer-events: auto;
         }
