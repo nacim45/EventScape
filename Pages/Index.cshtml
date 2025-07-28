@@ -146,7 +146,7 @@
                                     <div class="description" class="event-item">
                                         <h3>@eventItem.title</h3>
                                         <p>@(eventItem.description.Length > 100 ? eventItem.description.Substring(0, 100) + "..." : eventItem.description)</p>
-                                        <p><a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id" class="card_button">See details</a></p>
+                                        <p><a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id" class="event-details-link">See details</a></p>
                                     </div>
                                 </div>
                             </label>
