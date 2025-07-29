@@ -181,8 +181,8 @@
                                     <h3 class="card_title">@featuredEvent.title</h3>
                                     <p class="event_details">@featuredEvent.date</p>
                                     <p class="event_details">@(char.ToUpper(featuredEvent.location[0]) + featuredEvent.location.Substring(1))</p>
+                                    <a asp-page="/EventDetail" asp-route-location="@featuredEvent.location" asp-route-id="@featuredEvent.id" class="more-info-btn">More Information</a>
                                 </div>
-                                <a asp-page="/EventDetail" asp-route-location="@featuredEvent.location" asp-route-id="@featuredEvent.id" class="more-info-btn">More Information</a>
                             </article>
                         }
                     }
@@ -386,25 +386,27 @@
 
         /* Enhanced styling for the second section circles and buttons */
         #section2 .icon1 {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            background-color: #522B5B;
+            background: linear-gradient(135deg, #522B5B 0%, #854F6C 100%);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             margin-right: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             transform: scale(1);
+            border: 3px solid rgba(255,255,255,0.2);
         }
         
         #section2 .card:hover .icon1 {
-            transform: scale(1.1);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            transform: scale(1.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            border-color: rgba(255,255,255,0.4);
         }
 
         #section2 .card_button {
@@ -458,9 +460,16 @@
         #section3 .card_data {
             position: relative;
             z-index: 2;
-            padding: 25px;
+            padding: 30px;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(30,30,30,0.85);
+            border-radius: 12px;
+            margin: 20px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         #section3 .card_title {
@@ -634,22 +643,22 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 5px;
             padding: 0 10px 0 10px;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
         
         .london-slide-content h3 {
-            margin-bottom: 10px;
-            font-size: 20px;
+            margin-bottom: 5px;
+            font-size: 18px;
             font-weight: bold;
         }
         
         .london-slide-content p {
-            margin-bottom: 15px;
-            font-size: 14px;
-            line-height: 1.4;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.3;
         }
         .see-details-center {
             width: 100%;
@@ -689,35 +698,25 @@
             position: relative;
         }
         .more-info-btn {
-            background: #fff;
-            color: #222;
+            background: #522B5B;
+            color: #fff;
             font-weight: bold;
             border-radius: 6px;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
-            font-size: 16px;
-            margin-top: 18px;
+            font-size: 14px;
+            margin-top: 15px;
             text-decoration: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-block;
-            opacity: 0;
-            pointer-events: none;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%) translateY(10px);
-            bottom: 18px;
-            z-index: 10;
-        }
-        .card_article:hover .more-info-btn {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(-50%) translateY(0);
+            align-self: flex-start;
+            transform: translateY(0);
         }
         .more-info-btn:hover {
-            background: #222;
+            background: #854F6C;
             color: #fff;
-            transform: translateX(-50%) translateY(-3px);
+            transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
     </style>
