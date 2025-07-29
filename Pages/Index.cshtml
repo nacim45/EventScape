@@ -141,8 +141,7 @@
                             string bgImage = eventItem.images.Any() ? eventItem.images[0] : "/images/placeholder.png";
                             <input type="radio" name="slide" id="f@(i+1)" @(i == 0 ? "checked" : "")>
                             <label for="f@(i+1)" class="card" style="background-image: url('@bgImage'); background-size: cover; background-position: center;">
-                                <div class="row">
-                                    <div class="icon1">@(i+1)</div>
+                                <div class="card-content-wrapper">
                                     <div class="london-slide-content">
                                         <h3>@eventItem.title</h3>
                                         <p>@(eventItem.description.Length > 100 ? eventItem.description.Substring(0, 100) + "..." : eventItem.description)</p>
@@ -150,6 +149,7 @@
                                             <a asp-page="/EventDetail" asp-route-location="@eventItem.location" asp-route-id="@eventItem.id" class="see-details-btn">See details</a>
                                         </div>
                                     </div>
+                                    <div class="icon1">@(i+1)</div>
                                 </div>
                             </label>
                         }
@@ -384,6 +384,24 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
+        /* New card content wrapper for better structure */
+        .card-content-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* When card is expanded, change to column layout */
+        input:checked + .card .card-content-wrapper {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
         /* Enhanced styling for the second section circles and buttons */
         #section2 .icon1 {
             width: 50px;
@@ -401,14 +419,17 @@
             transform: scale(1);
             border: 2px solid rgba(255,255,255,0.2);
             position: relative;
+            flex-shrink: 0;
         }
         
-        /* When slide is expanded, make circle larger */
+        /* When slide is expanded, make circle larger and reposition */
         input:checked + .card .icon1 {
-            width: 70px;
-            height: 70px;
-            font-size: 24px;
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
             border: 3px solid rgba(255,255,255,0.3);
+            margin-right: 0;
+            margin-top: 15px;
         }
 
         #section2 .card_button {
@@ -650,6 +671,16 @@
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             justify-content: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        
+        /* Show content when card is expanded */
+        input:checked + .card .london-slide-content {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .london-slide-content h3 {
@@ -721,17 +752,24 @@
         }
         
         .card_article:hover .more-info-btn {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-            pointer-events: auto;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+            pointer-events: auto !important;
+        }
+        
+        .card_article:not(:hover) .more-info-btn {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transform: translateY(15px) !important;
+            pointer-events: none !important;
         }
         
         .more-info-btn:hover {
-            background: #854F6C;
-            color: #fff;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            background: #854F6C !important;
+            color: #fff !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25) !important;
         }
     </style>
 }
