@@ -386,21 +386,29 @@
 
         /* Enhanced styling for the second section circles and buttons */
         #section2 .icon1 {
-            width: 70px;
-            height: 70px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, #522B5B 0%, #854F6C 100%);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
-            margin-right: 20px;
+            margin-right: 15px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             transform: scale(1);
-            border: 3px solid rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.2);
             position: relative;
+        }
+        
+        /* When slide is expanded, make circle larger */
+        input:checked + .card .icon1 {
+            width: 70px;
+            height: 70px;
+            font-size: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
         }
 
         #section2 .card_button {
@@ -637,37 +645,38 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
-            padding: 0 10px 0 10px;
+            gap: 2px;
+            padding: 0 5px 0 5px;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            justify-content: center;
         }
         
         .london-slide-content h3 {
-            margin-bottom: 3px;
-            font-size: 18px;
+            margin-bottom: 2px;
+            font-size: 16px;
             font-weight: bold;
         }
         
         .london-slide-content p {
-            margin-bottom: 5px;
-            font-size: 13px;
-            line-height: 1.3;
+            margin-bottom: 3px;
+            font-size: 12px;
+            line-height: 1.2;
         }
         .see-details-center {
             width: 100%;
             display: flex;
             justify-content: center;
-            margin-top: 5px;
+            margin-top: 2px;
         }
         .see-details-btn {
             background: #522B5B;
             color: #fff;
             font-weight: bold;
-            border-radius: 6px;
-            padding: 10px 28px;
+            border-radius: 4px;
+            padding: 6px 16px;
             border: none;
-            font-size: 16px;
+            font-size: 12px;
             text-decoration: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.12);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -702,16 +711,18 @@
             margin-top: 15px;
             text-decoration: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-block;
             align-self: flex-start;
             opacity: 0;
-            transform: translateY(10px);
+            visibility: hidden;
+            transform: translateY(15px);
             pointer-events: none;
         }
         
         .card_article:hover .more-info-btn {
             opacity: 1;
+            visibility: visible;
             transform: translateY(0);
             pointer-events: auto;
         }
