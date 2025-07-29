@@ -237,6 +237,13 @@
             position: relative;
             color: white;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+        }
+        
+        .event-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
         
         .event-item::before {
@@ -264,13 +271,16 @@
             border-radius: 4px;
             text-decoration: none;
             margin-top: 10px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
         }
         
         .event-details-link:hover {
             background-color: #854F6C;
             text-decoration: none;
             color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
         
         /* Authentication links styling */
@@ -291,8 +301,9 @@
             border-radius: 4px;
             text-decoration: none;
             font-weight: bold;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
+            transform: translateY(0);
         }
         
         .login-button {
@@ -387,6 +398,13 @@
             font-weight: bold;
             margin-right: 20px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1);
+        }
+        
+        #section2 .card:hover .icon1 {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
         }
 
         #section2 .card_button {
@@ -397,13 +415,16 @@
             border-radius: 4px;
             text-decoration: none;
             margin-top: 10px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
         }
 
         #section2 .card_button:hover {
             background-color: #854F6C;
             text-decoration: none;
             color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
 
         /* Enhanced styling for the third section cards */
@@ -414,6 +435,13 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1);
+        }
+        
+        #section3 .card_article:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
         }
 
         #section3 .card_article::before {
@@ -459,13 +487,16 @@
             padding: 8px 16px;
             border-radius: 4px;
             text-decoration: none;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
         }
 
         #section3 .card_button:hover {
             background-color: #854F6C;
             text-decoration: none;
             color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
 
         .about-eventscape {
@@ -498,8 +529,8 @@
         }
 
         .auth-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
             text-decoration: none;
         }
 
@@ -536,10 +567,8 @@
                 grid-gap: 30px;
             }
         }
-        /* London section robust button and background */
+        /* London section - removed grey background */
         .london-slide-bg {
-            background: rgba(30,30,30,0.85);
-            border-radius: 10px;
             padding: 22px 18px 18px 18px;
             margin: 12px 8px 8px 8px;
             display: flex;
@@ -559,12 +588,15 @@
             margin-top: 8px;
             text-decoration: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            transition: background 0.2s, color 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
         }
         .slide-white-btn:hover {
             background: #222;
             color: #fff;
             text-decoration: none;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
         /* Third section: larger dark background for all event details and button */
         .card_data_bg {
@@ -621,12 +653,15 @@
             font-size: 16px;
             text-decoration: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            transition: background 0.2s, color 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
             display: inline-block;
         }
         .see-details-btn:hover {
             background: #854F6C;
             color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
         .card-details-bg {
             background: rgba(30,30,30,0.88);
@@ -650,23 +685,26 @@
             margin-top: 18px;
             text-decoration: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            transition: background 0.2s, color 0.2s, opacity 0.2s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-block;
             opacity: 0;
             pointer-events: none;
             position: absolute;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateY(10px);
             bottom: 18px;
             z-index: 10;
         }
         .card_article:hover .more-info-btn {
             opacity: 1;
             pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
         }
         .more-info-btn:hover {
             background: #222;
             color: #fff;
+            transform: translateX(-50%) translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
     </style>
 }
