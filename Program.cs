@@ -10,32 +10,15 @@ using soft20181_starter.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Map Azure environment variables to configuration
-var configBuilder = new ConfigurationBuilder()
-    .AddConfiguration(builder.Configuration)
-    .AddInMemoryCollection(new Dictionary<string, string?>
-    {
-        // Map Azure environment variable names to configuration keys
-        { "Stripe:PublicKey", Environment.GetEnvironmentVariable("StripePublic") ?? builder.Configuration["Stripe:PublicKey"] },
-        { "Stripe:SecretKey", Environment.GetEnvironmentVariable("StripeSecret") ?? builder.Configuration["Stripe:SecretKey"] },
-        { "Stripe:WebhookSecret", Environment.GetEnvironmentVariable("StripeWebhook") ?? builder.Configuration["Stripe:WebhookSecret"] },
-        { "PayPal:ClientId", Environment.GetEnvironmentVariable("PaypalClientID") ?? builder.Configuration["PayPal:ClientId"] },
-        { "PayPal:Secret", Environment.GetEnvironmentVariable("PaypalSecret") ?? builder.Configuration["PayPal:Secret"] }
-    });
-
-builder.Configuration.AddConfiguration(configBuilder.Build());
-
-// Log configuration status for debugging
-var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<Program>();
-logger.LogInformation("=== Payment Configuration Status ===");
-logger.LogInformation("Stripe Public Key: {Configured} (Length: {Length})", 
-    !string.IsNullOrEmpty(builder.Configuration["Stripe:PublicKey"]), 
-    builder.Configuration["Stripe:PublicKey"]?.Length ?? 0);
-logger.LogInformation("Stripe Secret Key: {Configured} (Length: {Length})", 
-    !string.IsNullOrEmpty(builder.Configuration["Stripe:SecretKey"]), 
-    builder.Configuration["Stripe:SecretKey"]?.Length ?? 0);
-logger.LogInformation("PayPal Client ID: {Configured} (Length: {Length})", 
-    !string.IsNullOrEmpty(builder.Configuration["PayPal:ClientId"]), 
-    builder.Configuration["PayPal:ClientId"]?.Length ?? 0);
+builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+{
+    // Map Azure environment variable names to configuration keys
+    { "Stripe:PublicKey", Environment.GetEnvironmentVariable("StripePublic") ?? builder.Configuration["Stripe:PublicKey"] },
+    { "Stripe:SecretKey", Environment.GetEnvironmentVariable("StripeSecret") ?? builder.Configuration["Stripe:SecretKey"] },
+    { "Stripe:WebhookSecret", Environment.GetEnvironmentVariable("StripeWebhook") ?? builder.Configuration["Stripe:WebhookSecret"] },
+    { "PayPal:ClientId", Environment.GetEnvironmentVariable("PaypalClientID") ?? builder.Configuration["PayPal:ClientId"] },
+    { "PayPal:Secret", Environment.GetEnvironmentVariable("PaypalSecret") ?? builder.Configuration["PayPal:Secret"] }
+});
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -98,6 +81,19 @@ builder.Services.AddRazorPages(options =>
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
+
+// Log payment configuration status for debugging (after app is built)
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+logger.LogInformation("=== Payment Configuration Status ===");
+logger.LogInformation("Stripe Public Key: {Configured} (Length: {Length})", 
+    !string.IsNullOrEmpty(app.Configuration["Stripe:PublicKey"]), 
+    app.Configuration["Stripe:PublicKey"]?.Length ?? 0);
+logger.LogInformation("Stripe Secret Key: {Configured} (Length: {Length})", 
+    !string.IsNullOrEmpty(app.Configuration["Stripe:SecretKey"]), 
+    app.Configuration["Stripe:SecretKey"]?.Length ?? 0);
+logger.LogInformation("PayPal Client ID: {Configured} (Length: {Length})", 
+    !string.IsNullOrEmpty(app.Configuration["PayPal:ClientId"]), 
+    app.Configuration["PayPal:ClientId"]?.Length ?? 0);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
