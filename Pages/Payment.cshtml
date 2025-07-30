@@ -20,6 +20,7 @@
     <div class="payment-form">
         <h3><i class="fas fa-credit-card"></i> Pay with Card (Stripe)</h3>
         <form id="payment-form">
+            @Html.AntiForgeryToken()
             <div class="form-section">
                 <div class="form-group">
                     <label for="cardholder-name">
@@ -823,11 +824,12 @@
                 buttonText.textContent = 'Processing...';
 
                 try {
-                    // Create payment intent
-                    const response = await fetch('/api/payment/create-payment-intent', {
+                    // Create payment intent using Razor Pages handler
+                    const response = await fetch('/Payment?handler=CreatePaymentIntent', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
                         },
                         body: JSON.stringify({
                             amount: @Model.TotalAmount,
@@ -875,11 +877,12 @@
                     }
 
                     if (paymentIntent.status === 'succeeded') {
-                        // Send email with ticket
-                        await fetch('/api/payment/send-ticket-email', {
+                        // Send email with ticket using Razor Pages handler
+                        await fetch('/Payment?handler=SendTicketEmail', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
                             },
                             body: JSON.stringify({
                                 email: document.getElementById('email').value,

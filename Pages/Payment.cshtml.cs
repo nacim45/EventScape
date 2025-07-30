@@ -221,8 +221,12 @@ namespace soft20181_starter.Pages
     public class PaymentIntentRequest
     {
         public decimal Amount { get; set; }
-        public string Email { get; set; }
-        public string Name { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string CardholderName { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string Postcode { get; set; } = string.Empty;
     }
 
     public class TicketEmailRequest
@@ -231,5 +235,8 @@ namespace soft20181_starter.Pages
         public string Email { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public decimal Amount { get; set; }
+        public string Address { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string Postcode { get; set; } = string.Empty;
     }
 } 
