@@ -301,14 +301,61 @@ namespace soft20181_starter.Controllers
         [HttpGet("test-config")]
         public IActionResult TestConfiguration()
         {
+            var stripePublic = _configuration["Stripe:PublicKey"];
+            var stripeSecret = _configuration["Stripe:SecretKey"];
+            var stripeWebhook = _configuration["Stripe:WebhookSecret"];
+            var paypalClient = _configuration["PayPal:ClientId"];
+            var paypalSecret = _configuration["PayPal:Secret"];
+
             var config = new
             {
-                StripePublicKey = _configuration["Stripe:PublicKey"] ?? "NULL",
-                StripeSecretKey = _configuration["Stripe:SecretKey"]?.Substring(0, 10) + "..." ?? "NULL",
-                StripeWebhookSecret = _configuration["Stripe:WebhookSecret"]?.Substring(0, 10) + "..." ?? "NULL",
-                PayPalClientId = _configuration["PayPal:ClientId"] ?? "NULL",
-                PayPalSecret = _configuration["PayPal:Secret"]?.Substring(0, 10) + "..." ?? "NULL",
-                Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown"
+                Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown",
+                ConfigurationMapping = new
+                {
+                    StripePublicKey = new
+                    {
+                        FromConfig = stripePublic ?? "NULL",
+                        FromEnvironmentVariable = Environment.GetEnvironmentVariable("StripePublic") ?? "NULL",
+                        Configured = !string.IsNullOrEmpty(stripePublic),
+                        Length = stripePublic?.Length ?? 0
+                    },
+                    StripeSecretKey = new
+                    {
+                        FromConfig = !string.IsNullOrEmpty(stripeSecret) ? stripeSecret[..Math.Min(10, stripeSecret.Length)] + "..." : "NULL",
+                        FromEnvironmentVariable = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StripeSecret")) ? 
+                            Environment.GetEnvironmentVariable("StripeSecret")![..Math.Min(10, Environment.GetEnvironmentVariable("StripeSecret")!.Length)] + "..." : "NULL",
+                        Configured = !string.IsNullOrEmpty(stripeSecret),
+                        Length = stripeSecret?.Length ?? 0
+                    },
+                    StripeWebhookSecret = new
+                    {
+                        FromConfig = !string.IsNullOrEmpty(stripeWebhook) ? stripeWebhook[..Math.Min(10, stripeWebhook.Length)] + "..." : "NULL",
+                        FromEnvironmentVariable = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("StripeWebhook")) ? 
+                            Environment.GetEnvironmentVariable("StripeWebhook")![..Math.Min(10, Environment.GetEnvironmentVariable("StripeWebhook")!.Length)] + "..." : "NULL",
+                        Configured = !string.IsNullOrEmpty(stripeWebhook),
+                        Length = stripeWebhook?.Length ?? 0
+                    },
+                    PayPalClientId = new
+                    {
+                        FromConfig = paypalClient ?? "NULL",
+                        FromEnvironmentVariable = Environment.GetEnvironmentVariable("PaypalClientID") ?? "NULL",
+                        Configured = !string.IsNullOrEmpty(paypalClient),
+                        Length = paypalClient?.Length ?? 0
+                    },
+                    PayPalSecret = new
+                    {
+                        FromConfig = !string.IsNullOrEmpty(paypalSecret) ? paypalSecret[..Math.Min(10, paypalSecret.Length)] + "..." : "NULL",
+                        FromEnvironmentVariable = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PaypalSecret")) ? 
+                            Environment.GetEnvironmentVariable("PaypalSecret")![..Math.Min(10, Environment.GetEnvironmentVariable("PaypalSecret")!.Length)] + "..." : "NULL",
+                        Configured = !string.IsNullOrEmpty(paypalSecret),
+                        Length = paypalSecret?.Length ?? 0
+                    }
+                },
+                AllPaymentEnvironmentVariables = Environment.GetEnvironmentVariables()
+                    .Cast<System.Collections.DictionaryEntry>()
+                    .Where(entry => entry.Key.ToString().ToLower().Contains("stripe") || 
+                                   entry.Key.ToString().ToLower().Contains("paypal"))
+                    .ToDictionary(entry => entry.Key.ToString(), entry => "***HIDDEN***")
             };
 
             return Ok(config);
