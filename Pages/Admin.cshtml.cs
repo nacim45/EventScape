@@ -160,20 +160,27 @@ namespace soft20181_starter.Pages
                 // Add to database
                 await _context.Events.AddAsync(newEvent);
 
-                // Create audit log entry
+                // Save changes to get the event ID
+                await _context.SaveChangesAsync();
+
+                // Create audit log entry with the generated ID
                 var auditLog = new AuditLog
                 {
                     EntityName = "Event",
                     EntityId = newEvent.id.ToString(),
                     Action = "Create",
                     UserId = userId,
-                    Changes = $"Created new event: {newEvent.title}",
+                    Changes = $"Created new event: {newEvent.title} (ID: {newEvent.id}) in location: {newEvent.location}",
                     Timestamp = DateTime.UtcNow
                 };
                 await _context.AuditLogs.AddAsync(auditLog);
 
-                // Save all changes
+                // Save audit log
                 await _context.SaveChangesAsync();
+
+                // Log success
+                _logger.LogInformation("Successfully created event: {EventId} - {EventTitle} in {Location}", 
+                    newEvent.id, newEvent.title, newEvent.location);
 
                 StatusMessage = "Event added successfully!";
             }
@@ -345,7 +352,21 @@ namespace soft20181_starter.Pages
                 };
                 await _context.AuditLogs.AddAsync(auditLog);
 
+                // Save changes first to update the event
                 await _context.SaveChangesAsync();
+
+                // Save audit log
+                await _context.SaveChangesAsync();
+
+                // Log success
+                _logger.LogInformation(
+                    "Successfully updated event: {EventId} - {EventTitle} in {Location}. Changes: {Changes}", 
+                    existingEvent.id, 
+                    existingEvent.title, 
+                    existingEvent.location,
+                    auditLog.Changes
+                );
+
                 StatusMessage = "Event updated successfully!";
             }
             catch (Exception ex)

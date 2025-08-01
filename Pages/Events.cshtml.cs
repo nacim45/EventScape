@@ -57,7 +57,8 @@ namespace soft20181_starter.Pages
 
                 // Get all available locations from the database
                 AvailableLocations = await _context.Events
-                    .Select(e => e.location)
+                    .Where(e => !e.IsDeleted) // Only get locations from non-deleted events
+                    .Select(e => e.location.ToLower()) // Convert to lowercase
                     .Distinct()
                     .Where(l => !string.IsNullOrEmpty(l))
                     .OrderBy(l => l)
@@ -67,20 +68,28 @@ namespace soft20181_starter.Pages
                 var query = _context.Events
                     .AsQueryable();
 
+                // Filter out soft-deleted events first
+                query = query.Where(e => !e.IsDeleted);
+
                 // Filter by location if provided
                 if (!string.IsNullOrEmpty(Location))
                 {
-                    query = query.Where(e => e.location.ToLower() == Location.ToLower());
+                    var locationLower = Location.ToLower();
+                    query = query.Where(e => e.location.ToLower() == locationLower);
                 }
 
                 // Filter by search string if provided
                 if (!string.IsNullOrEmpty(SearchString))
                 {
-                    query = query.Where(e => e.title.ToLower().Contains(SearchString.ToLower()));
+                    var searchLower = SearchString.ToLower();
+                    query = query.Where(e => 
+                        e.title.ToLower().Contains(searchLower) || 
+                        e.description.ToLower().Contains(searchLower) ||
+                        e.location.ToLower().Contains(searchLower) ||
+                        e.Category.ToLower().Contains(searchLower) ||
+                        (e.Tags != null && e.Tags.ToLower().Contains(searchLower))
+                    );
                 }
-
-                // Filter out soft-deleted events
-                query = query.Where(e => !e.IsDeleted);
 
                 // Get total count for pagination
                 var totalEvents = await query.CountAsync();
@@ -155,9 +164,10 @@ namespace soft20181_starter.Pages
 
         private async Task LoadAvailableLocationsAsync()
         {
-            // Get all available locations from the database
+            // Get all available locations from non-deleted events
             AvailableLocations = await _context.Events
-                .Select(e => e.location)
+                .Where(e => !e.IsDeleted)
+                .Select(e => e.location.ToLower())
                 .Distinct()
                 .Where(l => !string.IsNullOrEmpty(l))
                 .OrderBy(l => l)
