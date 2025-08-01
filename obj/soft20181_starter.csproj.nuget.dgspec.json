@@ -1,26 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Geekzone\\Desktop\\soft2081-starter-code-main\\soft2081-starter-code-main\\soft20181_starter\\soft20181_starter.csproj": {}
+    "/Users/nacim/Documents/EventScape-main 2/soft20181_starter.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Geekzone\\Desktop\\soft2081-starter-code-main\\soft2081-starter-code-main\\soft20181_starter\\soft20181_starter.csproj": {
+    "/Users/nacim/Documents/EventScape-main 2/soft20181_starter.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Geekzone\\Desktop\\soft2081-starter-code-main\\soft2081-starter-code-main\\soft20181_starter\\soft20181_starter.csproj",
+        "projectUniqueName": "/Users/nacim/Documents/EventScape-main 2/soft20181_starter.csproj",
         "projectName": "soft20181_starter",
-        "projectPath": "C:\\Users\\Geekzone\\Desktop\\soft2081-starter-code-main\\soft2081-starter-code-main\\soft20181_starter\\soft20181_starter.csproj",
-        "packagesPath": "C:\\Users\\Geekzone\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Geekzone\\Desktop\\soft2081-starter-code-main\\soft2081-starter-code-main\\soft20181_starter\\obj\\",
+        "projectPath": "/Users/nacim/Documents/EventScape-main 2/soft20181_starter.csproj",
+        "packagesPath": "/Users/nacim/.nuget/packages/",
+        "outputPath": "/Users/nacim/Documents/EventScape-main 2/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Geekzone\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/nacim/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -97,6 +96,20 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.14, 8.0.14]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.osx-arm64",
+              "version": "[8.0.14, 8.0.14]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.14, 8.0.14]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -105,7 +118,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

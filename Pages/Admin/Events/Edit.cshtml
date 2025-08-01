@@ -44,180 +44,241 @@
             </div>
             <div class="card-body p-0">
                 <div class="admin-form-container">
-                    <form method="post" enctype="multipart/form-data" class="admin-form">
+                    <form method="post" enctype="multipart/form-data" class="admin-form needs-validation" novalidate>
                     <input type="hidden" asp-for="Event.id" />
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger admin-validation-summary"></div>
                         
                         <div class="admin-form-section">
-                            <h3 class="admin-form-section-title">Basic Details</h3>
-                    
-                            <div class="row">
-                        <div class="col-md-6">
-                                    <div class="admin-form-group">
-                                        <label asp-for="Event.title" class="admin-form-label">Event Title</label>
-                                        <input asp-for="Event.title" class="admin-form-input" placeholder="Enter a descriptive title" />
-                                        <span asp-validation-for="Event.title" class="admin-validation-message"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                                    <div class="admin-form-group">
-                                        <label asp-for="Event.location" class="admin-form-label">Location</label>
-                                        <input asp-for="Event.location" class="admin-form-input" placeholder="City, Venue or Address" />
-                                        <span asp-validation-for="Event.location" class="admin-validation-message"></span>
-                            </div>
-                        </div>
-                    </div>
+                            <h3 class="admin-form-section-title">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Basic Details
+                            </h3>
                     
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="admin-form-group">
-                                        <label asp-for="Event.date" class="admin-form-label">Event Date</label>
-                                        <input asp-for="Event.date" class="admin-form-input" placeholder="YYYY-MM-DD" />
-                                        <span asp-validation-for="Event.date" class="admin-validation-message"></span>
+                                        <label asp-for="Event.title" class="admin-form-label">
+                                            <i class="fas fa-heading me-2"></i>
+                                            Event Title
+                                        </label>
+                                        <input asp-for="Event.title" class="admin-form-input" placeholder="Enter a descriptive title" required />
+                                        <span asp-validation-for="Event.title" class="admin-validation-message"></span>
+                                        <div class="invalid-feedback">Please enter a title for the event.</div>
                                     </div>
                                 </div>
-                        <div class="col-md-6">
+                                <div class="col-md-6">
                                     <div class="admin-form-group">
-                                        <label asp-for="Event.price" class="admin-form-label">Price</label>
-                                        <input asp-for="Event.price" class="admin-form-input" placeholder="£50 or Free" />
+                                        <label asp-for="Event.location" class="admin-form-label">
+                                            <i class="fas fa-map-marker-alt me-2"></i>
+                                            Location
+                                        </label>
+                                        <input asp-for="Event.location" class="admin-form-input" placeholder="City, Venue or Address" required />
+                                        <span asp-validation-for="Event.location" class="admin-validation-message"></span>
+                                        <div class="invalid-feedback">Please specify the event location.</div>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="Event.date" class="admin-form-label">
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            Event Date
+                                        </label>
+                                        <input asp-for="Event.date" type="date" class="admin-form-input" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                        <span asp-validation-for="Event.date" class="admin-validation-message"></span>
+                                        <div class="invalid-feedback">Please select a valid future date.</div>
+                                        <div class="admin-form-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            Select a date for your event
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="Event.price" class="admin-form-label">
+                                            <i class="fas fa-tag me-2"></i>
+                                            Price
+                                        </label>
+                                        <input asp-for="Event.price" class="admin-form-input" placeholder="£50 or Free" required pattern="^(\d+(\.\d{1,2})?|Free)$" />
                                         <span asp-validation-for="Event.price" class="admin-validation-message"></span>
+                                        <div class="invalid-feedback">Please enter a valid price (e.g., 50.00) or 'Free'.</div>
+                                        <div class="admin-form-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            Enter a price or 'Free' for no charge
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="admin-form-section">
-                            <h3 class="admin-form-section-title">Details & Media</h3>
+                            <h3 class="admin-form-section-title">
+                                <i class="fas fa-images me-2"></i>
+                                Details & Media
+                            </h3>
                             
                             <div class="admin-form-group">
-                                <label asp-for="Event.description" class="admin-form-label">Description</label>
-                                <textarea asp-for="Event.description" class="admin-form-input admin-form-textarea" rows="6" placeholder="Enter a detailed description of your event"></textarea>
+                                <label asp-for="Event.description" class="admin-form-label">
+                                    <i class="fas fa-align-left me-2"></i>
+                                    Description
+                                </label>
+                                <textarea asp-for="Event.description" class="admin-form-input admin-form-textarea" rows="6" 
+                                    placeholder="Enter a detailed description of your event" required minlength="10"></textarea>
                                 <span asp-validation-for="Event.description" class="admin-validation-message"></span>
+                                <div class="invalid-feedback">Please provide a description (minimum 10 characters).</div>
+                                <div class="admin-form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Describe your event in detail to attract attendees
+                                </div>
                             </div>
                             
                             <div class="admin-form-group">
-                                <label asp-for="Event.link" class="admin-form-label">Website Link (Optional)</label>
-                                <input asp-for="Event.link" class="admin-form-input" placeholder="https://example.com" />
+                                <label asp-for="Event.link" class="admin-form-label">
+                                    <i class="fas fa-link me-2"></i>
+                                    Website Link
+                                </label>
+                                <input asp-for="Event.link" type="url" class="admin-form-input" placeholder="https://example.com" />
                                 <span asp-validation-for="Event.link" class="admin-validation-message"></span>
+                                <div class="invalid-feedback">Please enter a valid URL (or leave empty).</div>
+                                <div class="admin-form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Optional: Add a link to your event's website or social media
+                                </div>
                             </div>
                             
                             <div class="admin-form-group">
-                                <label for="UploadedImages" class="admin-form-label">Upload Images (Max 3)</label>
+                                <label for="UploadedImages" class="admin-form-label">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Upload Images
+                                </label>
                                 <div class="image-upload-container">
-                                    <input type="file" name="UploadedImages" id="UploadedImages" accept="image/*" multiple class="admin-form-input file-input" />
+                                    <input type="file" name="UploadedImages" id="UploadedImages" 
+                                        accept="image/jpeg,image/png,image/gif" multiple 
+                                        class="admin-form-input file-input" />
                                     <div class="image-upload-overlay">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span>Drag images here or click to browse</span>
-                                        <small>(Maximum 3 images, 5MB each)</small>
+                                        <small>(Maximum 3 images, 5MB each, JPG/PNG/GIF)</small>
                                     </div>
                                 </div>
                                 <div id="image-preview-container" class="image-preview-container"></div>
+                                <div class="admin-form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Add up to 3 high-quality images to showcase your event
+                                </div>
                             </div>
                             
                             <div class="admin-form-group">
-                                <label for="ImageUrls" class="admin-form-label">Image URLs (Optional)</label>
-                                <textarea name="ImageUrls" class="admin-form-input admin-form-textarea" rows="4" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg">@Model.ImageUrlsString</textarea>
+                                <label for="ImageUrls" class="admin-form-label">
+                                    <i class="fas fa-globe me-2"></i>
+                                    Image URLs
+                                </label>
+                                <textarea name="ImageUrls" class="admin-form-input admin-form-textarea" rows="4" 
+                                    placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg">@Model.ImageUrlsString</textarea>
                                 <div class="admin-form-hint">
                                     <i class="fas fa-info-circle"></i>
-                                    Enter one image URL per line. Images will be displayed in the order listed.
+                                    Optional: Enter one image URL per line. Images will be displayed in the order listed.
                                 </div>
                             </div>
                         </div>
                         
                         <div class="admin-form-section">
-                            <h3 class="admin-form-section-title">Event Properties</h3>
+                            <h3 class="admin-form-section-title">
+                                <i class="fas fa-cog me-2"></i>
+                                Event Properties
+                            </h3>
                             
-                            <div class="admin-form-row">
-                                <div class="admin-form-group">
-                                    <label for="EventCategory" class="admin-form-label">Category</label>
-                                    <select id="EventCategory" name="EventCategory" class="admin-form-input">
-                                        <option value="">Select a category</option>
-                                        @if (Model.EventCategory == "Music") {
-                                            <option value="Music" selected>Music</option>
-                                        } else {
-                                            <option value="Music">Music</option>
-                                        }
-                                        @if (Model.EventCategory == "Sports") {
-                                            <option value="Sports" selected>Sports</option>
-                                        } else {
-                                            <option value="Sports">Sports</option>
-                                        }
-                                        @if (Model.EventCategory == "Arts") {
-                                            <option value="Arts" selected>Arts & Theatre</option>
-                                        } else {
-                                            <option value="Arts">Arts & Theatre</option>
-                                        }
-                                        @if (Model.EventCategory == "Food") {
-                                            <option value="Food" selected>Food & Drink</option>
-                                        } else {
-                                            <option value="Food">Food & Drink</option>
-                                        }
-                                        @if (Model.EventCategory == "Business") {
-                                            <option value="Business" selected>Business</option>
-                                        } else {
-                                            <option value="Business">Business</option>
-                                        }
-                                        @if (Model.EventCategory == "Education") {
-                                            <option value="Education" selected>Education</option>
-                                        } else {
-                                            <option value="Education">Education</option>
-                                        }
-                                        @if (Model.EventCategory == "Social") {
-                                            <option value="Social" selected>Social</option>
-                                        } else {
-                                            <option value="Social">Social</option>
-                                        }
-                                        @if (Model.EventCategory == "Other") {
-                                            <option value="Other" selected>Other</option>
-                                        } else {
-                                            <option value="Other">Other</option>
-                                        }
-                                    </select>
-                                    <div class="admin-form-hint">
-                                        <i class="fas fa-info-circle"></i>
-                                        Select a category that best describes your event
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label for="EventCategory" class="admin-form-label">
+                                            <i class="fas fa-folder me-2"></i>
+                                            Category
+                                        </label>
+                                        <select id="EventCategory" name="EventCategory" class="admin-form-input" required>
+                                            <option value="">Select a category</option>
+                                            @foreach (var category in new[] { "Music", "Sports", "Arts", "Food", "Business", "Education", "Social", "Other" })
+                                            {
+                                                var displayName = category == "Arts" ? "Arts & Theatre" : 
+                                                                category == "Food" ? "Food & Drink" : category;
+                                                <option value="@category" selected="@(Model.EventCategory == category)">@displayName</option>
+                                            }
+                                        </select>
+                                        <div class="invalid-feedback">Please select a category.</div>
+                                        <div class="admin-form-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            Select a category that best describes your event
+                                        </div>
                                     </div>
                                 </div>
                                 
-                                <div class="admin-form-group">
-                                    <label for="EventCapacity" class="admin-form-label">Capacity</label>
-                                    <input type="number" id="EventCapacity" name="EventCapacity" class="admin-form-input" placeholder="100" min="1" value="@Model.EventCapacity" />
-                                    <div class="admin-form-hint">
-                                        <i class="fas fa-info-circle"></i>
-                                        Maximum number of attendees (optional)
-                            </div>
-                        </div>
-                    </div>
-                    
-                            <div class="admin-form-row">
-                                <div class="admin-form-group">
-                                    <label for="EventStartTime" class="admin-form-label">Start Time</label>
-                                    <input type="time" id="EventStartTime" name="EventStartTime" class="admin-form-input" value="@Model.EventStartTime" />
-                                    <div class="admin-form-hint">
-                                        <i class="fas fa-info-circle"></i>
-                                        When does the event start? (optional)
-                                    </div>
-                    </div>
-                    
-                                <div class="admin-form-group">
-                                    <label for="EventEndTime" class="admin-form-label">End Time</label>
-                                    <input type="time" id="EventEndTime" name="EventEndTime" class="admin-form-input" value="@Model.EventEndTime" />
-                                    <div class="admin-form-hint">
-                                        <i class="fas fa-info-circle"></i>
-                                        When does the event end? (optional)
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label for="EventCapacity" class="admin-form-label">
+                                            <i class="fas fa-users me-2"></i>
+                                            Capacity
+                                        </label>
+                                        <input type="number" id="EventCapacity" name="EventCapacity" 
+                                            class="admin-form-input" placeholder="100" min="1" 
+                                            value="@Model.EventCapacity" />
+                                        <div class="invalid-feedback">Capacity must be at least 1.</div>
+                                        <div class="admin-form-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            Maximum number of attendees (optional)
+                                        </div>
                                     </div>
                                 </div>
-                    </div>
+                            </div>
+                    
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label for="EventStartTime" class="admin-form-label">
+                                            <i class="fas fa-clock me-2"></i>
+                                            Start Time
+                                        </label>
+                                        <input type="time" id="EventStartTime" name="EventStartTime" 
+                                            class="admin-form-input" value="@Model.EventStartTime" />
+                                        <div class="admin-form-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            When does the event start? (optional)
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label for="EventEndTime" class="admin-form-label">
+                                            <i class="fas fa-hourglass-end me-2"></i>
+                                            End Time
+                                        </label>
+                                        <input type="time" id="EventEndTime" name="EventEndTime" 
+                                            class="admin-form-input" value="@Model.EventEndTime" />
+                                        <div class="invalid-feedback">End time must be after start time.</div>
+                                        <div class="admin-form-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            When does the event end? (optional)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                     
                             <div class="admin-form-group">
-                                <label for="EventTags" class="admin-form-label">Tags</label>
-                                <input type="text" id="EventTags" name="EventTags" class="admin-form-input" placeholder="concert, live, music" value="@Model.EventTags" />
+                                <label for="EventTags" class="admin-form-label">
+                                    <i class="fas fa-tags me-2"></i>
+                                    Tags
+                                </label>
+                                <input type="text" id="EventTags" name="EventTags" 
+                                    class="admin-form-input" placeholder="concert, live, music" 
+                                    value="@Model.EventTags" />
                                 <div class="admin-form-hint">
                                     <i class="fas fa-info-circle"></i>
-                                    Separate tags with commas (optional)
+                                    Add relevant tags separated by commas (optional)
                                 </div>
                             </div>
-                    </div>
+                        </div>
                     
                         <div class="admin-form-actions">
                             <a asp-page="Index" class="admin-action-btn admin-cancel-btn">
@@ -226,12 +287,186 @@
                             <button type="submit" class="admin-action-btn admin-submit-btn">
                                 <i class="fas fa-save"></i> Save Changes
                             </button>
-                    </div>
-                </form>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const form = document.querySelector('.admin-form');
+            const startTimeInput = document.getElementById('EventStartTime');
+            const endTimeInput = document.getElementById('EventEndTime');
+            
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Add validation styling
+                    const invalidInputs = form.querySelectorAll(':invalid');
+                    invalidInputs.forEach(input => {
+                        input.classList.add('is-invalid');
+                        input.classList.add('shake');
+                        setTimeout(() => input.classList.remove('shake'), 500);
+                    });
+                    
+                    // Scroll to first invalid input
+                    if (invalidInputs.length > 0) {
+                        invalidInputs[0].focus();
+                        invalidInputs[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                
+                // Validate end time is after start time
+                if (startTimeInput.value && endTimeInput.value) {
+                    if (endTimeInput.value <= startTimeInput.value) {
+                        e.preventDefault();
+                        endTimeInput.classList.add('is-invalid');
+                        endTimeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                
+                form.classList.add('was-validated');
+            });
+            
+            // Image upload handling
+            const uploadInput = document.getElementById('UploadedImages');
+            const uploadContainer = document.querySelector('.image-upload-container');
+            const previewContainer = document.getElementById('image-preview-container');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadContainer.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadContainer.addEventListener(eventName, () => {
+                    uploadContainer.classList.add('dragover');
+                });
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadContainer.addEventListener(eventName, () => {
+                    uploadContainer.classList.remove('dragover');
+                });
+            });
+            
+            uploadInput.addEventListener('change', handleFiles);
+            uploadContainer.addEventListener('drop', e => {
+                const dt = e.dataTransfer;
+                uploadInput.files = dt.files;
+                handleFiles();
+            });
+            
+            function handleFiles() {
+                const files = Array.from(uploadInput.files).slice(0, 3);
+                previewContainer.innerHTML = '';
+                
+                files.forEach(file => {
+                    if (!file.type.match('image.*')) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const preview = document.createElement('div');
+                        preview.className = 'image-preview';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'remove-image';
+                        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                        removeBtn.onclick = () => preview.remove();
+                        
+                        preview.appendChild(img);
+                        preview.appendChild(removeBtn);
+                        previewContainer.appendChild(preview);
+                    };
+                    reader.readAsDataURL(file);
+                });
+                
+                if (files.length > 0) {
+                    const overlaySpan = uploadContainer.querySelector('.image-upload-overlay span');
+                    overlaySpan.textContent = `${files.length} file(s) selected`;
+                }
+            }
+            
+            // Input focus effects
+            const inputs = form.querySelectorAll('.admin-form-input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.parentElement.classList.add('is-focused');
+                });
+                
+                input.addEventListener('blur', () => {
+                    input.parentElement.classList.remove('is-focused');
+                    if (input.checkValidity()) {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+            });
+        });
+    </script>
+    <style>
+        /* Animation styles */
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .shake {
+            animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        
+        /* Focus effects */
+        .is-focused .admin-form-label {
+            color: #854F6C;
+            transform: translateX(5px);
+            transition: all 0.3s ease;
+        }
+        
+        .is-focused .admin-form-input {
+            border-color: #522B5B;
+            box-shadow: 0 0 0 4px rgba(82, 43, 91, 0.1);
+            background-color: #fff;
+        }
+        
+        /* Validation styles */
+        .was-validated .admin-form-input:invalid {
+            border-color: #dc3545;
+            background-color: #fff8f8;
+        }
+        
+        .was-validated .admin-form-input:valid {
+            border-color: #28a745;
+            background-color: #f8fff8;
+        }
+        
+        .invalid-feedback {
+            display: none;
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        
+        .was-validated .admin-form-input:invalid ~ .invalid-feedback {
+            display: block;
+        }
+    </style>
+}
 </div>
 
 @section Styles {

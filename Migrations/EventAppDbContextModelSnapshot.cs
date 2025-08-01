@@ -153,8 +153,14 @@ namespace soft20181_starter.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Bio")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
@@ -164,14 +170,30 @@ namespace soft20181_starter.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("FailedLoginAttempts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("LastLoginDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastPasswordChangeDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("LockoutEndDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
@@ -182,10 +204,6 @@ namespace soft20181_starter.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("TEXT");
 
@@ -193,6 +211,18 @@ namespace soft20181_starter.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PreferredLanguage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("ReceiveMarketingEmails")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ReceiveNotifications")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("RegisteredDate")
@@ -207,10 +237,20 @@ namespace soft20181_starter.Migrations
 
                     b.Property<string>("Surname")
                         .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TimeZone")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -229,6 +269,40 @@ namespace soft20181_starter.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("soft20181_starter.Models.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Changes")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EntityId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("soft20181_starter.Models.Contact", b =>
@@ -279,6 +353,9 @@ namespace soft20181_starter.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("EventId")
                         .HasColumnType("INTEGER");
 
@@ -300,6 +377,9 @@ namespace soft20181_starter.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("TheEventid")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("TicketNumber")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -310,7 +390,11 @@ namespace soft20181_starter.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AppUserId");
+
                     b.HasIndex("EventId");
+
+                    b.HasIndex("TheEventid");
 
                     b.HasIndex("UserId", "EventId")
                         .IsUnique();
@@ -349,6 +433,9 @@ namespace soft20181_starter.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -358,6 +445,9 @@ namespace soft20181_starter.Migrations
 
                     b.Property<string>("EventIds")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PayPalOrderId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PaymentIntentId")
@@ -394,6 +484,8 @@ namespace soft20181_starter.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AppUserId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("PaymentTransactions");
@@ -405,8 +497,40 @@ namespace soft20181_starter.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("Capacity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EndTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StartTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tags")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("date")
                         .IsRequired()
@@ -426,6 +550,7 @@ namespace soft20181_starter.Migrations
 
                     b.Property<string>("location")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("price")
@@ -438,6 +563,8 @@ namespace soft20181_starter.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("id");
+
+                    b.HasIndex("CreatedById");
 
                     b.HasIndex("date");
 
@@ -501,11 +628,19 @@ namespace soft20181_starter.Migrations
 
             modelBuilder.Entity("soft20181_starter.Models.EventAttendance", b =>
                 {
+                    b.HasOne("soft20181_starter.Models.AppUser", null)
+                        .WithMany("EventAttendances")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("soft20181_starter.Models.TheEvent", "Event")
                         .WithMany()
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("soft20181_starter.Models.TheEvent", null)
+                        .WithMany("Attendances")
+                        .HasForeignKey("TheEventid");
 
                     b.HasOne("soft20181_starter.Models.AppUser", "User")
                         .WithMany()
@@ -520,6 +655,10 @@ namespace soft20181_starter.Migrations
 
             modelBuilder.Entity("soft20181_starter.Models.PaymentTransaction", b =>
                 {
+                    b.HasOne("soft20181_starter.Models.AppUser", null)
+                        .WithMany("PaymentTransactions")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("soft20181_starter.Models.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -527,6 +666,29 @@ namespace soft20181_starter.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("soft20181_starter.Models.TheEvent", b =>
+                {
+                    b.HasOne("soft20181_starter.Models.AppUser", "CreatedBy")
+                        .WithMany("CreatedEvents")
+                        .HasForeignKey("CreatedById");
+
+                    b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("soft20181_starter.Models.AppUser", b =>
+                {
+                    b.Navigation("CreatedEvents");
+
+                    b.Navigation("EventAttendances");
+
+                    b.Navigation("PaymentTransactions");
+                });
+
+            modelBuilder.Entity("soft20181_starter.Models.TheEvent", b =>
+                {
+                    b.Navigation("Attendances");
                 });
 #pragma warning restore 612, 618
         }

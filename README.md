@@ -2,17 +2,47 @@
 
 A comprehensive event management web application built with ASP.NET Core, featuring secure payment processing through Stripe and PayPal.
 
-## 🔧 Azure Environment Variables Configuration
+## 🔧 **Azure Environment Variables Solution - Efficient Summary**
 
-Configure these environment variables in your Azure App Service:
+### **The Problem:**
+Azure App Service uses environment variable names like `StripePublic`, but ASP.NET Core expects configuration keys like `Stripe:PublicKey`. Without mapping, the app couldn't find the payment keys.
 
+### **The Solution in `Program.cs`:**
+
+```csharp
+// Map Azure environment variables to configuration
+builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+{
+    // Map Azure environment variable names to configuration keys
+    { "Stripe:PublicKey", Environment.GetEnvironmentVariable("StripePublic") ?? builder.Configuration["Stripe:PublicKey"] },
+    { "Stripe:SecretKey", Environment.GetEnvironmentVariable("StripeSecret") ?? builder.Configuration["Stripe:SecretKey"] },
+    { "Stripe:WebhookSecret", Environment.GetEnvironmentVariable("StripeWebhook") ?? builder.Configuration["Stripe:WebhookSecret"] },
+    { "PayPal:ClientId", Environment.GetEnvironmentVariable("PaypalClientID") ?? builder.Configuration["PayPal:ClientId"] },
+    { "PayPal:Secret", Environment.GetEnvironmentVariable("PaypalSecret") ?? builder.Configuration["PayPal:Secret"] }
+});
 ```
-StripePublic=your_stripe_public_key_here
-StripeSecret=your_stripe_secret_key_here
-StripeWebhook=your_stripe_webhook_secret_here
-PaypalClientID=your_paypal_client_id_here
-PaypalSecret=your_paypal_secret_here
-```
+
+### **What This Does:**
+
+1. **Direct Mapping**: `StripePublic` (Azure) → `Stripe:PublicKey` (App)
+2. **Fallback**: Uses local config if environment variable doesn't exist
+3. **No Configuration Changes**: Works with existing PaymentController and PaymentModel code
+4. **Simple & Safe**: Uses built-in ASP.NET Core configuration system
+
+### **Azure Setup:**
+In Azure App Service → Configuration → Application Settings:
+- `StripePublic` = your_stripe_public_key
+- `StripeSecret` = your_stripe_secret_key  
+- `StripeWebhook` = your_webhook_secret
+- `PaypalClientID` = your_paypal_client_id
+- `PaypalSecret` = your_paypal_secret
+
+### **Result:**
+✅ Environment variables automatically available as `_configuration["Stripe:PublicKey"]` throughout the app  
+✅ No code changes needed in controllers/models  
+✅ Works in both local development and Azure production
+
+**One simple mapping block solved the entire Azure environment variable integration!** 🎯
 
 ## 🛠️ Local Development Setup
 

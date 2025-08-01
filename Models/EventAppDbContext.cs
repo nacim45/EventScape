@@ -22,6 +22,7 @@ namespace soft20181_starter.Models
         public DbSet<TheEvent> Events { get; set; }
         public DbSet<EventAttendance> EventAttendances { get; set; }
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

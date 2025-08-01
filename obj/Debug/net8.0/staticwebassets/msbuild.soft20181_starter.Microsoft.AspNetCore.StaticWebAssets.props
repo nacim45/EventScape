@@ -12,8 +12,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>ri1tpgkic5</Fingerprint>
-      <Integrity>82UtwQxBYD4m113EbFBDYCYhWyQqMsT4XJJkWA79l0U=</Integrity>
+      <Fingerprint>8vifo4kesi</Fingerprint>
+      <Integrity>vIqqGl1Z7FbLqF0EB3yuEFJ0nACYVRU+gLwINsVkHMs=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\contact.css'))</OriginalItemSpec>
@@ -66,8 +66,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>286090m4kh</Fingerprint>
-      <Integrity>ftfsWdWiFwb8i1VcYJH/nuSNy3I3pmPO+Y0lrZm/ymw=</Integrity>
+      <Fingerprint>ecy0fmu8cq</Fingerprint>
+      <Integrity>IusamtSnfarfDM0XtYOHPEkEvs3YdNH/CU2HsZgtQRc=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\style.css'))</OriginalItemSpec>
@@ -3096,23 +3096,23 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\site.js'))</OriginalItemSpec>
     </StaticWebAsset>
-    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\soft20181_starter.8kzjkbl1jg.bundle.scp.css'))">
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\soft20181_starter.ugcpeqt69g.bundle.scp.css'))">
       <SourceType>Package</SourceType>
       <SourceId>soft20181_starter</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>_content/soft20181_starter</BasePath>
-      <RelativePath>soft20181_starter.8kzjkbl1jg.bundle.scp.css</RelativePath>
+      <RelativePath>soft20181_starter.ugcpeqt69g.bundle.scp.css</RelativePath>
       <AssetKind>All</AssetKind>
       <AssetMode>Reference</AssetMode>
       <AssetRole>Primary</AssetRole>
       <RelatedAsset></RelatedAsset>
       <AssetTraitName>ScopedCss</AssetTraitName>
       <AssetTraitValue>ProjectBundle</AssetTraitValue>
-      <Fingerprint>8kzjkbl1jg</Fingerprint>
-      <Integrity>yGrxGoG0kjMkWt7l9zrwrQnzNOD+hRMJPihWriXVWyc=</Integrity>
+      <Fingerprint>ugcpeqt69g</Fingerprint>
+      <Integrity>XtHQYdm+a28J7AmA1LuoYlJVUV0PUl+zsh01w0wjpWk=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\soft20181_starter.8kzjkbl1jg.bundle.scp.css'))</OriginalItemSpec>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\soft20181_starter.ugcpeqt69g.bundle.scp.css'))</OriginalItemSpec>
     </StaticWebAsset>
   </ItemGroup>
 </Project>

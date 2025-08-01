@@ -1,7 +1,8 @@
 @page "/AdminLegacy"
 @model soft20181_starter.Pages.AdminModel
 @{
-    ViewData["Title"] = "Admin Panel";
+    ViewData["Title"] = "Admin Panel - EventScape";
+    Layout = "_Layout";
 }
 
 <div class="head">
@@ -73,37 +74,145 @@
             <h2>Event Management</h2>
             
             <!-- Add Event Form -->
-            <div class="card mb-4" style="margin-bottom: 250px !important;">
-                <div class="card-header">
-                    <h3>Add Event</h3>
+            <div class="card admin-card shadow">
+                <div class="card-header admin-card-header">
+                    <h3 class="admin-card-title">
+                        <i class="fas fa-calendar-plus"></i> Create New Event
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <form method="post" asp-page-handler="AddEvent" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label asp-for="NewEvent.title">Title</label>
-                            <input asp-for="NewEvent.title" class="form-control" required />
+                <div class="card-body admin-form-container">
+                    <form method="post" asp-page-handler="AddEvent" enctype="multipart/form-data" class="admin-form needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger admin-validation-summary"></div>
+                        
+                        <div class="admin-form-section">
+                            <h4 class="admin-form-section-title">Basic Details</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NewEvent.title" class="admin-form-label">Event Title</label>
+                                        <input asp-for="NewEvent.title" class="admin-form-input" placeholder="Enter a descriptive title" required 
+                                               data-val="true" data-val-required="Title is required" data-val-length-max="100" />
+                                        <span asp-validation-for="NewEvent.title" class="admin-validation-message"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NewEvent.location" class="admin-form-label">Location</label>
+                                        <input asp-for="NewEvent.location" class="admin-form-input" placeholder="City or Venue" required />
+                                        <span asp-validation-for="NewEvent.location" class="admin-validation-message"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NewEvent.date" class="admin-form-label">Event Date</label>
+                                        <input type="date" asp-for="NewEvent.date" class="admin-form-input" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                        <span asp-validation-for="NewEvent.date" class="admin-validation-message"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NewEvent.StartTime" class="admin-form-label">Start Time</label>
+                                        <input type="time" asp-for="NewEvent.StartTime" class="admin-form-input" />
+                                        <span asp-validation-for="NewEvent.StartTime" class="admin-validation-message"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NewEvent.EndTime" class="admin-form-label">End Time</label>
+                                        <input type="time" asp-for="NewEvent.EndTime" class="admin-form-input" />
+                                        <span asp-validation-for="NewEvent.EndTime" class="admin-validation-message"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label asp-for="NewEvent.location">Location</label>
-                            <input asp-for="NewEvent.location" class="form-control" required />
+
+                        <div class="admin-form-section">
+                            <h4 class="admin-form-section-title">Event Details</h4>
+                            <div class="admin-form-group">
+                                <label asp-for="NewEvent.description" class="admin-form-label">Description</label>
+                                <textarea asp-for="NewEvent.description" class="admin-form-input admin-form-textarea" rows="5" 
+                                          placeholder="Provide a detailed description of your event" required></textarea>
+                                <span asp-validation-for="NewEvent.description" class="admin-validation-message"></span>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NewEvent.price" class="admin-form-label">Price</label>
+                                        <input asp-for="NewEvent.price" class="admin-form-input" placeholder="Enter price or 'Free'" required />
+                                        <span asp-validation-for="NewEvent.price" class="admin-validation-message"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NewEvent.Capacity" class="admin-form-label">Capacity</label>
+                                        <input type="number" asp-for="NewEvent.Capacity" class="admin-form-input" placeholder="Maximum attendees" min="1" />
+                                        <span asp-validation-for="NewEvent.Capacity" class="admin-validation-message"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NewEvent.Category" class="admin-form-label">Category</label>
+                                        <select asp-for="NewEvent.Category" class="admin-form-input" required>
+                                            <option value="">Select a category</option>
+                                            <option value="Music">Music</option>
+                                            <option value="Sports">Sports</option>
+                                            <option value="Arts">Arts & Theatre</option>
+                                            <option value="Food">Food & Drink</option>
+                                            <option value="Business">Business</option>
+                                            <option value="Education">Education</option>
+                                            <option value="Social">Social</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        <span asp-validation-for="NewEvent.Category" class="admin-validation-message"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label asp-for="NewEvent.Tags" class="admin-form-label">Tags</label>
+                                        <input asp-for="NewEvent.Tags" class="admin-form-input" placeholder="Enter tags separated by commas" />
+                                        <span asp-validation-for="NewEvent.Tags" class="admin-validation-message"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label asp-for="NewEvent.date">Date</label>
-                            <input asp-for="NewEvent.date" class="form-control" required />
+
+                        <div class="admin-form-section">
+                            <h4 class="admin-form-section-title">Media & Links</h4>
+                            <div class="admin-form-group">
+                                <label asp-for="NewEvent.link" class="admin-form-label">Website Link (Optional)</label>
+                                <input asp-for="NewEvent.link" class="admin-form-input" placeholder="https://example.com" />
+                                <span asp-validation-for="NewEvent.link" class="admin-validation-message"></span>
+                            </div>
+
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Event Images (Up to 3)</label>
+                                <div class="image-upload-container">
+                                    <input type="file" name="Images" id="eventImages" multiple accept="image/*" class="admin-form-input file-input" />
+                                    <div class="image-upload-overlay">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span>Drag images here or click to browse</span>
+                                        <small>(Maximum 3 images, 5MB each)</small>
+                                    </div>
+                                </div>
+                                <div id="imagePreviewContainer" class="image-preview-container"></div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label asp-for="NewEvent.description">Description</label>
-                            <textarea asp-for="NewEvent.description" class="form-control" rows="3" required></textarea>
+
+                        <div class="admin-form-actions">
+                            <button type="reset" class="admin-action-btn admin-cancel-btn">
+                                <i class="fas fa-times"></i> Reset Form
+                            </button>
+                            <button type="submit" class="admin-action-btn admin-submit-btn">
+                                <i class="fas fa-save"></i> Create Event
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <label asp-for="NewEvent.price">Price</label>
-                            <input asp-for="NewEvent.price" class="form-control" required />
-                        </div>
-                        <div class="form-group">
-                            <label>Images (Up to 3)</label>
-                            <input type="file" name="Images" multiple class="form-control-file" accept="image/*" />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add Event</button>
                     </form>
                 </div>
             </div>
@@ -233,36 +342,107 @@
             <h2>User Management</h2>
             
             <!-- Add User Form -->
-            <div class="card mb-4" style="margin-bottom: 250px !important;">
-                <div class="card-header">
-                    <h3>Add User</h3>
+            <div class="card admin-card shadow">
+                <div class="card-header admin-card-header">
+                    <h3 class="admin-card-title">
+                        <i class="fas fa-user-plus"></i> Create New User
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <form method="post" asp-page-handler="AddUser">
-                        <div class="form-group">
-                            <label for="newUserName">Name</label>
-                            <input type="text" id="newUserName" name="Name" class="form-control" required />
+                <div class="card-body admin-form-container">
+                    <form method="post" asp-page-handler="AddUser" class="admin-form needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger admin-validation-summary"></div>
+
+                        <div class="admin-form-section">
+                            <h4 class="admin-form-section-title">Personal Information</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label for="newUserName" class="admin-form-label">First Name</label>
+                                        <input type="text" id="newUserName" name="Name" class="admin-form-input" 
+                                               placeholder="Enter first name" required pattern="[a-zA-Z\s-']+" 
+                                               title="Name can only contain letters, spaces, hyphens and apostrophes" />
+                                        <div class="invalid-feedback">Please enter a valid first name.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label for="newUserSurname" class="admin-form-label">Last Name</label>
+                                        <input type="text" id="newUserSurname" name="Surname" class="admin-form-input" 
+                                               placeholder="Enter last name" required pattern="[a-zA-Z\s-']+" 
+                                               title="Surname can only contain letters, spaces, hyphens and apostrophes" />
+                                        <div class="invalid-feedback">Please enter a valid last name.</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="newUserSurname">Surname</label>
-                            <input type="text" id="newUserSurname" name="Surname" class="form-control" required />
+
+                        <div class="admin-form-section">
+                            <h4 class="admin-form-section-title">Account Details</h4>
+                            <div class="admin-form-group">
+                                <label for="newUserEmail" class="admin-form-label">Email Address</label>
+                                <input type="email" id="newUserEmail" name="Email" class="admin-form-input" 
+                                       placeholder="Enter email address" required />
+                                <div class="invalid-feedback">Please enter a valid email address.</div>
+                            </div>
+
+                            <div class="admin-form-group">
+                                <label for="newUserPassword" class="admin-form-label">Password</label>
+                                <div class="password-input-group">
+                                    <input type="password" id="newUserPassword" name="Password" class="admin-form-input" 
+                                           placeholder="Enter password" required minlength="6" />
+                                    <button type="button" class="password-toggle" onclick="togglePassword('newUserPassword')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="admin-form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Password must be at least 6 characters long
+                                </div>
+                                <div class="invalid-feedback">Password must be at least 6 characters long.</div>
+                            </div>
+
+                            <div class="admin-form-group">
+                                <label for="newUserRole" class="admin-form-label">User Role</label>
+                                <select id="newUserRole" name="Role" class="admin-form-input" required>
+                                    <option value="">Select a role</option>
+                                    <option value="User">User</option>
+                                    <option value="Admin">Administrator</option>
+                                </select>
+                                <div class="admin-form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Administrators have full access to manage events and users
+                                </div>
+                                <div class="invalid-feedback">Please select a user role.</div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="newUserEmail">Email</label>
-                            <input type="email" id="newUserEmail" name="Email" class="form-control" required />
+
+                        <div class="admin-form-section">
+                            <h4 class="admin-form-section-title">Preferences</h4>
+                            <div class="admin-form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="receiveNotifications" name="ReceiveNotifications" checked>
+                                    <label class="custom-control-label" for="receiveNotifications">Receive Notifications</label>
+                                </div>
+                                <div class="admin-form-hint">User will receive important updates and notifications</div>
+                            </div>
+
+                            <div class="admin-form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="receiveMarketing" name="ReceiveMarketingEmails">
+                                    <label class="custom-control-label" for="receiveMarketing">Receive Marketing Emails</label>
+                                </div>
+                                <div class="admin-form-hint">User will receive promotional content and newsletters</div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="newUserPassword">Password</label>
-                            <input type="password" id="newUserPassword" name="Password" class="form-control" required />
+
+                        <div class="admin-form-actions">
+                            <button type="reset" class="admin-action-btn admin-cancel-btn">
+                                <i class="fas fa-times"></i> Reset Form
+                            </button>
+                            <button type="submit" class="admin-action-btn admin-submit-btn">
+                                <i class="fas fa-user-plus"></i> Create User
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <label for="newUserRole">Role</label>
-                            <select id="newUserRole" name="Role" class="form-control" required>
-                                <option value="User">User</option>
-                                <option value="Admin">Admin</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add User</button>
                     </form>
                 </div>
             </div>
@@ -385,12 +565,355 @@
     <link rel="stylesheet" href="~/css/style.css">
     <link rel="stylesheet" href="~/css/slides.css">
     <link rel="stylesheet" href="~/css/contact.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        /* Admin Panel Layout */
         .admin-panel {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 30px auto;
             padding: 20px;
-            margin-bottom: 450px; /* Increased space before footer even more */
+            margin-bottom: 100px;
+        }
+
+        /* Card Styling */
+        .admin-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            background-color: #fff;
+        }
+
+        .admin-card-header {
+            background: linear-gradient(135deg, #522B5B 0%, #854F6C 100%);
+            color: white;
+            padding: 25px 30px;
+            border-bottom: none;
+        }
+
+        .admin-card-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .admin-card-title i {
+            font-size: 24px;
+        }
+
+        /* Form Styling */
+        .admin-form-container {
+            padding: 30px;
+        }
+
+        .admin-form-section {
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .admin-form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .admin-form-section-title {
+            color: #522B5B;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #BFACB5;
+            position: relative;
+        }
+
+        .admin-form-section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background-color: #522B5B;
+        }
+
+        .admin-form-group {
+            margin-bottom: 25px;
+        }
+
+        .admin-form-label {
+            display: block;
+            color: #522B5B;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .admin-form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #BFACB5;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #333;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .admin-form-input:focus {
+            border-color: #522B5B;
+            box-shadow: 0 0 0 3px rgba(82, 43, 91, 0.1);
+            outline: none;
+        }
+
+        .admin-form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .admin-form-hint {
+            margin-top: 6px;
+            color: #6c757d;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .admin-form-hint i {
+            color: #854F6C;
+        }
+
+        /* Image Upload */
+        .image-upload-container {
+            border: 2px dashed #BFACB5;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .image-upload-container.dragover {
+            border-color: #522B5B;
+            background-color: rgba(82, 43, 91, 0.05);
+        }
+
+        .image-upload-overlay {
+            pointer-events: none;
+        }
+
+        .image-upload-overlay i {
+            font-size: 40px;
+            color: #522B5B;
+            margin-bottom: 15px;
+        }
+
+        .image-preview-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .image-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .remove-image:hover {
+            background-color: #dc3545;
+            transform: scale(1.1);
+        }
+
+        /* Form Actions */
+        .admin-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .admin-action-btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .admin-submit-btn {
+            background-color: #522B5B;
+            color: white;
+        }
+
+        .admin-submit-btn:hover {
+            background-color: #854F6C;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .admin-cancel-btn {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+        }
+
+        .admin-cancel-btn:hover {
+            background-color: #e9ecef;
+            color: #495057;
+            transform: translateY(-2px);
+        }
+
+        /* Password Input Group */
+        .password-input-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+        }
+
+        .password-toggle:hover {
+            color: #522B5B;
+        }
+
+        /* Custom Switch */
+        .custom-switch {
+            padding-left: 2.25rem;
+        }
+
+        .custom-control-label {
+            padding-top: 2px;
+            cursor: pointer;
+        }
+
+        .custom-control-input:checked ~ .custom-control-label::before {
+            background-color: #522B5B;
+            border-color: #522B5B;
+        }
+
+        /* Validation Styling */
+        .was-validated .admin-form-input:invalid,
+        .admin-form-input.is-invalid {
+            border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(.375em + .1875rem) center;
+            background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+        }
+
+        .was-validated .admin-form-input:valid,
+        .admin-form-input.is-valid {
+            border-color: #28a745;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(.375em + .1875rem) center;
+            background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+        }
+
+        .invalid-feedback {
+            display: none;
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .was-validated .admin-form-input:invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .admin-card-header {
+                padding: 20px;
+            }
+
+            .admin-form-container {
+                padding: 20px;
+            }
+
+            .admin-form-actions {
+                flex-direction: column-reverse;
+            }
+
+            .admin-action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .image-preview {
+                width: calc(50% - 8px);
+                height: 100px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .admin-card-title {
+                font-size: 20px;
+            }
+
+            .admin-form-section-title {
+                font-size: 18px;
+            }
+
+            .image-preview {
+                width: 100%;
+                height: 200px;
+            }
         }
         
         .nav-tabs {
@@ -550,6 +1073,7 @@
 }
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize Bootstrap tabs
@@ -565,6 +1089,158 @@
             if (toggleButton && navMenu) {
                 toggleButton.addEventListener('click', () => {
                     navMenu.classList.toggle('active');
+                });
+            }
+
+            // Form validation
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            });
+
+            // Image upload preview
+            const imageInput = document.getElementById('eventImages');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const uploadContainer = document.querySelector('.image-upload-container');
+
+            if (imageInput && previewContainer) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    uploadContainer.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    uploadContainer.addEventListener(eventName, highlight, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    uploadContainer.addEventListener(eventName, unhighlight, false);
+                });
+
+                function highlight() {
+                    uploadContainer.classList.add('dragover');
+                }
+
+                function unhighlight() {
+                    uploadContainer.classList.remove('dragover');
+                }
+
+                uploadContainer.addEventListener('drop', handleDrop, false);
+                imageInput.addEventListener('change', handleFiles, false);
+
+                function handleDrop(e) {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    handleFiles({ target: { files: files } });
+                }
+
+                function handleFiles(e) {
+                    const files = Array.from(e.target.files).slice(0, 3);
+                    previewContainer.innerHTML = '';
+
+                    files.forEach(file => {
+                        if (!file.type.startsWith('image/')) return;
+
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const preview = document.createElement('div');
+                            preview.className = 'image-preview';
+                            
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            
+                            const removeBtn = document.createElement('button');
+                            removeBtn.className = 'remove-image';
+                            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            removeBtn.onclick = function() {
+                                preview.remove();
+                                updateImageCount();
+                            };
+                            
+                            preview.appendChild(img);
+                            preview.appendChild(removeBtn);
+                            previewContainer.appendChild(preview);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+
+                    updateImageCount();
+                }
+
+                function updateImageCount() {
+                    const count = previewContainer.children.length;
+                    const overlayText = uploadContainer.querySelector('.image-upload-overlay span');
+                    overlayText.textContent = count > 0 ? 
+                        `${count} image${count > 1 ? 's' : ''} selected` : 
+                        'Drag images here or click to browse';
+                }
+            }
+
+            // Password toggle functionality
+            window.togglePassword = function(inputId) {
+                const input = document.getElementById(inputId);
+                const icon = input.nextElementSibling.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            };
+
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Initialize custom file input
+            $('.custom-file-input').on('change', function() {
+                let fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileName);
+            });
+
+            // Date validation
+            const dateInputs = document.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                input.min = new Date().toISOString().split('T')[0];
+            });
+
+            // Time input validation
+            const startTimeInput = document.querySelector('input[name="NewEvent.StartTime"]');
+            const endTimeInput = document.querySelector('input[name="NewEvent.EndTime"]');
+            
+            if (startTimeInput && endTimeInput) {
+                endTimeInput.addEventListener('change', function() {
+                    if (startTimeInput.value && this.value && this.value <= startTimeInput.value) {
+                        this.setCustomValidity('End time must be after start time');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+
+            // Price input validation
+            const priceInput = document.querySelector('input[name="NewEvent.price"]');
+            if (priceInput) {
+                priceInput.addEventListener('input', function() {
+                    const value = this.value.toLowerCase();
+                    if (value === 'free' || /^\d+(\.\d{0,2})?$/.test(value)) {
+                        this.setCustomValidity('');
+                    } else {
+                        this.setCustomValidity('Price must be a number or "Free"');
+                    }
                 });
             }
         });

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace soft20181_starter.Pages
 {
@@ -18,11 +19,16 @@ namespace soft20181_starter.Pages
     {
         private readonly EventAppDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<AdminModel> _logger;
 
-        public AdminModel(EventAppDbContext context, IWebHostEnvironment webHostEnvironment)
+        public AdminModel(
+            EventAppDbContext context,
+            IWebHostEnvironment webHostEnvironment,
+            ILogger<AdminModel> logger)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _logger = logger;
             StatusMessage = string.Empty;
             NewEvent = new TheEvent();
             Events = new List<TheEvent>();
@@ -102,18 +108,71 @@ namespace soft20181_starter.Pages
                     }
                 }
 
-                // Create new event
+                // Get current user ID
+                var userId = User.Identity?.Name;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    throw new InvalidOperationException("User not found");
+                }
+
+                // Create new event with all fields
                 var newEvent = new TheEvent
                 {
                     title = NewEvent.title,
-                    location = NewEvent.location,
+                    location = NewEvent.location.ToLower(), // Store location in lowercase for consistency
                     date = NewEvent.date,
                     description = NewEvent.description,
                     price = NewEvent.price,
-                    images = imageUrls
+                    images = imageUrls,
+                    Category = NewEvent.Category,
+                    Capacity = NewEvent.Capacity,
+                    StartTime = NewEvent.StartTime,
+                    EndTime = NewEvent.EndTime,
+                    Tags = NewEvent.Tags,
+                    Status = "Active",
+                    CreatedById = userId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
 
-                _context.Events.Add(newEvent);
+                // Validate date format
+                if (!DateTime.TryParse(newEvent.date, out _))
+                {
+                    throw new ArgumentException("Invalid date format");
+                }
+
+                // Validate time format if provided
+                if (!string.IsNullOrEmpty(newEvent.StartTime) && !TimeSpan.TryParse(newEvent.StartTime, out _))
+                {
+                    throw new ArgumentException("Invalid start time format");
+                }
+                if (!string.IsNullOrEmpty(newEvent.EndTime) && !TimeSpan.TryParse(newEvent.EndTime, out _))
+                {
+                    throw new ArgumentException("Invalid end time format");
+                }
+
+                // Validate capacity
+                if (newEvent.Capacity.HasValue && newEvent.Capacity.Value <= 0)
+                {
+                    throw new ArgumentException("Capacity must be greater than 0");
+                }
+
+                // Add to database
+                await _context.Events.AddAsync(newEvent);
+
+                // Create audit log entry
+                var auditLog = new AuditLog
+                {
+                    EntityName = "Event",
+                    EntityId = newEvent.id.ToString(),
+                    Action = "Create",
+                    UserId = userId,
+                    Changes = $"Created new event: {newEvent.title}",
+                    Timestamp = DateTime.UtcNow
+                };
+                await _context.AuditLogs.AddAsync(auditLog);
+
+                // Save all changes
                 await _context.SaveChangesAsync();
 
                 StatusMessage = "Event added successfully!";
@@ -121,6 +180,8 @@ namespace soft20181_starter.Pages
             catch (Exception ex)
             {
                 StatusMessage = $"Error: {ex.Message}";
+                // Log the error
+                _logger.LogError(ex, "Error adding event");
             }
 
             return RedirectToPage();
@@ -137,7 +198,9 @@ namespace soft20181_starter.Pages
 
             try
             {
-                var existingEvent = _context.Events.Find(EditEvent.id);
+                var existingEvent = await _context.Events
+                    .Include(e => e.Attendances)
+                    .FirstOrDefaultAsync(e => e.id == EditEvent.id);
 
                 if (existingEvent == null)
                 {
@@ -145,12 +208,68 @@ namespace soft20181_starter.Pages
                     return RedirectToPage();
                 }
 
+                // Get current user ID
+                var userId = User.Identity?.Name;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    throw new InvalidOperationException("User not found");
+                }
+
+                // Store original values for audit log
+                var originalValues = new
+                {
+                    existingEvent.title,
+                    existingEvent.location,
+                    existingEvent.date,
+                    existingEvent.description,
+                    existingEvent.price,
+                    existingEvent.Category,
+                    existingEvent.Capacity,
+                    existingEvent.Status
+                };
+
                 // Update event properties
                 existingEvent.title = EditEvent.title;
-                existingEvent.location = EditEvent.location;
+                existingEvent.location = EditEvent.location.ToLower();
                 existingEvent.date = EditEvent.date;
                 existingEvent.description = EditEvent.description;
                 existingEvent.price = EditEvent.price;
+                existingEvent.Category = EditEvent.Category;
+                existingEvent.Capacity = EditEvent.Capacity;
+                existingEvent.StartTime = EditEvent.StartTime;
+                existingEvent.EndTime = EditEvent.EndTime;
+                existingEvent.Tags = EditEvent.Tags;
+                existingEvent.Status = EditEvent.Status;
+                existingEvent.UpdatedAt = DateTime.UtcNow;
+
+                // Validate date format
+                if (!DateTime.TryParse(existingEvent.date, out _))
+                {
+                    throw new ArgumentException("Invalid date format");
+                }
+
+                // Validate time format if provided
+                if (!string.IsNullOrEmpty(existingEvent.StartTime) && !TimeSpan.TryParse(existingEvent.StartTime, out _))
+                {
+                    throw new ArgumentException("Invalid start time format");
+                }
+                if (!string.IsNullOrEmpty(existingEvent.EndTime) && !TimeSpan.TryParse(existingEvent.EndTime, out _))
+                {
+                    throw new ArgumentException("Invalid end time format");
+                }
+
+                // Validate capacity
+                if (existingEvent.Capacity.HasValue)
+                {
+                    if (existingEvent.Capacity.Value <= 0)
+                    {
+                        throw new ArgumentException("Capacity must be greater than 0");
+                    }
+                    if (existingEvent.Capacity.Value < existingEvent.Attendances.Count)
+                    {
+                        throw new ArgumentException("Cannot set capacity lower than current number of attendees");
+                    }
+                }
 
                 // Handle images
                 if (EditImages != null && EditImages.Count > 0)
@@ -184,6 +303,15 @@ namespace soft20181_starter.Pages
 
                     if (ReplaceImages)
                     {
+                        // Delete old image files
+                        foreach (var oldImage in existingEvent.images ?? new List<string>())
+                        {
+                            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, oldImage.TrimStart('/'));
+                            if (System.IO.File.Exists(oldImagePath))
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                        }
                         // Replace existing images with new ones
                         existingEvent.images = imageUrls;
                     }
@@ -196,12 +324,34 @@ namespace soft20181_starter.Pages
                     }
                 }
 
+                // Create audit log entry
+                var changes = new List<string>();
+                if (originalValues.title != existingEvent.title) changes.Add($"Title: {originalValues.title} -> {existingEvent.title}");
+                if (originalValues.location != existingEvent.location) changes.Add($"Location: {originalValues.location} -> {existingEvent.location}");
+                if (originalValues.date != existingEvent.date) changes.Add($"Date: {originalValues.date} -> {existingEvent.date}");
+                if (originalValues.price != existingEvent.price) changes.Add($"Price: {originalValues.price} -> {existingEvent.price}");
+                if (originalValues.Category != existingEvent.Category) changes.Add($"Category: {originalValues.Category} -> {existingEvent.Category}");
+                if (originalValues.Capacity != existingEvent.Capacity) changes.Add($"Capacity: {originalValues.Capacity} -> {existingEvent.Capacity}");
+                if (originalValues.Status != existingEvent.Status) changes.Add($"Status: {originalValues.Status} -> {existingEvent.Status}");
+
+                var auditLog = new AuditLog
+                {
+                    EntityName = "Event",
+                    EntityId = existingEvent.id.ToString(),
+                    Action = "Update",
+                    UserId = userId,
+                    Changes = string.Join(", ", changes),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _context.AuditLogs.AddAsync(auditLog);
+
                 await _context.SaveChangesAsync();
                 StatusMessage = "Event updated successfully!";
             }
             catch (Exception ex)
             {
                 StatusMessage = $"Error: {ex.Message}";
+                _logger.LogError(ex, "Error updating event {EventId}", EditEvent.id);
             }
 
             return RedirectToPage();
@@ -212,7 +362,9 @@ namespace soft20181_starter.Pages
         {
             try
             {
-                var eventToDelete = _context.Events.Find(eventId);
+                var eventToDelete = await _context.Events
+                    .Include(e => e.Attendances)
+                    .FirstOrDefaultAsync(e => e.id == eventId);
 
                 if (eventToDelete == null)
                 {
@@ -220,14 +372,68 @@ namespace soft20181_starter.Pages
                     return RedirectToPage();
                 }
 
-                _context.Events.Remove(eventToDelete);
-                await _context.SaveChangesAsync();
+                // Get current user ID
+                var userId = User.Identity?.Name;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    throw new InvalidOperationException("User not found");
+                }
 
+                // Check if event has attendees
+                if (eventToDelete.Attendances.Any())
+                {
+                    // Soft delete if there are attendees
+                    eventToDelete.IsDeleted = true;
+                    eventToDelete.Status = "Cancelled";
+                    eventToDelete.UpdatedAt = DateTime.UtcNow;
+
+                    // Create audit log entry for soft delete
+                    var auditLog = new AuditLog
+                    {
+                        EntityName = "Event",
+                        EntityId = eventToDelete.id.ToString(),
+                        Action = "SoftDelete",
+                        UserId = userId,
+                        Changes = $"Soft deleted event: {eventToDelete.title} (has {eventToDelete.Attendances.Count} attendees)",
+                        Timestamp = DateTime.UtcNow
+                    };
+                    await _context.AuditLogs.AddAsync(auditLog);
+                }
+                else
+                {
+                    // Hard delete if no attendees
+                    // Delete image files
+                    foreach (var image in eventToDelete.images ?? new List<string>())
+                    {
+                        var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, image.TrimStart('/'));
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            System.IO.File.Delete(imagePath);
+                        }
+                    }
+
+                    _context.Events.Remove(eventToDelete);
+
+                    // Create audit log entry for hard delete
+                    var auditLog = new AuditLog
+                    {
+                        EntityName = "Event",
+                        EntityId = eventToDelete.id.ToString(),
+                        Action = "HardDelete",
+                        UserId = userId,
+                        Changes = $"Hard deleted event: {eventToDelete.title}",
+                        Timestamp = DateTime.UtcNow
+                    };
+                    await _context.AuditLogs.AddAsync(auditLog);
+                }
+
+                await _context.SaveChangesAsync();
                 StatusMessage = "Event deleted successfully!";
             }
             catch (Exception ex)
             {
                 StatusMessage = $"Error: {ex.Message}";
+                _logger.LogError(ex, "Error deleting event {EventId}", eventId);
             }
 
             return RedirectToPage();
