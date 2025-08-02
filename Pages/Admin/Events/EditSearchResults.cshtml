@@ -62,9 +62,20 @@
                             <div class="event-details">
                                 <h3 class="event-title">@eventItem.title</h3>
                                 <div class="event-info">
-                                    <p><i class="fas fa-map-marker-alt"></i> @eventItem.location</p>
+                                    <p><i class="fas fa-map-marker-alt"></i> @(char.ToUpper(eventItem.location[0]) + eventItem.location.Substring(1))</p>
                                     <p><i class="fas fa-calendar-day"></i> @eventItem.date</p>
+                                    <p><i class="fas fa-clock"></i> @(eventItem.StartTime ?? "Not specified") - @(eventItem.EndTime ?? "Not specified")</p>
                                     <p><i class="fas fa-pound-sign"></i> @eventItem.price</p>
+                                    <p><i class="fas fa-tag"></i> @(eventItem.Category ?? "Other")</p>
+                                    <p><i class="fas fa-users"></i> Capacity: @(eventItem.Capacity.HasValue ? eventItem.Capacity.Value.ToString() : "Unlimited")</p>
+                                    @if (!string.IsNullOrEmpty(eventItem.Tags))
+                                    {
+                                        <p><i class="fas fa-tags"></i> @eventItem.Tags</p>
+                                    }
+                                    <p><i class="fas fa-info-circle"></i> Status: @eventItem.Status</p>
+                                </div>
+                                <div class="event-description">
+                                    <p>@(eventItem.description.Length > 150 ? eventItem.description.Substring(0, 150) + "..." : eventItem.description)</p>
                                 </div>
                             </div>
                             <div class="event-actions">
@@ -91,7 +102,7 @@
     <link rel="stylesheet" href="~/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        /* Add styles consistent with other admin pages */
+        /* Enhanced styles for event cards and details */
         .events-list-container {
             margin-bottom: 30px;
         }

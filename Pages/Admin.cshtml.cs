@@ -192,7 +192,7 @@ namespace soft20181_starter.Pages
                         _logger.LogInformation("Successfully created event: {EventId} - {EventTitle} in {Location}", 
                             newEvent.id, newEvent.title, newEvent.location);
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         // Rollback transaction on error
                         await transaction.RollbackAsync();
@@ -401,7 +401,7 @@ namespace soft20181_starter.Pages
                             auditLog.Changes
                         );
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         // Rollback transaction on error
                         await transaction.RollbackAsync();
@@ -519,7 +519,7 @@ namespace soft20181_starter.Pages
 
                         StatusMessage = "Event deleted successfully!";
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         // Rollback transaction on error
                         await transaction.RollbackAsync();

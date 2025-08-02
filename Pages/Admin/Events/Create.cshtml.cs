@@ -88,7 +88,7 @@ namespace soft20181_starter.Pages.Admin.Events
                     Event.Status = "Active";
                     Event.CreatedAt = DateTime.UtcNow;
                     Event.UpdatedAt = DateTime.UtcNow;
-                    Event.CreatedById = User.Identity?.Name;
+                                            Event.CreatedById = User.Identity?.Name ?? "system";
 
                     // Initialize images list
                     Event.images = new List<string>();
@@ -96,33 +96,76 @@ namespace soft20181_starter.Pages.Admin.Events
                     // Process uploaded images
                     if (UploadedImages != null && UploadedImages.Count > 0)
                     {
-                        string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "events");
-                        
-                        // Ensure directory exists
-                        if (!Directory.Exists(uploadsFolder))
-                        {
-                            Directory.CreateDirectory(uploadsFolder);
-                        }
+                                                    string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "events");
+                            
+                            try
+                            {
+                                // Ensure directory exists
+                                if (!Directory.Exists(uploadsFolder))
+                                {
+                                    Directory.CreateDirectory(uploadsFolder);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning("Could not create events directory. Using URL storage only. Error: {Error}", ex.Message);
+                                // Continue without local file storage - we'll use URLs only
+                                uploadsFolder = null;
+                            }
 
                         // Process up to 3 images
                         foreach (var image in UploadedImages.Take(3))
                         {
                             if (image.Length > 0)
                             {
-                                // Create unique filename
-                                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                                string filePath = Path.Combine(uploadsFolder, fileName);
+                                                                    if (uploadsFolder != null)
+                                    {
+                                        try
+                                        {
+                                            // Create unique filename
+                                            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                                            string filePath = Path.Combine(uploadsFolder, fileName);
+                                            
+                                            // Save image
+                                            using (var stream = new FileStream(filePath, FileMode.Create))
+                                            {
+                                                await image.CopyToAsync(stream);
+                                            }
+                                            
+                                            // Add relative path to event images
+                                            Event.images.Add($"images/events/{fileName}");
+                                            _logger.LogInformation("Successfully saved image {FileName} to disk", fileName);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            _logger.LogWarning("Could not save image to disk. Error: {Error}", ex.Message);
+                                            // If file save fails, store the image as a data URL
+                                            using (var memoryStream = new MemoryStream())
+                                            {
+                                                await image.CopyToAsync(memoryStream);
+                                                var bytes = memoryStream.ToArray();
+                                                var base64 = Convert.ToBase64String(bytes);
+                                                var dataUrl = $"data:{image.ContentType};base64,{base64}";
+                                                Event.images.Add(dataUrl);
+                                                _logger.LogInformation("Stored image as data URL instead");
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Store image as data URL when local storage is not available
+                                        using (var memoryStream = new MemoryStream())
+                                        {
+                                            await image.CopyToAsync(memoryStream);
+                                            var bytes = memoryStream.ToArray();
+                                            var base64 = Convert.ToBase64String(bytes);
+                                            var dataUrl = $"data:{image.ContentType};base64,{base64}";
+                                            Event.images.Add(dataUrl);
+                                            _logger.LogInformation("Stored image as data URL");
+                                        }
+                                    }
                                 
-                                // Save image
-                                using (var stream = new FileStream(filePath, FileMode.Create))
-                                {
-                                    await image.CopyToAsync(stream);
-                                }
-                                
-                                // Add relative path to event images
-                                Event.images.Add($"images/events/{fileName}");
-                                
-                                _logger.LogInformation("Uploaded image {FileName} for event", fileName);
+                                _logger.LogInformation("Processed image for event");
                             }
                         }
                     }
@@ -172,12 +215,12 @@ namespace soft20181_starter.Pages.Admin.Events
                     // Redirect to Admin page
                     return RedirectToPage("/Admin");
                 }
-                catch (Exception ex)
-                {
-                    // Rollback transaction on error
-                    await transaction.RollbackAsync();
-                    throw;
-                }
+                                    catch
+                    {
+                        // Rollback transaction on error
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
             }
             catch (Exception ex)
             {

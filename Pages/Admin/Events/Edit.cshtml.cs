@@ -186,9 +186,9 @@ namespace soft20181_starter.Pages.Admin.Events
                                 return Page();
                             }
                             newPrice = $"£{price:N2}";
-                        }
-                        else
-                        {
+                }
+                else
+                {
                             newPrice = "Free";
                         }
 
@@ -242,29 +242,40 @@ namespace soft20181_starter.Pages.Admin.Events
                         Event.Tags = EventTags;
                     }
 
-                    // Process image URLs
-                    var newImages = new List<string>();
-                    if (!string.IsNullOrWhiteSpace(ImageUrls))
-                    {
-                        var urls = ImageUrls
-                            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(url => url.Trim())
-                            .Where(url => !string.IsNullOrWhiteSpace(url))
-                            .ToList();
+                                            // Process image URLs
+                        var newImages = new List<string>();
                         
-                        foreach (var url in urls)
+                        // Keep existing data URLs and external URLs
+                        if (existingEvent.images != null)
                         {
-                            if (!Uri.TryCreate(url, UriKind.Absolute, out _))
-                            {
-                                ModelState.AddModelError("ImageUrls", $"Invalid URL format: {url}");
-                                return Page();
-                            }
+                            newImages.AddRange(existingEvent.images.Where(img => 
+                                img.StartsWith("data:") || 
+                                (img.StartsWith("http") && Uri.TryCreate(img, UriKind.Absolute, out _))));
                         }
                         
-                        newImages.AddRange(urls);
-                    }
+                        // Add new URLs
+                        if (!string.IsNullOrWhiteSpace(ImageUrls))
+                        {
+                            var urls = ImageUrls
+                                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Select(url => url.Trim())
+                                .Where(url => !string.IsNullOrWhiteSpace(url))
+                                .ToList();
+                            
+                            foreach (var url in urls)
+                            {
+                                if (url.StartsWith("data:") || Uri.TryCreate(url, UriKind.Absolute, out _))
+                                {
+                                    newImages.Add(url);
+                                }
+                                else
+                                {
+                                    _logger.LogWarning("Skipping invalid URL: {Url}", url);
+                                }
+                            }
+                        }
 
-                    if (!newImages.SequenceEqual(existingEvent.images))
+                    if (!newImages.SequenceEqual(existingEvent.images ?? new List<string>()))
                     {
                         changes.Add("Images updated");
                         Event.images = newImages;
@@ -273,8 +284,8 @@ namespace soft20181_starter.Pages.Admin.Events
                     // Update audit fields
                     Event.UpdatedAt = DateTime.UtcNow;
 
-                    // Update the event
-                    _context.Attach(Event).State = EntityState.Modified;
+                // Update the event
+                _context.Attach(Event).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
 
                     // Create audit log if there were changes
@@ -307,11 +318,11 @@ namespace soft20181_starter.Pages.Admin.Events
                 catch (DbUpdateConcurrencyException ex)
                 {
                     await transaction.RollbackAsync();
-                    _logger.LogError(ex, "Concurrency conflict when updating event {EventId}", Event.id);
+                        _logger.LogError(ex, "Concurrency conflict when updating event {EventId}", Event.id);
                     ModelState.AddModelError(string.Empty, "The event was modified by another user. Please refresh and try again.");
-                    return Page();
-                }
-                catch (Exception ex)
+                        return Page();
+                    }
+                catch
                 {
                     await transaction.RollbackAsync();
                     throw;

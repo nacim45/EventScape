@@ -166,7 +166,7 @@ namespace soft20181_starter.Pages
 
             try
             {
-                if (!User.Identity.IsAuthenticated)
+                if (User.Identity?.IsAuthenticated != true)
                 {
                     _logger.LogWarning("Unauthenticated user attempted to register for event");
                     return RedirectToPage("/Account/Login");

@@ -38,18 +38,69 @@
             @foreach (var eventItem in Model.Events)
             {
                 <div class="event-card">
+                    <div class="event-image">
+                        @if (eventItem.images != null && eventItem.images.Any())
+                        {
+                            <img src="/@eventItem.images.First()" alt="@eventItem.title" class="event-thumbnail">
+                        }
+                        else
+                        {
+                            <div class="event-placeholder">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        }
+                    </div>
                     <div class="event-details">
                         <h3 class="event-title">@eventItem.title</h3>
                         <div class="event-info">
-                            <p><i class="fas fa-map-marker-alt"></i> @eventItem.location</p>
+                            <p><i class="fas fa-map-marker-alt"></i> @(char.ToUpper(eventItem.location[0]) + eventItem.location.Substring(1))</p>
                             <p><i class="fas fa-calendar-day"></i> @eventItem.date</p>
+                            <p><i class="fas fa-clock"></i> @(eventItem.StartTime ?? "Not specified") - @(eventItem.EndTime ?? "Not specified")</p>
                             <p><i class="fas fa-pound-sign"></i> @eventItem.price</p>
+                            <p><i class="fas fa-tag"></i> @(eventItem.Category ?? "Other")</p>
+                            <p><i class="fas fa-users"></i> Capacity: @(eventItem.Capacity.HasValue ? eventItem.Capacity.Value.ToString() : "Unlimited")</p>
+                            @if (!string.IsNullOrEmpty(eventItem.Tags))
+                            {
+                                <p><i class="fas fa-tags"></i> @eventItem.Tags</p>
+                            }
+                            <p><i class="fas fa-info-circle"></i> Status: @eventItem.Status</p>
+                        </div>
+                        <div class="event-description">
+                            <p>@(eventItem.description.Length > 150 ? eventItem.description.Substring(0, 150) + "..." : eventItem.description)</p>
                         </div>
                     </div>
                     <div class="event-actions">
-                        <a asp-page="Delete" asp-route-id="@eventItem.id" class="btn btn-danger delete-btn">
+                        <button onclick="confirmDelete(@eventItem.id, '@eventItem.title')" class="btn btn-danger delete-btn">
                             <i class="fas fa-trash"></i> Delete
-                        </a>
+                        </button>
+                        
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteModal@(eventItem.id)" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel@(eventItem.id)" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="deleteModalLabel@(eventItem.id)">Confirm Delete</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete the event: <strong>@eventItem.title</strong>?
+                                        <br><br>
+                                        <small class="text-danger">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            This action cannot be undone.
+                                        </small>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                        <a asp-page="Delete" asp-route-id="@eventItem.id" class="btn btn-danger">
+                                            <i class="fas fa-trash"></i> Confirm Delete
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             }
@@ -139,13 +190,14 @@
     .event-card {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         border: 1px solid #e9ecef;
-        border-radius: 6px;
+        border-radius: 10px;
         padding: 20px;
-        margin-bottom: 15px;
-        background-color: #f8f9fa;
-        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 20px;
+        background-color: white;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
     .event-card:hover {
@@ -239,6 +291,28 @@
 
         .btn {
             width: 100%;
+            }
+}
+
+@section Scripts {
+    <script>
+        function confirmDelete(eventId, eventTitle) {
+            $(`#deleteModal${eventId}`).modal('show');
         }
-    }
+
+        // Add fade-in animation to event cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.event-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+}
 </style> 

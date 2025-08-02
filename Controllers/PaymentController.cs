@@ -353,9 +353,10 @@ namespace soft20181_starter.Controllers
                 },
                 AllPaymentEnvironmentVariables = Environment.GetEnvironmentVariables()
                     .Cast<System.Collections.DictionaryEntry>()
-                    .Where(entry => entry.Key.ToString().ToLower().Contains("stripe") || 
-                                   entry.Key.ToString().ToLower().Contains("paypal"))
-                    .ToDictionary(entry => entry.Key.ToString(), entry => "***HIDDEN***")
+                    .Where(entry => entry.Key != null && 
+                           (entry.Key.ToString()!.ToLower().Contains("stripe") || 
+                            entry.Key.ToString()!.ToLower().Contains("paypal")))
+                    .ToDictionary(entry => entry.Key.ToString()!, entry => "***HIDDEN***")
             };
 
             return Ok(config);

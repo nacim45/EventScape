@@ -78,13 +78,13 @@ namespace soft20181_starter.Pages.Admin.Events
                 try
                 {
                     // Find the event to delete with its attendances
-                    var eventToDelete = await _context.Events
+                var eventToDelete = await _context.Events
                         .Include(e => e.Attendances)
-                        .FirstOrDefaultAsync(e => e.id == eventId);
+                    .FirstOrDefaultAsync(e => e.id == eventId);
 
-                    if (eventToDelete == null)
-                    {
-                        _logger.LogWarning("Event with ID {EventId} not found when attempting to delete", eventId);
+                if (eventToDelete == null)
+                {
+                    _logger.LogWarning("Event with ID {EventId} not found when attempting to delete", eventId);
                         return NotFound("Event not found or has already been deleted.");
                     }
 
@@ -119,22 +119,38 @@ namespace soft20181_starter.Pages.Admin.Events
                         // Hard delete if no attendees
                         _logger.LogInformation("Event {EventId} has no attendees. Performing hard delete.", eventId);
                         
-                        // Delete associated images
-                        if (eventToDelete.images != null && eventToDelete.images.Any())
-                        {
-                            foreach (var imagePath in eventToDelete.images)
+                                                    // Delete associated images
+                            var images = eventToDelete.images ?? new List<string>();
+                            if (images.Any())
                             {
-                                if (imagePath.StartsWith("images/events/"))
+                                foreach (var imagePath in images)
                                 {
-                                    var fullPath = Path.Combine(_environment.WebRootPath, imagePath);
-                                    if (System.IO.File.Exists(fullPath))
+                                    // Skip data URLs and external URLs
+                                    if (imagePath.StartsWith("data:") || imagePath.StartsWith("http"))
                                     {
-                                        System.IO.File.Delete(fullPath);
-                                        _logger.LogInformation("Deleted image file: {ImagePath}", imagePath);
+                                        continue;
+                                    }
+
+                                    if (imagePath.StartsWith("images/events/"))
+                                    {
+                                        try
+                                        {
+                                            var fullPath = Path.Combine(_environment.WebRootPath, imagePath);
+                                            if (System.IO.File.Exists(fullPath))
+                                            {
+                                                System.IO.File.Delete(fullPath);
+                                                _logger.LogInformation("Deleted image file: {ImagePath}", imagePath);
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            // Log but don't fail if file deletion fails
+                                            _logger.LogWarning("Could not delete image file {ImagePath}. Error: {Error}", 
+                                                imagePath, ex.Message);
+                                        }
                                     }
                                 }
                             }
-                        }
 
                         // Remove the event
                         _context.Events.Remove(eventToDelete);
@@ -168,12 +184,12 @@ namespace soft20181_starter.Pages.Admin.Events
                     
                     return RedirectToPage("/Admin");
                 }
-                catch (Exception ex)
-                {
-                    // Rollback transaction on error
-                    await transaction.RollbackAsync();
-                    throw;
-                }
+                                    catch
+                    {
+                        // Rollback transaction on error
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
             }
             catch (Exception ex)
             {

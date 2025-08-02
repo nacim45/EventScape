@@ -19,7 +19,7 @@ namespace soft20181_starter.Pages
         private readonly EventAppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<PaymentModel> _logger;
-        private readonly string _stripeSecretKey;
+        private readonly string? _stripeSecretKey;
 
         public PaymentModel(
             EventAppDbContext context, 
@@ -63,7 +63,7 @@ namespace soft20181_starter.Pages
 
         public async Task<IActionResult> OnGetAsync()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity?.IsAuthenticated ?? true)
             {
                 return RedirectToPage("/Account/Login");
             }
