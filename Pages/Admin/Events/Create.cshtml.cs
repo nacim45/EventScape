@@ -152,23 +152,31 @@ namespace soft20181_starter.Pages.Admin.Events
                     Event.Status = "Active";
                     Event.CreatedAt = DateTime.UtcNow;
                     Event.UpdatedAt = DateTime.UtcNow;
-                    Event.CreatedById = User.Identity?.Name ?? "system";
+                    // Get the current user's ID for the foreign key
+                    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (string.IsNullOrEmpty(userId))
+                    {
+                        _logger.LogError("Could not determine user ID for event creation");
+                        ModelState.AddModelError(string.Empty, "Could not determine user ID. Please try logging out and back in.");
+                        return Page();
+                    }
+                    Event.CreatedById = userId;
                     Event.IsDeleted = false;
 
-                    // Initialize images list
-                    Event.images = new List<string>();
+                // Initialize images list
+                Event.images = new List<string>();
 
-                    // Process uploaded images
-                    if (UploadedImages != null && UploadedImages.Count > 0)
-                    {
+                // Process uploaded images
+                if (UploadedImages != null && UploadedImages.Count > 0)
+                {
                                                     string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "events");
-                            
+                    
                             try
                             {
-                                // Ensure directory exists
-                                if (!Directory.Exists(uploadsFolder))
-                                {
-                                    Directory.CreateDirectory(uploadsFolder);
+                    // Ensure directory exists
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
                                 }
                             }
                             catch (Exception ex)
@@ -176,28 +184,28 @@ namespace soft20181_starter.Pages.Admin.Events
                                 _logger.LogWarning("Could not create events directory. Using URL storage only. Error: {Error}", ex.Message);
                                 // Continue without local file storage - we'll use URLs only
                                 uploadsFolder = null;
-                            }
+                    }
 
-                        // Process up to 3 images
-                        foreach (var image in UploadedImages.Take(3))
-                        {
-                            if (image.Length > 0)
+                    // Process up to 3 images
+                    foreach (var image in UploadedImages.Take(3))
+                    {
+                        if (image.Length > 0)
                             {
                                                                     if (uploadsFolder != null)
                                     {
                                         try
-                                        {
-                                            // Create unique filename
-                                            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                                            string filePath = Path.Combine(uploadsFolder, fileName);
-                                            
-                                            // Save image
-                                            using (var stream = new FileStream(filePath, FileMode.Create))
-                                            {
-                                                await image.CopyToAsync(stream);
-                                            }
-                                            
-                                            // Add relative path to event images
+                        {
+                            // Create unique filename
+                            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                            string filePath = Path.Combine(uploadsFolder, fileName);
+                            
+                            // Save image
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await image.CopyToAsync(stream);
+                            }
+                            
+                            // Add relative path to event images
                                             Event.images.Add($"images/events/{fileName}");
                                             _logger.LogInformation("Successfully saved image {FileName} to disk", fileName);
                                         }
@@ -232,25 +240,25 @@ namespace soft20181_starter.Pages.Admin.Events
                                 
                                 _logger.LogInformation("Processed image for event");
                             }
-                        }
                     }
+                }
 
-                    // Process image URLs if any
-                    if (!string.IsNullOrWhiteSpace(ImageUrls))
-                    {
-                        var urls = ImageUrls
-                            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(url => url.Trim())
-                            .Where(url => !string.IsNullOrWhiteSpace(url))
-                            .ToList();
-                        
-                        // Add URLs to event images
-                        Event.images.AddRange(urls);
-                    }
+                // Process image URLs if any
+                if (!string.IsNullOrWhiteSpace(ImageUrls))
+                {
+                    var urls = ImageUrls
+                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(url => url.Trim())
+                        .Where(url => !string.IsNullOrWhiteSpace(url))
+                        .ToList();
+                    
+                    // Add URLs to event images
+                    Event.images.AddRange(urls);
+                }
 
                     // Date is already formatted in the validation step above
 
-                    // Add event to database
+                // Add event to database
                     await _context.Events.AddAsync(Event);
                     await _context.SaveChangesAsync();
 
@@ -265,8 +273,8 @@ namespace soft20181_starter.Pages.Admin.Events
                         Timestamp = DateTime.UtcNow
                     };
                     await _context.AuditLogs.AddAsync(auditLog);
-                    await _context.SaveChangesAsync();
-
+                await _context.SaveChangesAsync();
+                
                     // Commit transaction
                     await transaction.CommitAsync();
                     

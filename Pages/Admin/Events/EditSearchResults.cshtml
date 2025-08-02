@@ -83,7 +83,7 @@
                                         @if (eventItem.UpdatedAt != null)
                                         {
                                             <br />
-                                            <text><i class="fas fa-calendar-plus"></i> Updated: </text>@eventItem.UpdatedAt.Value.ToString()
+                                            <text><i class="fas fa-calendar-plus"></i> Updated: </text>@eventItem.UpdatedAt?.ToString("g")
                                         }
                                     </p>
                                     @if (!string.IsNullOrEmpty(eventItem.link))

@@ -133,7 +133,8 @@ namespace soft20181_starter.Pages.Admin.Events
                     if (existingEvent == null)
                     {
                         _logger.LogWarning("Event with ID {EventId} no longer exists", Event.id);
-                        return NotFound("Event not found or has been deleted.");
+                        ModelState.AddModelError(string.Empty, "Event not found or has been deleted.");
+                        return RedirectToPage("/Admin");
                     }
 
                     // Store original values for audit log

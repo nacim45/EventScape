@@ -101,8 +101,9 @@ namespace soft20181_starter.Pages.Admin.Events
                 if (eventToDelete == null)
                 {
                     _logger.LogWarning("Event with ID {EventId} not found when attempting to delete", eventId);
-                        return NotFound("Event not found or has already been deleted.");
-                    }
+                    ModelState.AddModelError(string.Empty, "Event not found or has already been deleted.");
+                    return RedirectToPage("/Admin");
+                }
 
                     // Check if event has attendees
                     var hasAttendees = eventToDelete.Attendances.Any(a => a.Status != "Cancelled");
