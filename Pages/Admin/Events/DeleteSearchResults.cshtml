@@ -85,12 +85,36 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        Are you sure you want to delete the event: <strong>@eventItem.title</strong>?
-                                        <br><br>
-                                        <small class="text-danger">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            This action cannot be undone.
-                                        </small>
+                                        <div class="delete-confirmation-content">
+                                            <div class="event-summary">
+                                                <h5>Event Details:</h5>
+                                                <p><strong>Title:</strong> @eventItem.title</p>
+                                                <p><strong>Date:</strong> @eventItem.date</p>
+                                                <p><strong>Location:</strong> @(char.ToUpper(eventItem.location[0]) + eventItem.location.Substring(1))</p>
+                                                <p><strong>Status:</strong> @eventItem.Status</p>
+                                                @if (eventItem.Attendances?.Any() == true)
+                                                {
+                                                    <div class="alert alert-warning">
+                                                        <i class="fas fa-users"></i>
+                                                        This event has registered attendees. It will be soft-deleted (hidden) instead of permanently deleted.
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="alert alert-danger">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                        This event will be permanently deleted as it has no registered attendees.
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="confirmation-text">
+                                                <p>Are you sure you want to proceed with deletion?</p>
+                                                <small class="text-danger">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                    This action cannot be undone.
+                                                </small>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
 using System;
@@ -73,10 +74,73 @@ namespace soft20181_starter.Pages.Admin.Events
 
                 try
                 {
-                    // Process the form data and ensure location is lowercase for consistency
-                    if (!string.IsNullOrEmpty(Event.location))
+                    // Validate required fields
+                    if (string.IsNullOrEmpty(Event.title))
                     {
-                        Event.location = Event.location.ToLower().Trim();
+                        ModelState.AddModelError("Event.title", "Title is required");
+                        return Page();
+                    }
+                    if (string.IsNullOrEmpty(Event.location))
+                    {
+                        ModelState.AddModelError("Event.location", "Location is required");
+                        return Page();
+                    }
+                    if (string.IsNullOrEmpty(Event.description))
+                    {
+                        ModelState.AddModelError("Event.description", "Description is required");
+                        return Page();
+                    }
+                    if (string.IsNullOrEmpty(Event.date))
+                    {
+                        ModelState.AddModelError("Event.date", "Date is required");
+                        return Page();
+                    }
+                    if (string.IsNullOrEmpty(Event.price))
+                    {
+                        ModelState.AddModelError("Event.price", "Price is required");
+                        return Page();
+                    }
+
+                    // Process the form data and ensure location is lowercase for consistency
+                    Event.location = Event.location.ToLower().Trim();
+                    Event.title = Event.title.Trim();
+                    Event.description = Event.description.Trim();
+
+                    // Log the location being used
+                    _logger.LogInformation("Creating event with location: {Location}", Event.location);
+
+                    // Check if this is a new location
+                    var existingLocations = await _context.Events
+                        .Where(e => !e.IsDeleted)
+                        .Select(e => e.location.ToLower())
+                        .Distinct()
+                        .ToListAsync();
+
+                    var isNewLocation = !existingLocations.Contains(Event.location);
+                    _logger.LogInformation("Location {Location} is {Status}", Event.location, isNewLocation ? "new" : "existing");
+
+                    // Validate and format date
+                    if (DateTime.TryParse(Event.date, out DateTime parsedDate))
+                    {
+                        if (parsedDate < DateTime.Today)
+                        {
+                            ModelState.AddModelError("Event.date", "Event date must be in the future");
+                            return Page();
+                        }
+                        Event.date = parsedDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Event.date", "Invalid date format");
+                        return Page();
+                    }
+
+                    // Validate price format
+                    if (!Event.price.Equals("Free", StringComparison.OrdinalIgnoreCase) && 
+                        !decimal.TryParse(Event.price, out _))
+                    {
+                        ModelState.AddModelError("Event.price", "Price must be a number or 'Free'");
+                        return Page();
                     }
 
                     // Set additional event properties
@@ -88,7 +152,8 @@ namespace soft20181_starter.Pages.Admin.Events
                     Event.Status = "Active";
                     Event.CreatedAt = DateTime.UtcNow;
                     Event.UpdatedAt = DateTime.UtcNow;
-                                            Event.CreatedById = User.Identity?.Name ?? "system";
+                    Event.CreatedById = User.Identity?.Name ?? "system";
+                    Event.IsDeleted = false;
 
                     // Initialize images list
                     Event.images = new List<string>();
@@ -183,11 +248,7 @@ namespace soft20181_starter.Pages.Admin.Events
                         Event.images.AddRange(urls);
                     }
 
-                    // Format the date correctly
-                    if (!string.IsNullOrEmpty(Event.date) && DateTime.TryParse(Event.date, out DateTime parsedDate))
-                    {
-                        Event.date = parsedDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
-                    }
+                    // Date is already formatted in the validation step above
 
                     // Add event to database
                     await _context.Events.AddAsync(Event);
@@ -210,7 +271,12 @@ namespace soft20181_starter.Pages.Admin.Events
                     await transaction.CommitAsync();
                     
                     _logger.LogInformation("Event created successfully: {EventTitle} (ID: {EventId})", Event.title, Event.id);
-                    TempData["SuccessMessage"] = $"Event '{Event.title}' created successfully!";
+                    
+                    var successMessage = isNewLocation
+                        ? $"Event '{Event.title}' created successfully with new location '{Event.location}'! The event will be displayed in the Events page."
+                        : $"Event '{Event.title}' created successfully in {Event.location}! The event will be displayed in both the Events page and the {Event.location} section.";
+                    
+                    TempData["SuccessMessage"] = successMessage;
                     
                     // Redirect to Admin page
                     return RedirectToPage("/Admin");
@@ -226,7 +292,19 @@ namespace soft20181_starter.Pages.Admin.Events
             {
                 _logger.LogError(ex, "Error creating event: {Title}. Error: {Error}", 
                     Event.title, ex.Message);
-                ModelState.AddModelError(string.Empty, $"An error occurred while creating the event: {ex.Message}");
+                
+                // Get the inner exception message if available
+                var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                
+                // Log detailed error information
+                _logger.LogError("Detailed error information:");
+                _logger.LogError("Title: {Title}", Event.title);
+                _logger.LogError("Location: {Location}", Event.location);
+                _logger.LogError("Date: {Date}", Event.date);
+                _logger.LogError("Category: {Category}", Event.Category);
+                _logger.LogError("Stack Trace: {StackTrace}", ex.StackTrace);
+                
+                ModelState.AddModelError(string.Empty, $"An error occurred while creating the event: {errorMessage}");
                 return Page();
             }
         }

@@ -124,10 +124,11 @@ namespace soft20181_starter.Pages.Admin.Events
 
                 try
                 {
-                    // Get the existing event to track changes
+                    // Get the existing event with attendances to track changes
                     var existingEvent = await _context.Events
+                        .Include(e => e.Attendances)
                         .AsNoTracking()
-                        .FirstOrDefaultAsync(e => e.id == Event.id);
+                        .FirstOrDefaultAsync(e => e.id == Event.id && !e.IsDeleted);
 
                     if (existingEvent == null)
                     {
@@ -138,7 +139,32 @@ namespace soft20181_starter.Pages.Admin.Events
                     // Store original values for audit log
                     var changes = new List<string>();
 
+                    // Validate required fields
+                    if (string.IsNullOrEmpty(Event.title))
+                    {
+                        ModelState.AddModelError("Event.title", "Title is required");
+                        return Page();
+                    }
+
+                    if (string.IsNullOrEmpty(Event.description))
+                    {
+                        ModelState.AddModelError("Event.description", "Description is required");
+                        return Page();
+                    }
+
+                    if (Event.description.Length < 10)
+                    {
+                        ModelState.AddModelError("Event.description", "Description must be at least 10 characters");
+                        return Page();
+                    }
+
                     // Validate and format the date
+                    if (string.IsNullOrEmpty(Event.date))
+                    {
+                        ModelState.AddModelError("Event.date", "Date is required");
+                        return Page();
+                    }
+
                     if (!DateTime.TryParse(Event.date, out DateTime eventDate))
                     {
                         ModelState.AddModelError("Event.date", "Invalid date format");

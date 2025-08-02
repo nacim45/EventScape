@@ -79,8 +79,24 @@ namespace soft20181_starter.Pages.Admin.Events
                 {
                     // Find the event to delete with its attendances
                 var eventToDelete = await _context.Events
-                        .Include(e => e.Attendances)
-                    .FirstOrDefaultAsync(e => e.id == eventId);
+                    .Include(e => e.Attendances)
+                    .FirstOrDefaultAsync(e => e.id == eventId && !e.IsDeleted);
+
+                // Validate event exists and is not already deleted
+                if (eventToDelete == null)
+                {
+                    _logger.LogWarning("Event with ID {EventId} not found or already deleted", eventId);
+                    ModelState.AddModelError(string.Empty, "Event not found or has already been deleted.");
+                    return Page();
+                }
+
+                // Check if event is in the past
+                if (DateTime.TryParse(eventToDelete.date, out DateTime eventDate) && eventDate < DateTime.Today)
+                {
+                    _logger.LogWarning("Attempting to delete past event {EventId}", eventId);
+                    ModelState.AddModelError(string.Empty, "Cannot delete past events for record-keeping purposes.");
+                    return Page();
+                }
 
                 if (eventToDelete == null)
                 {

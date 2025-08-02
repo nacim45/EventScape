@@ -72,7 +72,27 @@
                                     {
                                         <p><i class="fas fa-tags"></i> @eventItem.Tags</p>
                                     }
-                                    <p><i class="fas fa-info-circle"></i> Status: @eventItem.Status</p>
+                                    <p>
+                                        <i class="fas fa-info-circle"></i> Status: 
+                                        <span class="badge @(eventItem.Status == "Active" ? "badge-success" : eventItem.Status == "Cancelled" ? "badge-danger" : "badge-warning")">
+                                            @eventItem.Status
+                                        </span>
+                                    </p>
+                                    <p>
+                                        <i class="fas fa-calendar-check"></i> Created: @eventItem.CreatedAt.ToString("g")
+                                        @if (eventItem.UpdatedAt != null)
+                                        {
+                                            <br />
+                                            <text><i class="fas fa-calendar-plus"></i> Updated: </text>@eventItem.UpdatedAt.Value.ToString()
+                                        }
+                                    </p>
+                                    @if (!string.IsNullOrEmpty(eventItem.link))
+                                    {
+                                        <p>
+                                            <i class="fas fa-link"></i> 
+                                            <a href="@eventItem.link" target="_blank" rel="noopener noreferrer">Event Website</a>
+                                        </p>
+                                    }
                                 </div>
                                 <div class="event-description">
                                     <p>@(eventItem.description.Length > 150 ? eventItem.description.Substring(0, 150) + "..." : eventItem.description)</p>
