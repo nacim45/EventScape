@@ -33,25 +33,25 @@ namespace soft20181_starter.Pages.Admin.Events
         public TheEvent Event { get; set; } = new TheEvent();
 
         [BindProperty]
-        public string ImageUrls { get; set; }
+        public string? ImageUrls { get; set; }
 
         [BindProperty]
         public List<IFormFile> UploadedImages { get; set; } = new List<IFormFile>();
 
         [BindProperty]
-        public string EventCategory { get; set; }
+        public string EventCategory { get; set; } = "Other";  // Default category
 
         [BindProperty]
         public int? EventCapacity { get; set; }
 
         [BindProperty]
-        public string EventStartTime { get; set; }
+        public string? EventStartTime { get; set; }
 
         [BindProperty]
-        public string EventEndTime { get; set; }
+        public string? EventEndTime { get; set; }
 
         [BindProperty]
-        public string EventTags { get; set; }
+        public string? EventTags { get; set; }
 
         public void OnGet()
         {

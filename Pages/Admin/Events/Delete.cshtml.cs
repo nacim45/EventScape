@@ -15,15 +15,20 @@ namespace soft20181_starter.Pages.Admin.Events
     {
         private readonly EventAppDbContext _context;
         private readonly ILogger<DeleteModel> _logger;
+        private readonly IWebHostEnvironment _environment;
 
-        public DeleteModel(EventAppDbContext context, ILogger<DeleteModel> logger)
+        public DeleteModel(
+            EventAppDbContext context, 
+            ILogger<DeleteModel> logger,
+            IWebHostEnvironment environment)
         {
             _context = context;
             _logger = logger;
+            _environment = environment;
         }
 
         [BindProperty]
-        public TheEvent Event { get; set; }
+        public TheEvent Event { get; set; } = new TheEvent();
         
         public int AttendeeCount { get; set; }
 
@@ -65,44 +70,116 @@ namespace soft20181_starter.Pages.Admin.Events
             try
             {
                 var eventId = Event.id;
-                _logger.LogInformation("Deleting event with ID: {EventId}", eventId);
+                _logger.LogInformation("Attempting to delete event with ID: {EventId}", eventId);
 
-                // Find the event to delete
-                var eventToDelete = await _context.Events
-                    .FirstOrDefaultAsync(e => e.id == eventId);
+                // Begin transaction
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
-                if (eventToDelete == null)
+                try
                 {
-                    _logger.LogWarning("Event with ID {EventId} not found when attempting to delete", eventId);
-                    return NotFound();
-                }
+                    // Find the event to delete with its attendances
+                    var eventToDelete = await _context.Events
+                        .Include(e => e.Attendances)
+                        .FirstOrDefaultAsync(e => e.id == eventId);
 
-                // Find and delete all attendances for this event
-                var attendances = await _context.EventAttendances
-                    .Where(ea => ea.EventId == eventId)
-                    .ToListAsync();
-                
-                if (attendances.Any())
+                    if (eventToDelete == null)
+                    {
+                        _logger.LogWarning("Event with ID {EventId} not found when attempting to delete", eventId);
+                        return NotFound("Event not found or has already been deleted.");
+                    }
+
+                    // Check if event has attendees
+                    var hasAttendees = eventToDelete.Attendances.Any(a => a.Status != "Cancelled");
+
+                    if (hasAttendees)
+                    {
+                        // Soft delete if event has attendees
+                        _logger.LogInformation("Event {EventId} has attendees. Performing soft delete.", eventId);
+                        
+                        eventToDelete.IsDeleted = true;
+                        eventToDelete.Status = "Cancelled";
+                        eventToDelete.UpdatedAt = DateTime.UtcNow;
+                        
+                        _context.Events.Update(eventToDelete);
+                        
+                        // Create audit log for soft delete
+                        var softDeleteAudit = new AuditLog
+                        {
+                            EntityName = "Event",
+                            EntityId = eventId.ToString(),
+                            Action = "SoftDelete",
+                            UserId = User.Identity?.Name,
+                            Changes = $"Soft deleted event: {eventToDelete.title} (ID: {eventId}) due to existing attendees",
+                            Timestamp = DateTime.UtcNow
+                        };
+                        await _context.AuditLogs.AddAsync(softDeleteAudit);
+                    }
+                    else
+                    {
+                        // Hard delete if no attendees
+                        _logger.LogInformation("Event {EventId} has no attendees. Performing hard delete.", eventId);
+                        
+                        // Delete associated images
+                        if (eventToDelete.images != null && eventToDelete.images.Any())
+                        {
+                            foreach (var imagePath in eventToDelete.images)
+                            {
+                                if (imagePath.StartsWith("images/events/"))
+                                {
+                                    var fullPath = Path.Combine(_environment.WebRootPath, imagePath);
+                                    if (System.IO.File.Exists(fullPath))
+                                    {
+                                        System.IO.File.Delete(fullPath);
+                                        _logger.LogInformation("Deleted image file: {ImagePath}", imagePath);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Remove the event
+                        _context.Events.Remove(eventToDelete);
+                        
+                        // Create audit log for hard delete
+                        var hardDeleteAudit = new AuditLog
+                        {
+                            EntityName = "Event",
+                            EntityId = eventId.ToString(),
+                            Action = "HardDelete",
+                            UserId = User.Identity?.Name,
+                            Changes = $"Hard deleted event: {eventToDelete.title} (ID: {eventId})",
+                            Timestamp = DateTime.UtcNow
+                        };
+                        await _context.AuditLogs.AddAsync(hardDeleteAudit);
+                    }
+
+                    // Save all changes
+                    await _context.SaveChangesAsync();
+
+                    // Commit transaction
+                    await transaction.CommitAsync();
+                    
+                    var deleteType = hasAttendees ? "soft" : "hard";
+                    _logger.LogInformation("Event {EventTitle} (ID: {EventId}) {DeleteType} deleted successfully", 
+                        eventToDelete.title, eventId, deleteType);
+                    
+                    TempData["SuccessMessage"] = hasAttendees 
+                        ? $"Event '{eventToDelete.title}' was marked as deleted (soft delete due to existing attendees)."
+                        : $"Event '{eventToDelete.title}' was permanently deleted.";
+                    
+                    return RedirectToPage("/Admin");
+                }
+                catch (Exception ex)
                 {
-                    _logger.LogInformation("Removing {Count} attendances for event {EventId}", 
-                        attendances.Count, eventId);
-                    _context.EventAttendances.RemoveRange(attendances);
+                    // Rollback transaction on error
+                    await transaction.RollbackAsync();
+                    throw;
                 }
-
-                // Delete the event
-                _context.Events.Remove(eventToDelete);
-                await _context.SaveChangesAsync();
-                
-                _logger.LogInformation("Event {EventTitle} (ID: {EventId}) deleted successfully", 
-                    eventToDelete.title, eventId);
-                
-                TempData["SuccessMessage"] = "Event deleted successfully!";
-                return RedirectToPage("./Index");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting event {EventId}", Event?.id ?? 0);
-                ModelState.AddModelError(string.Empty, "An error occurred while deleting the event. Please try again.");
+                _logger.LogError(ex, "Error deleting event {EventId}. Error: {Error}", 
+                    Event?.id ?? 0, ex.Message);
+                ModelState.AddModelError(string.Empty, $"An error occurred while deleting the event: {ex.Message}");
                 return Page();
             }
         }
