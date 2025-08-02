@@ -5,6 +5,24 @@
     Layout = "_Layout";
 }
 
+<div class="container my-5">
+    <div class="featured-events-header">
+        <h2 class="featured-title">Edit Event Results</h2>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col text-center">
+            <div class="admin-navigation-links">
+                <a href="/Admin" class="admin-nav-link">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/Admin/Events" class="admin-nav-link">
+                    <i class="fas fa-calendar-alt"></i> All Events
+                </a>
+            </div>
+        </div>
+    </div>
+
 <div class="main-container my-5">
     <div class="featured-events-header">
         <h2 class="featured-title">Edit Event Results</h2>
@@ -80,11 +98,17 @@
                                     </p>
                                     <p>
                                         <i class="fas fa-calendar-check"></i> Created: @eventItem.CreatedAt.ToString("g")
-                                        @if (eventItem.UpdatedAt != null)
-                                        {
-                                            <br />
-                                            <text><i class="fas fa-calendar-plus"></i> Updated: </text>@eventItem.UpdatedAt?.ToString("g")
-                                        }
+                                                                            @if (eventItem.UpdatedAt != null)
+                                    {
+                                        <br />
+                                        <text><i class="fas fa-calendar-plus"></i> Updated: </text>@eventItem.UpdatedAt?.ToString("g")
+                                    }
+                                    @if (eventItem.IsDeleted)
+                                    {
+                                        <p class="text-danger">
+                                            <i class="fas fa-trash-alt"></i> This event has been deleted
+                                        </p>
+                                    }
                                     </p>
                                     @if (!string.IsNullOrEmpty(eventItem.link))
                                     {
@@ -98,11 +122,11 @@
                                     <p>@(eventItem.description.Length > 150 ? eventItem.description.Substring(0, 150) + "..." : eventItem.description)</p>
                                 </div>
                             </div>
-                            <div class="event-actions">
-                                <a asp-page="Edit" asp-route-id="@eventItem.id" class="btn btn-primary admin-submit-btn">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                            </div>
+                                                            <div class="event-actions">
+                                    <a asp-page="Edit" asp-route-id="@eventItem.id" class="btn admin-action-btn admin-submit-btn">
+                                        <i class="fas fa-edit"></i> Edit Event
+                                    </a>
+                                </div>
                         </div>
                     }
                 </div>
@@ -121,7 +145,62 @@
     <link rel="stylesheet" href="~/css/style.css">
     <link rel="stylesheet" href="~/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        /* Featured Events title styling */
+        .featured-title {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 28px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        
+        .featured-events-header {
+            margin-top: 60px;
+            text-align: center;
+            margin-left: 0;
+        }
+        
+        /* Navigation links */
+        .admin-navigation-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .admin-nav-link {
+            display: inline-block;
+            background-color: #854F6C;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .admin-nav-link:hover {
+            background-color: #522B5B;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+        
+        .admin-nav-link i {
+            margin-right: 8px;
+        }
+        
         /* Enhanced styles for event cards and details */
         .events-list-container {
             margin-bottom: 30px;

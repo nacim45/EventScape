@@ -128,7 +128,14 @@ namespace soft20181_starter.Pages.Admin.Events
                     var existingEvent = await _context.Events
                         .Include(e => e.Attendances)
                         .AsNoTracking()
-                        .FirstOrDefaultAsync(e => e.id == Event.id && !e.IsDeleted);
+                        .FirstOrDefaultAsync(e => e.id == Event.id);
+
+                    if (existingEvent.IsDeleted)
+                    {
+                        _logger.LogWarning("Attempted to edit deleted event: {EventId}", Event.id);
+                        ModelState.AddModelError(string.Empty, "Cannot edit a deleted event.");
+                        return RedirectToPage("/Admin");
+                    }
 
                     if (existingEvent == null)
                     {

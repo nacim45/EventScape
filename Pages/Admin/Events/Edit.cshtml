@@ -34,6 +34,22 @@
             </div>
         </div>
     }
+    else if (Model.Event.IsDeleted)
+    {
+        <div class="alert alert-warning">
+            <h4 class="alert-heading">
+                <i class="fas fa-exclamation-triangle"></i>
+                Deleted Event
+            </h4>
+            <p>This event has been deleted and is no longer visible to users. You can still view its details, but it cannot be edited.</p>
+            <hr>
+            <div class="mb-0">
+                <a asp-page="Index" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Return to Events List
+                </a>
+            </div>
+        </div>
+    }
     else
     {
         <div class="card admin-card shadow">

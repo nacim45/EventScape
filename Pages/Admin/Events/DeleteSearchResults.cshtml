@@ -2,7 +2,26 @@
 @model DeleteSearchResultsModel
 @{
     ViewData["Title"] = "Delete Event Results - EventScape";
+    Layout = "_Layout";
 }
+
+<div class="container my-5">
+    <div class="featured-events-header">
+        <h2 class="featured-title">Delete Event Results</h2>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col text-center">
+            <div class="admin-navigation-links">
+                <a href="/Admin" class="admin-nav-link">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/Admin/Events" class="admin-nav-link">
+                    <i class="fas fa-calendar-alt"></i> All Events
+                </a>
+            </div>
+        </div>
+    </div>
 
 <div class="main-container">
     <div class="breadcrumb-nav">
@@ -63,7 +82,19 @@
                             {
                                 <p><i class="fas fa-tags"></i> @eventItem.Tags</p>
                             }
-                            <p><i class="fas fa-info-circle"></i> Status: @eventItem.Status</p>
+                            <p>
+                                <i class="fas fa-info-circle"></i> Status: 
+                                <span class="badge @(eventItem.IsDeleted ? "badge-danger" : eventItem.Status == "Active" ? "badge-success" : eventItem.Status == "Cancelled" ? "badge-danger" : "badge-warning")">
+                                    @(eventItem.IsDeleted ? "Deleted" : eventItem.Status)
+                                </span>
+                            </p>
+                            @if (eventItem.IsDeleted)
+                            {
+                                <div class="alert alert-danger mt-2">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    This event has been deleted and is no longer visible to users.
+                                </div>
+                            }
                         </div>
                         <div class="event-description">
                             <p>@(eventItem.description.Length > 150 ? eventItem.description.Substring(0, 150) + "..." : eventItem.description)</p>
@@ -316,6 +347,222 @@
         .btn {
             width: 100%;
             }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Featured Events title styling */
+        .featured-title {
+            display: inline-block;
+            background-color: #522B5B;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 28px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        
+        .featured-events-header {
+            margin-top: 60px;
+            text-align: center;
+            margin-left: 0;
+        }
+        
+        /* Navigation links */
+        .admin-navigation-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .admin-nav-link {
+            display: inline-block;
+            background-color: #854F6C;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .admin-nav-link:hover {
+            background-color: #522B5B;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+        
+        .admin-nav-link i {
+            margin-right: 8px;
+        }
+        
+        /* Enhanced styles for event cards and details */
+        .events-list-container {
+            margin-bottom: 30px;
+        }
+
+        .event-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .event-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-title {
+            color: #343a40;
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .event-info p {
+            margin: 5px 0;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .event-info i {
+            width: 20px;
+            color: #6c757d;
+            margin-right: 5px;
+        }
+
+        .event-actions {
+            margin-left: 15px;
+        }
+
+        .admin-action-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            background-color: #522B5B;
+            color: white;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .admin-action-btn:hover {
+            background-color: #854F6C;
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.25);
+            text-decoration: none;
+        }
+
+        .admin-action-btn i {
+            margin-right: 8px;
+        }
+
+        /* Alert styling */
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+
+        .alert i {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        /* Modal styling */
+        .modal-content {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background-color: #522B5B;
+            color: white;
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+        }
+
+        /* Responsive styles */
+        @@media (max-width: 768px) {
+            .event-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .event-actions {
+                margin-left: 0;
+                margin-top: 15px;
+                align-self: stretch;
+            }
+
+            .admin-action-btn {
+                width: 100%;
+            }
+
+            .admin-navigation-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .admin-nav-link {
+                width: 100%;
+            }
+        }
+    </style>
 }
 
 @section Scripts {
