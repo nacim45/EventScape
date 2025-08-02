@@ -68,109 +68,122 @@ namespace soft20181_starter.Pages.Admin.Events
                     return Page();
                 }
 
-                // Process the form data and capitalize the first letter of location
-                if (!string.IsNullOrEmpty(Event.location))
-                {
-                    // Ensure first letter is capitalized for location
-                    Event.location = char.ToUpper(Event.location[0]) + Event.location.Substring(1).ToLower();
-                }
+                // Begin transaction
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
-                // Save the additional event properties to the ViewData for display purpose
-                // Since we're not modifying the TheEvent model, we'll store these as TempData
-                if (!string.IsNullOrEmpty(EventCategory))
+                try
                 {
-                    TempData["EventCategory"] = EventCategory;
-                }
-
-                if (EventCapacity.HasValue)
-                {
-                    TempData["EventCapacity"] = EventCapacity.Value;
-                }
-
-                if (!string.IsNullOrEmpty(EventStartTime))
-                {
-                    TempData["EventStartTime"] = EventStartTime;
-                }
-
-                if (!string.IsNullOrEmpty(EventEndTime))
-                {
-                    TempData["EventEndTime"] = EventEndTime;
-                }
-
-                if (!string.IsNullOrEmpty(EventTags))
-                {
-                    TempData["EventTags"] = EventTags;
-                }
-
-                // Initialize images list
-                Event.images = new List<string>();
-
-                // Process uploaded images
-                if (UploadedImages != null && UploadedImages.Count > 0)
-                {
-                    string uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "events");
-                    
-                    // Ensure directory exists
-                    if (!Directory.Exists(uploadsFolder))
+                    // Process the form data and ensure location is lowercase for consistency
+                    if (!string.IsNullOrEmpty(Event.location))
                     {
-                        Directory.CreateDirectory(uploadsFolder);
+                        Event.location = Event.location.ToLower().Trim();
                     }
 
-                    // Process up to 3 images
-                    foreach (var image in UploadedImages.Take(3))
+                    // Set additional event properties
+                    Event.Category = EventCategory ?? "Other";
+                    Event.Capacity = EventCapacity;
+                    Event.StartTime = EventStartTime;
+                    Event.EndTime = EventEndTime;
+                    Event.Tags = EventTags;
+                    Event.Status = "Active";
+                    Event.CreatedAt = DateTime.UtcNow;
+                    Event.UpdatedAt = DateTime.UtcNow;
+                    Event.CreatedById = User.Identity?.Name;
+
+                    // Initialize images list
+                    Event.images = new List<string>();
+
+                    // Process uploaded images
+                    if (UploadedImages != null && UploadedImages.Count > 0)
                     {
-                        if (image.Length > 0)
+                        string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "events");
+                        
+                        // Ensure directory exists
+                        if (!Directory.Exists(uploadsFolder))
                         {
-                            // Create unique filename
-                            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                            string filePath = Path.Combine(uploadsFolder, fileName);
-                            
-                            // Save image
-                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        // Process up to 3 images
+                        foreach (var image in UploadedImages.Take(3))
+                        {
+                            if (image.Length > 0)
                             {
-                                await image.CopyToAsync(stream);
+                                // Create unique filename
+                                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                                string filePath = Path.Combine(uploadsFolder, fileName);
+                                
+                                // Save image
+                                using (var stream = new FileStream(filePath, FileMode.Create))
+                                {
+                                    await image.CopyToAsync(stream);
+                                }
+                                
+                                // Add relative path to event images
+                                Event.images.Add($"images/events/{fileName}");
+                                
+                                _logger.LogInformation("Uploaded image {FileName} for event", fileName);
                             }
-                            
-                            // Add relative path to event images
-                            Event.images.Add($"uploads/events/{fileName}");
-                            
-                            _logger.LogInformation("Uploaded image {FileName} for event", fileName);
                         }
                     }
-                }
 
-                // Process image URLs if any
-                if (!string.IsNullOrWhiteSpace(ImageUrls))
-                {
-                    var urls = ImageUrls
-                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(url => url.Trim())
-                        .Where(url => !string.IsNullOrWhiteSpace(url))
-                        .ToList();
+                    // Process image URLs if any
+                    if (!string.IsNullOrWhiteSpace(ImageUrls))
+                    {
+                        var urls = ImageUrls
+                            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(url => url.Trim())
+                            .Where(url => !string.IsNullOrWhiteSpace(url))
+                            .ToList();
+                        
+                        // Add URLs to event images
+                        Event.images.AddRange(urls);
+                    }
+
+                    // Format the date correctly
+                    if (!string.IsNullOrEmpty(Event.date) && DateTime.TryParse(Event.date, out DateTime parsedDate))
+                    {
+                        Event.date = parsedDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                    }
+
+                    // Add event to database
+                    await _context.Events.AddAsync(Event);
+                    await _context.SaveChangesAsync();
+
+                    // Create audit log entry
+                    var auditLog = new AuditLog
+                    {
+                        EntityName = "Event",
+                        EntityId = Event.id.ToString(),
+                        Action = "Create",
+                        UserId = User.Identity?.Name,
+                        Changes = $"Created new event: {Event.title} (ID: {Event.id}) in location: {Event.location}",
+                        Timestamp = DateTime.UtcNow
+                    };
+                    await _context.AuditLogs.AddAsync(auditLog);
+                    await _context.SaveChangesAsync();
+
+                    // Commit transaction
+                    await transaction.CommitAsync();
                     
-                    // Add URLs to event images
-                    Event.images.AddRange(urls);
+                    _logger.LogInformation("Event created successfully: {EventTitle} (ID: {EventId})", Event.title, Event.id);
+                    TempData["SuccessMessage"] = $"Event '{Event.title}' created successfully!";
+                    
+                    // Redirect to Admin page
+                    return RedirectToPage("/Admin");
                 }
-
-                // Format the date correctly if it's not already in the right format
-                if (!string.IsNullOrEmpty(Event.date) && DateTime.TryParse(Event.date, out DateTime parsedDate))
+                catch (Exception ex)
                 {
-                    Event.date = parsedDate.ToString("yyyy-MM-dd");
+                    // Rollback transaction on error
+                    await transaction.RollbackAsync();
+                    throw;
                 }
-
-                // Add event to database
-                _context.Events.Add(Event);
-                await _context.SaveChangesAsync();
-                
-                _logger.LogInformation("Event created successfully: {EventTitle}", Event.title);
-                TempData["SuccessMessage"] = "Event created successfully!";
-                
-                return RedirectToPage("./Index");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating event");
-                ModelState.AddModelError(string.Empty, "An error occurred while creating the event. Please try again.");
+                _logger.LogError(ex, "Error creating event: {Title}. Error: {Error}", 
+                    Event.title, ex.Message);
+                ModelState.AddModelError(string.Empty, $"An error occurred while creating the event: {ex.Message}");
                 return Page();
             }
         }

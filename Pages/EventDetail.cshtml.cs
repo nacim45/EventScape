@@ -52,15 +52,39 @@ namespace soft20181_starter.Pages
                     return Page();
                 }
 
-                // If location is provided, use it in query
+                // Build query for event
+                var query = _context.Events
+                    .Where(e => !e.IsDeleted && e.id == id);
+
+                // If location is provided, add location filter
                 if (!string.IsNullOrEmpty(location))
                 {
-                    Event = await _context.Events.FirstOrDefaultAsync(e => e.location.ToLower() == location.ToLower() && e.id == id);
+                    query = query.Where(e => e.location.ToLower() == location.ToLower());
                 }
-                else
+
+                // Get the event with all its details
+                Event = await query.FirstOrDefaultAsync();
+
+                // Format event details for display if found
+                if (Event != null)
                 {
-                    // If no location provided, just query by ID
-                    Event = await _context.Events.FirstOrDefaultAsync(e => e.id == id);
+                    // Format date
+                    if (DateTime.TryParse(Event.date, out DateTime parsedDate))
+                    {
+                        Event.date = parsedDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                    }
+
+                    // Format location
+                    if (!string.IsNullOrEmpty(Event.location))
+                    {
+                        Event.location = char.ToUpper(Event.location[0]) + Event.location.Substring(1);
+                    }
+
+                    // Format price if it's a number
+                    if (decimal.TryParse(Event.price.Replace("£", "").Replace("$", "").Trim(), out decimal price))
+                    {
+                        Event.price = $"£{price:N2}";
+                    }
                 }
 
                 if (Event == null)

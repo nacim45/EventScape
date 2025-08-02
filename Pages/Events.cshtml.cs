@@ -103,10 +103,24 @@ namespace soft20181_starter.Pages
 
                 // Get the events for the current page
                 Events = await query
-                    .OrderByDescending(e => e.id) // Newest events first
+                    .OrderByDescending(e => e.CreatedAt) // Newest events first
+                    .ThenByDescending(e => e.id)
                     .Skip((CurrentPage - 1) * PageSize)
                     .Take(PageSize)
                     .ToListAsync();
+
+                // Format dates and locations for display
+                foreach (var evt in Events)
+                {
+                    if (DateTime.TryParse(evt.date, out DateTime parsedDate))
+                    {
+                        evt.date = parsedDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                    }
+                    if (!string.IsNullOrEmpty(evt.location))
+                    {
+                        evt.location = char.ToUpper(evt.location[0]) + evt.location.Substring(1);
+                    }
+                }
 
                 _logger.LogInformation("Retrieved {Count} events for page {Page} of {TotalPages}",
                     Events.Count, CurrentPage, TotalPages);
