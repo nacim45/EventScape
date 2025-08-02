@@ -109,6 +109,9 @@ namespace soft20181_starter.Pages
                     .Take(PageSize)
                     .ToListAsync();
 
+                _logger.LogInformation("Retrieved {Count} events. Page {Page} of {TotalPages}. Total events: {Total}", 
+                    Events.Count, CurrentPage, TotalPages, totalEvents);
+
                 // Format dates and locations for display
                 foreach (var evt in Events)
                 {

@@ -150,8 +150,10 @@ namespace soft20181_starter.Pages.Admin.Events
                     Event.EndTime = EventEndTime;
                     Event.Tags = EventTags;
                     Event.Status = "Active";
-                    Event.CreatedAt = DateTime.UtcNow;
-                    Event.UpdatedAt = DateTime.UtcNow;
+                    var now = DateTime.UtcNow;
+                    Event.CreatedAt = now;
+                    Event.UpdatedAt = now;
+                    _logger.LogInformation("Setting CreatedAt to: {CreatedAt}", now);
                     // Get the current user's ID for the foreign key
                     var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                     if (string.IsNullOrEmpty(userId))
@@ -258,9 +260,27 @@ namespace soft20181_starter.Pages.Admin.Events
 
                     // Date is already formatted in the validation step above
 
-                // Add event to database
-                    await _context.Events.AddAsync(Event);
-                    await _context.SaveChangesAsync();
+                                    // Add event to database
+                    _logger.LogInformation("Attempting to save event to database: {Title}", Event.title);
+                    _logger.LogInformation("Event details before save: Location: {Location}, Date: {Date}, Price: {Price}", 
+                        Event.location, Event.date, Event.price);
+                    
+                    var entry = await _context.Events.AddAsync(Event);
+                    var saveResult = await _context.SaveChangesAsync();
+                    
+                    // Verify the event was saved
+                    var savedEvent = await _context.Events
+                        .FirstOrDefaultAsync(e => e.id == Event.id);
+                    
+                    if (savedEvent != null)
+                    {
+                        _logger.LogInformation("Event saved successfully. ID: {EventId}, Title: {Title}, Location: {Location}", 
+                            savedEvent.id, savedEvent.title, savedEvent.location);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Event not found in database after save. ID: {EventId}", Event.id);
+                    }
 
                     // Create audit log entry
                     var auditLog = new AuditLog
