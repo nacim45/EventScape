@@ -157,30 +157,54 @@ namespace soft20181_starter.Pages
                     throw new ArgumentException("Capacity must be greater than 0");
                 }
 
-                // Add to database
-                await _context.Events.AddAsync(newEvent);
-
-                // Save changes to get the event ID
-                await _context.SaveChangesAsync();
-
-                // Create audit log entry with the generated ID
-                var auditLog = new AuditLog
+                try
                 {
-                    EntityName = "Event",
-                    EntityId = newEvent.id.ToString(),
-                    Action = "Create",
-                    UserId = userId,
-                    Changes = $"Created new event: {newEvent.title} (ID: {newEvent.id}) in location: {newEvent.location}",
-                    Timestamp = DateTime.UtcNow
-                };
-                await _context.AuditLogs.AddAsync(auditLog);
+                    // Begin transaction
+                    await using var transaction = await _context.Database.BeginTransactionAsync();
 
-                // Save audit log
-                await _context.SaveChangesAsync();
+                    try
+                    {
+                        // Add to database
+                        await _context.Events.AddAsync(newEvent);
+                        
+                        // Save changes to get the event ID
+                        await _context.SaveChangesAsync();
 
-                // Log success
-                _logger.LogInformation("Successfully created event: {EventId} - {EventTitle} in {Location}", 
-                    newEvent.id, newEvent.title, newEvent.location);
+                        // Create audit log entry with the generated ID
+                        var auditLog = new AuditLog
+                        {
+                            EntityName = "Event",
+                            EntityId = newEvent.id.ToString(),
+                            Action = "Create",
+                            UserId = userId,
+                            Changes = $"Created new event: {newEvent.title} (ID: {newEvent.id}) in location: {newEvent.location}",
+                            Timestamp = DateTime.UtcNow
+                        };
+                        await _context.AuditLogs.AddAsync(auditLog);
+
+                        // Save audit log
+                        await _context.SaveChangesAsync();
+
+                        // Commit transaction
+                        await transaction.CommitAsync();
+
+                        // Log success
+                        _logger.LogInformation("Successfully created event: {EventId} - {EventTitle} in {Location}", 
+                            newEvent.id, newEvent.title, newEvent.location);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Rollback transaction on error
+                        await transaction.RollbackAsync();
+                        throw; // Re-throw to be caught by outer try-catch
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to create event: {Title} in {Location}. Error: {Error}", 
+                        newEvent.title, newEvent.location, ex.Message);
+                    throw; // Re-throw to be handled by the calling method
+                }
 
                 StatusMessage = "Event added successfully!";
             }
@@ -352,20 +376,44 @@ namespace soft20181_starter.Pages
                 };
                 await _context.AuditLogs.AddAsync(auditLog);
 
-                // Save changes first to update the event
-                await _context.SaveChangesAsync();
+                try
+                {
+                    // Begin transaction
+                    await using var transaction = await _context.Database.BeginTransactionAsync();
 
-                // Save audit log
-                await _context.SaveChangesAsync();
+                    try
+                    {
+                        // Save changes first to update the event
+                        await _context.SaveChangesAsync();
 
-                // Log success
-                _logger.LogInformation(
-                    "Successfully updated event: {EventId} - {EventTitle} in {Location}. Changes: {Changes}", 
-                    existingEvent.id, 
-                    existingEvent.title, 
-                    existingEvent.location,
-                    auditLog.Changes
-                );
+                        // Save audit log
+                        await _context.SaveChangesAsync();
+
+                        // Commit transaction
+                        await transaction.CommitAsync();
+
+                        // Log success
+                        _logger.LogInformation(
+                            "Successfully updated event: {EventId} - {EventTitle} in {Location}. Changes: {Changes}", 
+                            existingEvent.id, 
+                            existingEvent.title, 
+                            existingEvent.location,
+                            auditLog.Changes
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        // Rollback transaction on error
+                        await transaction.RollbackAsync();
+                        throw; // Re-throw to be caught by outer try-catch
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to update event: {EventId} - {Title}. Error: {Error}", 
+                        existingEvent.id, existingEvent.title, ex.Message);
+                    throw; // Re-throw to be handled by the calling method
+                }
 
                 StatusMessage = "Event updated successfully!";
             }
@@ -448,8 +496,42 @@ namespace soft20181_starter.Pages
                     await _context.AuditLogs.AddAsync(auditLog);
                 }
 
-                await _context.SaveChangesAsync();
-                StatusMessage = "Event deleted successfully!";
+                try
+                {
+                    // Begin transaction
+                    await using var transaction = await _context.Database.BeginTransactionAsync();
+
+                    try
+                    {
+                        // Save changes
+                        await _context.SaveChangesAsync();
+
+                        // Commit transaction
+                        await transaction.CommitAsync();
+
+                        // Log success
+                        _logger.LogInformation(
+                            "Successfully deleted event: {EventId} - {Title}. Type: {DeleteType}", 
+                            eventToDelete.id, 
+                            eventToDelete.title,
+                            eventToDelete.Attendances.Any() ? "Soft Delete" : "Hard Delete"
+                        );
+
+                        StatusMessage = "Event deleted successfully!";
+                    }
+                    catch (Exception ex)
+                    {
+                        // Rollback transaction on error
+                        await transaction.RollbackAsync();
+                        throw; // Re-throw to be caught by outer try-catch
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to delete event: {EventId} - {Title}. Error: {Error}", 
+                        eventToDelete.id, eventToDelete.title, ex.Message);
+                    throw; // Re-throw to be handled by the calling method
+                }
             }
             catch (Exception ex)
             {
