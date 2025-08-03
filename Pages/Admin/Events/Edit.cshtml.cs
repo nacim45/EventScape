@@ -53,14 +53,25 @@ namespace soft20181_starter.Pages.Admin.Events
                 _logger.LogInformation("Loading event for editing. ID: {EventId}", id);
 
                 Event = await _context.Events
+                    .Include(e => e.Attendances)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(e => e.id == id);
 
                 if (Event == null)
                 {
                     _logger.LogWarning("Event with ID {EventId} not found for editing", id);
-                    return Page();
+                    TempData["ErrorMessage"] = "Event not found or has been deleted.";
+                    return RedirectToPage("/Admin");
                 }
+
+                // Set initial values for additional properties
+                EventCategory = Event.Category ?? "Other";
+                EventCapacity = Event.Capacity;
+                EventStartTime = Event.StartTime;
+                EventEndTime = Event.EndTime;
+                EventTags = Event.Tags;
+
+                // Event null check is already done above
 
                 // Convert image list to string for textarea
                 if (Event.images != null && Event.images.Any())
@@ -187,9 +198,16 @@ namespace soft20181_starter.Pages.Admin.Events
 
                     // Format date in consistent format
                     var newDate = eventDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                    
+                    // Always update the date to ensure consistent formatting
                     if (newDate != existingEvent.date)
                     {
-                        changes.Add($"Date changed from '{existingEvent.date}' to '{newDate}'");
+                        // Try to parse both dates to compare actual values
+                        if (DateTime.TryParse(existingEvent.date, out DateTime oldDate) && 
+                            oldDate.Date != eventDate.Date)
+                        {
+                            changes.Add($"Date changed from '{existingEvent.date}' to '{newDate}'");
+                        }
                         Event.date = newDate;
                     }
 
@@ -276,38 +294,44 @@ namespace soft20181_starter.Pages.Admin.Events
                         Event.Tags = EventTags;
                     }
 
-                                            // Process image URLs
-                        var newImages = new List<string>();
+                    // Process image URLs
+                    var newImages = new List<string>();
+                    
+                    // Keep existing data URLs and external URLs
+                    if (existingEvent.images != null)
+                    {
+                        newImages.AddRange(existingEvent.images.Where(img => 
+                            img.StartsWith("data:") || 
+                            (img.StartsWith("http") && Uri.TryCreate(img, UriKind.Absolute, out _)) ||
+                            img.StartsWith("images/events/")));
+                    }
+                    
+                    // Add new URLs
+                    if (!string.IsNullOrWhiteSpace(ImageUrls))
+                    {
+                        var urls = ImageUrls
+                            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(url => url.Trim())
+                            .Where(url => !string.IsNullOrWhiteSpace(url))
+                            .ToList();
                         
-                        // Keep existing data URLs and external URLs
-                        if (existingEvent.images != null)
+                        foreach (var url in urls)
                         {
-                            newImages.AddRange(existingEvent.images.Where(img => 
-                                img.StartsWith("data:") || 
-                                (img.StartsWith("http") && Uri.TryCreate(img, UriKind.Absolute, out _))));
-                        }
-                        
-                        // Add new URLs
-                        if (!string.IsNullOrWhiteSpace(ImageUrls))
-                        {
-                            var urls = ImageUrls
-                                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                                .Select(url => url.Trim())
-                                .Where(url => !string.IsNullOrWhiteSpace(url))
-                                .ToList();
-                            
-                            foreach (var url in urls)
+                            if (url.StartsWith("data:") || 
+                                url.StartsWith("images/events/") ||
+                                (url.StartsWith("http") && Uri.TryCreate(url, UriKind.Absolute, out _)))
                             {
-                                if (url.StartsWith("data:") || Uri.TryCreate(url, UriKind.Absolute, out _))
+                                if (!newImages.Contains(url))
                                 {
                                     newImages.Add(url);
                                 }
-                                else
-                                {
-                                    _logger.LogWarning("Skipping invalid URL: {Url}", url);
-                                }
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Skipping invalid URL: {Url}", url);
                             }
                         }
+                    }
 
                     if (!newImages.SequenceEqual(existingEvent.images ?? new List<string>()))
                     {

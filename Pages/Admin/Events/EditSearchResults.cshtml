@@ -105,7 +105,7 @@
                                 </div>
                             </div>
                                                             <div class="event-actions">
-                                    <a asp-page="Edit" asp-route-id="@eventItem.id" class="btn admin-action-btn admin-submit-btn">
+                                    <a asp-page="./Edit" asp-route-id="@eventItem.id" class="btn admin-action-btn admin-submit-btn">
                                         <i class="fas fa-edit"></i> Edit Event
                                     </a>
                                 </div>
@@ -128,6 +128,13 @@
     <link rel="stylesheet" href="~/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        /* Main container styling */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
         /* Featured Events title styling */
         .featured-title {
             display: inline-block;
@@ -187,27 +194,41 @@
 
         .event-card {
             display: flex;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
+            border: none;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
             background-color: #fff;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             align-items: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
         .event-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            background-color: #fafafa;
+        }
+
+        .event-card:hover .admin-action-btn {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
         }
 
         .event-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 8px;
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
             overflow: hidden;
-            margin-right: 20px;
+            margin-right: 25px;
             flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .event-card:hover .event-image {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transform: scale(1.05);
         }
 
         .event-thumbnail {
@@ -229,29 +250,102 @@
 
         .event-details {
             flex: 1;
+            padding: 0 15px;
         }
 
         .event-title {
             color: #522B5B;
-            margin-bottom: 10px;
-            font-size: 20px;
+            margin-bottom: 15px;
+            font-size: 24px;
             font-weight: bold;
+            line-height: 1.3;
+            transition: color 0.3s ease;
+        }
+
+        .event-card:hover .event-title {
+            color: #854F6C;
+        }
+
+        .event-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
         }
 
         .event-info p {
-            margin: 5px 0;
+            margin: 0;
             color: #6c757d;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .event-info p:hover {
+            background-color: #e9ecef;
+            transform: translateX(5px);
         }
 
         .event-info i {
-            width: 20px;
+            width: 24px;
+            height: 24px;
             color: #854F6C;
-            margin-right: 8px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(133, 79, 108, 0.1);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .event-info p:hover i {
+            background-color: #854F6C;
+            color: white;
         }
 
         .event-actions {
-            margin-left: 15px;
+            margin-left: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .admin-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .admin-submit-btn {
+            background-color: #522B5B;
+            color: white;
+            box-shadow: 0 4px 12px rgba(82, 43, 91, 0.2);
+        }
+
+        .admin-submit-btn:hover {
+            background-color: #854F6C;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(82, 43, 91, 0.3);
+            text-decoration: none;
+        }
+
+        .admin-submit-btn i {
+            margin-right: 8px;
+            font-size: 18px;
         }
 
         .search-no-results {
@@ -274,25 +368,61 @@
         }
 
         /* Responsive styles */
+        @@media (max-width: 992px) {
+            .event-info {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @@media (max-width: 768px) {
             .event-card {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: center;
+                text-align: center;
+                padding: 20px;
             }
 
             .event-image {
                 margin-right: 0;
-                margin-bottom: 15px;
-                width: 100%;
-                height: 150px;
+                margin-bottom: 20px;
+                width: 180px;
+                height: 180px;
+            }
+
+            .event-details {
+                padding: 0;
+            }
+
+            .event-info {
+                grid-template-columns: 1fr;
+                text-align: left;
             }
 
             .event-actions {
                 margin-left: 0;
-                margin-top: 15px;
-                align-self: stretch;
-                display: flex;
+                margin-top: 20px;
+                width: 100%;
                 justify-content: center;
+            }
+
+            .admin-action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .event-image {
+                width: 140px;
+                height: 140px;
+            }
+
+            .event-title {
+                font-size: 20px;
+            }
+
+            .event-info p {
+                font-size: 14px;
             }
         }
     </style>
