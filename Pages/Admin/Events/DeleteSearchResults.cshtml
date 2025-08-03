@@ -46,7 +46,7 @@
             <span>No events found matching your search criteria. Please try a different search.</span>
         </div>
         <div class="back-button-container">
-            <a asp-page="SearchForDelete" class="btn btn-primary">
+            <a asp-page="SearchForDelete" class="admin-action-btn admin-cancel-btn">
                 <i class="fas fa-arrow-left"></i> Back to Search
             </a>
         </div>
@@ -60,12 +60,15 @@
                     <div class="event-image">
                         @if (eventItem.images != null && eventItem.images.Any())
                         {
-                            <img src="/@eventItem.images.First()" alt="@eventItem.title" class="event-thumbnail">
+                            <div class="event-thumbnail-container">
+                                <img src="/@eventItem.images.First()" alt="@eventItem.title" class="event-thumbnail">
+                            </div>
                         }
                         else
                         {
                             <div class="event-placeholder">
                                 <i class="fas fa-image"></i>
+                                <span>No Image</span>
                             </div>
                         }
                     </div>
@@ -101,19 +104,20 @@
                         </div>
                     </div>
                     <div class="event-actions">
-                        <button onclick="confirmDelete(@eventItem.id, '@eventItem.title')" class="btn btn-danger delete-btn">
-                            <i class="fas fa-trash"></i> Delete
+                        <button onclick="confirmDelete(@eventItem.id, '@eventItem.title')" class="admin-action-btn admin-delete-btn">
+                            <i class="fas fa-trash"></i> Delete Event
                         </button>
                         
                         <!-- Delete Confirmation Modal -->
                         <div class="modal fade" id="deleteModal@(eventItem.id)" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel@(eventItem.id)" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="deleteModalLabel@(eventItem.id)">Confirm Delete</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title" id="deleteModalLabel@(eventItem.id)">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Confirm Deletion
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
                                         <div class="delete-confirmation-content">
@@ -148,10 +152,14 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                        <a asp-page="Delete" asp-route-id="@eventItem.id" class="btn btn-danger">
-                                            <i class="fas fa-trash"></i> Confirm Delete
-                                        </a>
+                                        <button type="button" class="admin-action-btn admin-cancel-btn" data-bs-dismiss="modal">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                        <form method="get" asp-page="Delete" asp-route-id="@eventItem.id" class="d-inline">
+                                            <button type="submit" class="admin-action-btn admin-delete-btn">
+                                                <i class="fas fa-trash"></i> Confirm Delete
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -162,7 +170,7 @@
         </div>
 
         <div class="back-button-container">
-            <a asp-page="SearchForDelete" class="btn btn-primary">
+            <a asp-page="SearchForDelete" class="admin-action-btn admin-cancel-btn">
                 <i class="fas fa-arrow-left"></i> Back to Search
             </a>
         </div>
@@ -413,15 +421,57 @@
 
         .event-card {
             display: flex;
-            justify-content: space-between;
             align-items: flex-start;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
+            border: none;
+            border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
-            background-color: white;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background-color: #fff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .event-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .event-thumbnail-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .event-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #adb5bd;
+            font-size: 24px;
+            gap: 8px;
+        }
+
+        .event-placeholder span {
+            font-size: 14px;
+            color: #6c757d;
         }
 
         .event-card:hover {
@@ -440,16 +490,56 @@
             font-weight: 600;
         }
 
+        .event-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
         .event-info p {
-            margin: 5px 0;
-            color: #495057;
+            margin: 0;
+            color: #6c757d;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .event-info p:hover {
+            background-color: #e9ecef;
+            transform: translateX(5px);
         }
 
         .event-info i {
-            width: 20px;
-            color: #6c757d;
-            margin-right: 5px;
+            width: 24px;
+            height: 24px;
+            color: #854F6C;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(133, 79, 108, 0.1);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .event-info p:hover i {
+            background-color: #854F6C;
+            color: white;
+        }
+
+        .event-description {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            color: #495057;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         .event-actions {
@@ -457,18 +547,32 @@
         }
 
         .admin-action-btn {
-            display: inline-block;
-            padding: 15px 30px;
-            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 25px;
+            border-radius: 8px;
             font-weight: bold;
             font-size: 16px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: none;
-            background-color: #522B5B;
+            cursor: pointer;
+            min-width: 140px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .admin-delete-btn {
+            background-color: #dc3545;
             color: white;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .admin-delete-btn:hover {
+            background-color: #c82333;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+            text-decoration: none;
         }
 
         .admin-action-btn:hover {
@@ -499,17 +603,45 @@
             background-color: #f8d7da;
             border-color: #f5c6cb;
             color: #721c24;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
         }
 
         .alert-warning {
             background-color: #fff3cd;
             border-color: #ffeeba;
             color: #856404;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
         }
 
         .alert i {
-            font-size: 20px;
-            margin-right: 10px;
+            font-size: 18px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .alert-danger i {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .alert-warning i {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
         }
 
         /* Modal styling */
@@ -517,23 +649,97 @@
             border: none;
             border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
         }
 
         .modal-header {
-            background-color: #522B5B;
+            background-color: #dc3545;
             color: white;
             border-bottom: none;
             padding: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-header .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-header .btn-close {
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            padding: 0;
+            margin: 0;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .modal-header .btn-close:hover {
+            opacity: 1;
         }
 
         .modal-body {
             padding: 1.5rem;
         }
 
+        .event-summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .event-summary h5 {
+            color: #343a40;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .event-summary p {
+            margin: 0.5rem 0;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .event-summary strong {
+            color: #343a40;
+            min-width: 80px;
+        }
+
+        .confirmation-text {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .confirmation-text p {
+            font-size: 1.1rem;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+        }
+
+        .confirmation-text small {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
         .modal-footer {
             border-top: 1px solid #dee2e6;
             padding: 1.5rem;
             background-color: #f8f9fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
         }
 
         /* Responsive styles */

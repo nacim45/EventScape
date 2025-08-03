@@ -93,16 +93,16 @@
                                         <input asp-for="NewEvent.title" class="admin-form-input" placeholder="Enter a descriptive title" required 
                                                data-val="true" data-val-required="Title is required" data-val-length-max="100" />
                                         <span asp-validation-for="NewEvent.title" class="admin-validation-message"></span>
-                                    </div>
-                                </div>
+                        </div>
+                        </div>
                                 <div class="col-md-6">
                                     <div class="admin-form-group">
                                         <label asp-for="NewEvent.location" class="admin-form-label">Location</label>
                                         <input asp-for="NewEvent.location" class="admin-form-input" placeholder="City or Venue" required />
                                         <span asp-validation-for="NewEvent.location" class="admin-validation-message"></span>
-                                    </div>
-                                </div>
-                            </div>
+                        </div>
+                        </div>
+                        </div>
 
                             <div class="row">
                                 <div class="col-md-4">
@@ -110,7 +110,7 @@
                                         <label asp-for="NewEvent.date" class="admin-form-label">Event Date</label>
                                         <input type="date" asp-for="NewEvent.date" class="admin-form-input" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
                                         <span asp-validation-for="NewEvent.date" class="admin-validation-message"></span>
-                                    </div>
+                        </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="admin-form-group">
@@ -362,8 +362,8 @@
                                                placeholder="Enter first name" required pattern="[a-zA-Z\s-']+" 
                                                title="Name can only contain letters, spaces, hyphens and apostrophes" />
                                         <div class="invalid-feedback">Please enter a valid first name.</div>
-                                    </div>
-                                </div>
+                        </div>
+                        </div>
                                 <div class="col-md-6">
                                     <div class="admin-form-group">
                                         <label for="newUserSurname" class="admin-form-label">Last Name</label>
@@ -371,8 +371,8 @@
                                                placeholder="Enter last name" required pattern="[a-zA-Z\s-']+" 
                                                title="Surname can only contain letters, spaces, hyphens and apostrophes" />
                                         <div class="invalid-feedback">Please enter a valid last name.</div>
-                                    </div>
-                                </div>
+                        </div>
+                        </div>
                             </div>
                         </div>
 
@@ -405,13 +405,13 @@
                                 <label for="newUserRole" class="admin-form-label">User Role</label>
                                 <select id="newUserRole" name="Role" class="admin-form-input" required>
                                     <option value="">Select a role</option>
-                                    <option value="User">User</option>
+                                <option value="User">User</option>
                                     <option value="Admin">Administrator</option>
-                                </select>
+                            </select>
                                 <div class="admin-form-hint">
                                     <i class="fas fa-info-circle"></i>
                                     Administrators have full access to manage events and users
-                                </div>
+                        </div>
                                 <div class="invalid-feedback">Please select a user role.</div>
                             </div>
                         </div>

@@ -105,9 +105,11 @@
                                 </div>
                             </div>
                                                             <div class="event-actions">
-                                    <a asp-page="./Edit" asp-route-id="@eventItem.id" class="btn admin-action-btn admin-submit-btn">
-                                        <i class="fas fa-edit"></i> Edit Event
-                                    </a>
+                                    <form method="get" asp-page="./Edit" asp-route-id="@eventItem.id" class="d-inline">
+                                        <button type="submit" class="admin-action-btn admin-edit-btn">
+                                            <i class="fas fa-edit"></i> Edit Event
+                                        </button>
+                                    </form>
                                 </div>
                         </div>
                     }
@@ -329,13 +331,13 @@
             min-width: 140px;
         }
 
-        .admin-submit-btn {
+        .admin-edit-btn {
             background-color: #522B5B;
             color: white;
             box-shadow: 0 4px 12px rgba(82, 43, 91, 0.2);
         }
 
-        .admin-submit-btn:hover {
+        .admin-edit-btn:hover {
             background-color: #854F6C;
             color: white;
             transform: translateY(-3px);
@@ -343,7 +345,7 @@
             text-decoration: none;
         }
 
-        .admin-submit-btn i {
+        .admin-edit-btn i {
             margin-right: 8px;
             font-size: 18px;
         }
