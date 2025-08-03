@@ -130,18 +130,18 @@ namespace soft20181_starter.Pages.Admin.Events
                         .AsNoTracking()
                         .FirstOrDefaultAsync(e => e.id == Event.id);
 
-                    if (existingEvent.IsDeleted)
-                    {
-                        _logger.LogWarning("Attempted to edit deleted event: {EventId}", Event.id);
-                        ModelState.AddModelError(string.Empty, "Cannot edit a deleted event.");
-                        return RedirectToPage("/Admin");
-                    }
-
                     if (existingEvent == null)
                     {
                         _logger.LogWarning("Event with ID {EventId} no longer exists", Event.id);
-                        ModelState.AddModelError(string.Empty, "Event not found or has been deleted.");
-                        return RedirectToPage("/Admin");
+                        TempData["ErrorMessage"] = "Event not found or has been deleted.";
+                        return RedirectToPage("/Admin", new { error = "not_found" });
+                    }
+
+                    if (existingEvent.IsDeleted)
+                    {
+                        _logger.LogWarning("Attempted to edit deleted event: {EventId}", Event.id);
+                        TempData["ErrorMessage"] = "Cannot edit a deleted event.";
+                        return RedirectToPage("/Admin", new { error = "deleted" });
                     }
 
                     // Store original values for audit log
@@ -344,10 +344,10 @@ namespace soft20181_starter.Pages.Admin.Events
                     _logger.LogInformation("Event updated successfully: {EventId} - {EventTitle}. Changes: {Changes}", 
                         Event.id, Event.title, string.Join("; ", changes));
 
-                    TempData["SuccessMessage"] = $"Event '{Event.title}' was updated successfully!";
+                    TempData["SuccessMessage"] = $"Event '{Event.title}' was updated successfully! All changes have been saved to the database.";
                     
-                    // Redirect to Admin page
-                    return RedirectToPage("/Admin");
+                    // Redirect to Admin page with success indicator
+                    return RedirectToPage("/Admin", new { updated = true });
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
