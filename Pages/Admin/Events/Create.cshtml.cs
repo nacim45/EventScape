@@ -34,7 +34,7 @@ namespace soft20181_starter.Pages.Admin.Events
         public TheEvent Event { get; set; } = new TheEvent();
 
         [BindProperty]
-        public string? ImageUrls { get; set; }
+        public string ImageUrls { get; set; } = string.Empty;
 
         [BindProperty]
         public List<IFormFile> UploadedImages { get; set; } = new List<IFormFile>();
@@ -53,6 +53,18 @@ namespace soft20181_starter.Pages.Admin.Events
 
         [BindProperty]
         public string? EventTags { get; set; }
+
+        public List<string> AvailableCategories { get; } = new List<string> 
+        { 
+            "Music", 
+            "Sports", 
+            "Arts", 
+            "Food", 
+            "Business", 
+            "Education", 
+            "Social", 
+            "Other" 
+        };
 
         public void OnGet()
         {
@@ -171,7 +183,7 @@ namespace soft20181_starter.Pages.Admin.Events
                 // Process uploaded images
                 if (UploadedImages != null && UploadedImages.Count > 0)
                 {
-                                                    string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "events");
+                                                    string uploadsFolder = Path.Combine(_environment.WebRootPath ?? throw new InvalidOperationException("WebRootPath is null"), "images", "events");
                     
                             try
                             {
@@ -193,42 +205,26 @@ namespace soft20181_starter.Pages.Admin.Events
                     {
                         if (image.Length > 0)
                             {
-                                                                    if (uploadsFolder != null)
+                                                                                                                        try
                                     {
-                                        try
-                        {
-                            // Create unique filename
-                            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                            string filePath = Path.Combine(uploadsFolder, fileName);
-                            
-                            // Save image
-                            using (var stream = new FileStream(filePath, FileMode.Create))
-                            {
-                                await image.CopyToAsync(stream);
-                            }
-                            
-                            // Add relative path to event images
-                                            Event.images.Add($"images/events/{fileName}");
-                                            _logger.LogInformation("Successfully saved image {FileName} to disk", fileName);
-                                        }
-                                        catch (Exception ex)
+                                        // Create unique filename
+                                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                                        string filePath = Path.Combine(uploadsFolder, fileName);
+                                        
+                                        // Save image
+                                        using (var stream = new FileStream(filePath, FileMode.Create))
                                         {
-                                            _logger.LogWarning("Could not save image to disk. Error: {Error}", ex.Message);
-                                            // If file save fails, store the image as a data URL
-                                            using (var memoryStream = new MemoryStream())
-                                            {
-                                                await image.CopyToAsync(memoryStream);
-                                                var bytes = memoryStream.ToArray();
-                                                var base64 = Convert.ToBase64String(bytes);
-                                                var dataUrl = $"data:{image.ContentType};base64,{base64}";
-                                                Event.images.Add(dataUrl);
-                                                _logger.LogInformation("Stored image as data URL instead");
-                                            }
+                                            await image.CopyToAsync(stream);
                                         }
+                                        
+                                        // Add relative path to event images
+                                        Event.images.Add($"images/events/{fileName}");
+                                        _logger.LogInformation("Successfully saved image {FileName} to disk", fileName);
                                     }
-                                    else
+                                    catch (Exception ex)
                                     {
-                                        // Store image as data URL when local storage is not available
+                                        _logger.LogWarning("Could not save image to disk. Error: {Error}", ex.Message);
+                                        // If file save fails, store the image as a data URL
                                         using (var memoryStream = new MemoryStream())
                                         {
                                             await image.CopyToAsync(memoryStream);
@@ -236,7 +232,7 @@ namespace soft20181_starter.Pages.Admin.Events
                                             var base64 = Convert.ToBase64String(bytes);
                                             var dataUrl = $"data:{image.ContentType};base64,{base64}";
                                             Event.images.Add(dataUrl);
-                                            _logger.LogInformation("Stored image as data URL");
+                                            _logger.LogInformation("Stored image as data URL instead");
                                         }
                                     }
                                 

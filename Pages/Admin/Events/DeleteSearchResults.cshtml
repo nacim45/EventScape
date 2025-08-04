@@ -7,20 +7,16 @@
 
 <div class="container my-5">
     <div class="featured-events-header">
-        <h2 class="featured-title">Delete Event Results</h2>
+        <h2 class="featured-title">Delete Events Results</h2>
     </div>
     
-    <div class="row mb-4">
-        <div class="col text-center">
-            <div class="admin-navigation-links">
-                <a href="/Admin" class="admin-nav-link">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-                <a href="/Admin/Events" class="admin-nav-link">
-                    <i class="fas fa-calendar-alt"></i> All Events
-                </a>
-            </div>
-        </div>
+    <div class="admin-navigation-container">
+        <a href="/Admin" class="admin-nav-btn">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a href="/Admin/Events" class="admin-nav-btn">
+            <i class="fas fa-calendar-alt"></i> All Events
+        </a>
     </div>
 
 <div class="main-container">
@@ -112,12 +108,12 @@
                         <div class="modal fade delete-modal" id="deleteModal@(eventItem.id)" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel@(eventItem.id)" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header">
+                                    <div class="modal-header bg-danger text-white">
                                         <h5 class="modal-title" id="deleteModalLabel@(eventItem.id)">
                                             <i class="fas fa-exclamation-triangle"></i>
                                             Delete Event
                                         </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
                                         <div class="event-summary">
@@ -140,33 +136,34 @@
                                                 </div>
                                             </div>
 
-                                            @if (eventItem.Attendances?.Any() == true)
-                                            {
-                                                <div class="alert alert-warning mt-3">
-                                                    <i class="fas fa-users"></i>
-                                                    <div class="alert-content">
-                                                        <strong>Note:</strong>
-                                                        <p>This event has registered attendees. It will be hidden but preserved in the database.</p>
+                                            <div class="confirmation-message">
+                                                <p class="mb-3">Are you sure you want to delete this event?</p>
+                                                
+                                                @if (eventItem.Attendances?.Any() == true)
+                                                {
+                                                    <div class="alert alert-warning">
+                                                        <i class="fas fa-users"></i>
+                                                        <div class="alert-content">
+                                                            <strong>Note:</strong>
+                                                            <p>This event has registered attendees. It will be hidden but preserved in the database.</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div class="alert alert-danger mt-3">
-                                                    <i class="fas fa-exclamation-triangle"></i>
-                                                    <div class="alert-content">
-                                                        <strong>Warning:</strong>
-                                                        <p>This event will be permanently deleted from the database.</p>
+                                                }
+                                                else
+                                                {
+                                                    <div class="alert alert-danger">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                        <div class="alert-content">
+                                                            <strong>Warning:</strong>
+                                                            <p>This event will be permanently deleted from the database.</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            }
-
-                                            <div class="confirmation-text text-center mt-4">
-                                                <p class="mb-2">Are you sure you want to delete this event?</p>
-                                                <small class="text-danger d-flex align-items-center justify-content-center">
-                                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                                }
+                                                
+                                                <div class="text-danger mt-3">
+                                                    <i class="fas fa-exclamation-circle"></i>
                                                     This action cannot be undone
-                                                </small>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -174,9 +171,11 @@
                                         <button type="button" class="admin-action-btn admin-cancel-btn" data-bs-dismiss="modal">
                                             <i class="fas fa-times"></i> Cancel
                                         </button>
-                                        <a asp-page="/Admin/Events/Delete" asp-route-id="@eventItem.id" class="admin-action-btn admin-delete-btn">
-                                            <i class="fas fa-trash"></i> Delete Event
-                                        </a>
+                                        <form method="post" asp-page="/Admin/Events/Delete" asp-route-id="@eventItem.id" class="d-inline">
+                                            <button type="submit" class="admin-action-btn admin-delete-btn">
+                                                <i class="fas fa-trash"></i> Delete Event
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -875,33 +874,8 @@
 
 @section Scripts {
     <script>
-        function confirmDelete(eventId) {
-            const modal = document.querySelector(`#deleteModal${eventId}`);
-            const bsModal = new bootstrap.Modal(modal);
-            bsModal.show();
-
-            // Add animation classes
-            modal.addEventListener('show.bs.modal', function () {
-                const content = this.querySelector('.modal-content');
-                content.style.transform = 'scale(0.7)';
-                content.style.opacity = '0';
-                setTimeout(() => {
-                    content.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-                    content.style.transform = 'scale(1)';
-                    content.style.opacity = '1';
-                }, 50);
-            });
-
-            // Remove animation classes
-            modal.addEventListener('hide.bs.modal', function () {
-                const content = this.querySelector('.modal-content');
-                content.style.transform = 'scale(0.7)';
-                content.style.opacity = '0';
-            });
-        }
-
-        // Add fade-in animation to event cards
         document.addEventListener('DOMContentLoaded', function() {
+            // Add fade-in animation to event cards
             const cards = document.querySelectorAll('.event-card');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
@@ -921,7 +895,72 @@
                     keyboard: false
                 });
             });
+
+            // Add hover effects to event info items
+            const infoItems = document.querySelectorAll('.event-info-item');
+            infoItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    const icon = this.querySelector('i');
+                    icon.style.transform = 'scale(1.1)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    const icon = this.querySelector('i');
+                    icon.style.transform = 'scale(1)';
+                });
+            });
+
+            // Add click effect to buttons
+            const buttons = document.querySelectorAll('.admin-action-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mousedown', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                button.addEventListener('mouseup', function() {
+                    this.style.transform = '';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                });
+            });
         });
+
+        function confirmDelete(eventId) {
+            const modal = document.querySelector(`#deleteModal${eventId}`);
+            const bsModal = new bootstrap.Modal(modal);
+            
+            // Add animation classes
+            modal.addEventListener('show.bs.modal', function () {
+                const content = this.querySelector('.modal-content');
+                content.style.transform = 'scale(0.7)';
+                content.style.opacity = '0';
+                setTimeout(() => {
+                    content.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    content.style.transform = 'scale(1)';
+                    content.style.opacity = '1';
+                }, 50);
+            });
+
+            // Remove animation classes
+            modal.addEventListener('hide.bs.modal', function () {
+                const content = this.querySelector('.modal-content');
+                content.style.transform = 'scale(0.7)';
+                content.style.opacity = '0';
+            });
+
+            bsModal.show();
+        }
+
+        // Show success message if present in TempData
+        if (document.querySelector('.success-message')) {
+            setTimeout(() => {
+                const message = document.querySelector('.success-message');
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 300);
+            }, 3000);
+        }
     </script>
 }
 </style> 

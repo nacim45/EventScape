@@ -7,20 +7,16 @@
 
 <div class="container my-5">
     <div class="featured-events-header">
-        <h2 class="featured-title">Edit Event Results</h2>
+        <h2 class="featured-title">Edit Events Results</h2>
     </div>
     
-    <div class="row mb-4">
-        <div class="col text-center">
-            <div class="admin-navigation-links">
-                <a href="/Admin" class="admin-nav-link">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-                <a href="/Admin/Events" class="admin-nav-link">
-                    <i class="fas fa-calendar-alt"></i> All Events
-                </a>
-            </div>
-        </div>
+    <div class="admin-navigation-container">
+        <a href="/Admin" class="admin-nav-btn">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a href="/Admin/Events" class="admin-nav-btn">
+            <i class="fas fa-calendar-alt"></i> All Events
+        </a>
     </div>
 
     <div class="user-form-container">
@@ -50,65 +46,95 @@
                             <div class="event-image">
                                 @if (eventItem.images != null && eventItem.images.Any())
                                 {
-                                    <img src="/@eventItem.images.First()" alt="@eventItem.title" class="event-thumbnail">
+                                    <div class="event-thumbnail-container">
+                                        <img src="/@eventItem.images.First()" alt="@eventItem.title" class="event-thumbnail">
+                                    </div>
                                 }
                                 else
                                 {
                                     <div class="event-placeholder">
                                         <i class="fas fa-image"></i>
+                                        <span>No Image</span>
                                     </div>
                                 }
                             </div>
                             <div class="event-details">
                                 <h3 class="event-title">@eventItem.title</h3>
-                                <div class="event-info">
-                                    <p><i class="fas fa-map-marker-alt"></i> @(char.ToUpper(eventItem.location[0]) + eventItem.location.Substring(1))</p>
-                                    <p><i class="fas fa-calendar-day"></i> @eventItem.date</p>
-                                    <p><i class="fas fa-clock"></i> @(eventItem.StartTime ?? "Not specified") - @(eventItem.EndTime ?? "Not specified")</p>
-                                    <p><i class="fas fa-pound-sign"></i> @eventItem.price</p>
-                                    <p><i class="fas fa-tag"></i> @(eventItem.Category ?? "Other")</p>
-                                    <p><i class="fas fa-users"></i> Capacity: @(eventItem.Capacity.HasValue ? eventItem.Capacity.Value.ToString() : "Unlimited")</p>
+                                <div class="event-info-grid">
+                                    <div class="event-info-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>@(char.ToUpper(eventItem.location[0]) + eventItem.location.Substring(1))</span>
+                                    </div>
+                                    <div class="event-info-item">
+                                        <i class="fas fa-calendar-day"></i>
+                                        <span>@eventItem.date</span>
+                                    </div>
+                                    <div class="event-info-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>@(eventItem.StartTime ?? "Not specified") - @(eventItem.EndTime ?? "Not specified")</span>
+                                    </div>
+                                    <div class="event-info-item">
+                                        <i class="fas fa-pound-sign"></i>
+                                        <span>@eventItem.price</span>
+                                    </div>
+                                    <div class="event-info-item">
+                                        <i class="fas fa-tag"></i>
+                                        <span>@(eventItem.Category ?? "Other")</span>
+                                    </div>
+                                    <div class="event-info-item">
+                                        <i class="fas fa-users"></i>
+                                        <span>Capacity: @(eventItem.Capacity.HasValue ? eventItem.Capacity.Value.ToString() : "Unlimited")</span>
+                                    </div>
                                     @if (!string.IsNullOrEmpty(eventItem.Tags))
                                     {
-                                        <p><i class="fas fa-tags"></i> @eventItem.Tags</p>
+                                        <div class="event-info-item">
+                                            <i class="fas fa-tags"></i>
+                                            <span>@eventItem.Tags</span>
+                                        </div>
                                     }
-                                    <p>
-                                        <i class="fas fa-info-circle"></i> Status: 
-                                        <span class="badge @(eventItem.Status == "Active" ? "badge-success" : eventItem.Status == "Cancelled" ? "badge-danger" : "badge-warning")">
-                                            @eventItem.Status
+                                    <div class="event-info-item">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Status: 
+                                            <span class="status-badge @(eventItem.Status == "Active" ? "status-active" : eventItem.Status == "Cancelled" ? "status-cancelled" : "status-pending")">
+                                                @eventItem.Status
+                                            </span>
                                         </span>
-                                    </p>
-                                    <p>
-                                        <i class="fas fa-calendar-check"></i> Created: @eventItem.CreatedAt.ToString("g")
-                                                                            @if (eventItem.UpdatedAt != null)
-                                    {
-                                        <br />
-                                        <text><i class="fas fa-calendar-plus"></i> Updated: </text>@eventItem.UpdatedAt?.ToString("g")
-                                    }
+                                    </div>
+                                    <div class="event-info-item">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <span>
+                                            Created: @eventItem.CreatedAt.ToString("g")
+                                            @if (eventItem.UpdatedAt.HasValue)
+                                            {
+                                                <br />
+                                                <text><i class="fas fa-calendar-plus"></i> Updated: </text>@eventItem.UpdatedAt.Value.ToString("g")
+                                            }
+                                        </span>
+                                    </div>
                                     @if (eventItem.IsDeleted)
                                     {
-                                        <p class="text-danger">
-                                            <i class="fas fa-trash-alt"></i> This event has been deleted
-                                        </p>
+                                        <div class="event-info-item text-danger">
+                                            <i class="fas fa-trash-alt"></i>
+                                            <span>This event has been deleted</span>
+                                        </div>
                                     }
-                                    </p>
                                     @if (!string.IsNullOrEmpty(eventItem.link))
                                     {
-                                        <p>
-                                            <i class="fas fa-link"></i> 
+                                        <div class="event-info-item">
+                                            <i class="fas fa-link"></i>
                                             <a href="@eventItem.link" target="_blank" rel="noopener noreferrer">Event Website</a>
-                                        </p>
+                                        </div>
                                     }
                                 </div>
                                 <div class="event-description">
                                     <p>@(eventItem.description.Length > 150 ? eventItem.description.Substring(0, 150) + "..." : eventItem.description)</p>
                                 </div>
                             </div>
-                                                            <div class="event-actions">
-                                    <a asp-page="/Admin/Events/Edit" asp-route-id="@eventItem.id" class="admin-action-btn admin-edit-btn">
-                                        <i class="fas fa-edit"></i> Edit Event
-                                    </a>
-                                </div>
+                            <div class="event-actions">
+                                <a asp-page="/Admin/Events/Edit" asp-route-id="@eventItem.id" class="admin-action-btn admin-edit-btn">
+                                    <i class="fas fa-edit"></i> Edit Event
+                                </a>
+                            </div>
                         </div>
                     }
                 </div>
@@ -129,10 +155,44 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         /* Main container styling */
-        .main-container {
+        .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+        }
+
+        /* Admin navigation container */
+        .admin-navigation-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .admin-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background-color: #522B5B;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-nav-btn:hover {
+            background-color: #854F6C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            color: white;
+            text-decoration: none;
+        }
+
+        .admin-nav-btn i {
+            margin-right: 8px;
+            font-size: 16px;
         }
 
         /* Featured Events title styling */
@@ -141,124 +201,93 @@
             background-color: #522B5B;
             color: white;
             padding: 15px 30px;
-            border-radius: 4px;
+            border-radius: 8px;
             font-weight: bold;
             font-size: 28px;
             margin: 40px auto;
             text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         
         .featured-events-header {
-            margin-top: 60px;
+            margin-top: 40px;
             text-align: center;
-            margin-left: 0;
-        }
-        
-        /* Navigation links */
-        .admin-navigation-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        
-        .admin-nav-link {
-            display: inline-block;
-            background-color: #854F6C;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .admin-nav-link:hover {
-            background-color: #522B5B;
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-            text-decoration: none;
-        }
-        
-        .admin-nav-link i {
-            margin-right: 8px;
-        }
-        
-        /* Enhanced styles for event cards and details */
-        .events-list-container {
             margin-bottom: 30px;
         }
 
+        /* Event card styling */
+        .events-list-container {
+            margin: 30px 0;
+        }
+
         .event-card {
-            display: flex;
-            border: none;
+            background: white;
             border-radius: 15px;
             padding: 25px;
-            margin-bottom: 20px;
-            background-color: #fff;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            align-items: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: flex-start;
+            gap: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
 
         .event-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-            background-color: #fafafa;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
         }
 
-        .event-card:hover .admin-action-btn {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .event-image {
-            width: 120px;
-            height: 120px;
+        .event-thumbnail-container {
+            width: 150px;
+            height: 150px;
             border-radius: 12px;
             overflow: hidden;
-            margin-right: 25px;
-            flex-shrink: 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
-        }
-
-        .event-card:hover .event-image {
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            transform: scale(1.05);
         }
 
         .event-thumbnail {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .event-card:hover .event-thumbnail {
+            transform: scale(1.05);
         }
 
         .event-placeholder {
-            width: 100%;
-            height: 100%;
+            width: 150px;
+            height: 150px;
             background-color: #f8f9fa;
+            border-radius: 12px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             color: #adb5bd;
-            font-size: 24px;
+            gap: 10px;
+        }
+
+        .event-placeholder i {
+            font-size: 40px;
+        }
+
+        .event-placeholder span {
+            font-size: 14px;
+            color: #6c757d;
         }
 
         .event-details {
             flex: 1;
-            padding: 0 15px;
         }
 
         .event-title {
             color: #522B5B;
-            margin-bottom: 15px;
             font-size: 24px;
             font-weight: bold;
-            line-height: 1.3;
+            margin-bottom: 20px;
             transition: color 0.3s ease;
         }
 
@@ -266,50 +295,85 @@
             color: #854F6C;
         }
 
-        .event-info {
+        .event-info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 15px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .event-info p {
-            margin: 0;
-            color: #6c757d;
-            font-size: 16px;
+        .event-info-item {
             display: flex;
             align-items: center;
-            padding: 8px;
-            border-radius: 8px;
+            gap: 10px;
+            padding: 10px;
             background-color: #f8f9fa;
+            border-radius: 8px;
             transition: all 0.3s ease;
         }
 
-        .event-info p:hover {
+        .event-info-item:hover {
             background-color: #e9ecef;
             transform: translateX(5px);
         }
 
-        .event-info i {
-            width: 24px;
-            height: 24px;
-            color: #854F6C;
-            margin-right: 10px;
+        .event-info-item i {
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: rgba(133, 79, 108, 0.1);
+            color: #854F6C;
             border-radius: 6px;
+            font-size: 14px;
             transition: all 0.3s ease;
         }
 
-        .event-info p:hover i {
+        .event-info-item:hover i {
             background-color: #854F6C;
             color: white;
         }
 
+        .event-info-item span {
+            color: #6c757d;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-cancelled {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .status-pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .event-description {
+            margin-top: 20px;
+            color: #6c757d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
         .event-actions {
-            margin-left: 25px;
+            margin-top: 20px;
             display: flex;
             gap: 15px;
         }
@@ -318,15 +382,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 25px;
+            padding: 12px 24px;
             border-radius: 8px;
             font-weight: bold;
             font-size: 16px;
             text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
-            cursor: pointer;
-            min-width: 140px;
+            transition: all 0.3s ease;
+            min-width: 150px;
         }
 
         .admin-edit-btn {
@@ -344,32 +406,44 @@
         }
 
         .admin-edit-btn i {
-            margin-right: 8px;
+            margin-right: 10px;
             font-size: 18px;
         }
 
+        .admin-cancel-btn {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+        }
+
+        .admin-cancel-btn:hover {
+            background-color: #e9ecef;
+            color: #495057;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+        }
+
         .search-no-results {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
             display: flex;
             align-items: center;
-            padding: 20px;
-            background-color: #e2f3fd;
-            border-radius: 10px;
-            margin-bottom: 30px;
+            gap: 15px;
         }
 
         .search-no-results i {
             font-size: 24px;
-            color: #007bff;
-            margin-right: 15px;
-        }
-
-        .mt-4 {
-            margin-top: 20px;
+            color: #856404;
         }
 
         /* Responsive styles */
         @@media (max-width: 992px) {
-            .event-info {
+            .event-info-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -382,48 +456,116 @@
                 padding: 20px;
             }
 
-            .event-image {
-                margin-right: 0;
+            .event-thumbnail-container,
+            .event-placeholder {
+                width: 200px;
+                height: 200px;
                 margin-bottom: 20px;
-                width: 180px;
-                height: 180px;
             }
 
-            .event-details {
-                padding: 0;
-            }
-
-            .event-info {
+            .event-info-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .event-info-item {
                 text-align: left;
             }
 
             .event-actions {
-                margin-left: 0;
-                margin-top: 20px;
+                flex-direction: column;
                 width: 100%;
-                justify-content: center;
             }
 
             .admin-action-btn {
                 width: 100%;
-                max-width: 300px;
+            }
+
+            .admin-navigation-container {
+                flex-direction: column;
+            }
+
+            .admin-nav-btn {
+                width: 100%;
+                justify-content: center;
             }
         }
 
         @@media (max-width: 480px) {
-            .event-image {
-                width: 140px;
-                height: 140px;
+            .event-thumbnail-container,
+            .event-placeholder {
+                width: 150px;
+                height: 150px;
             }
 
             .event-title {
                 font-size: 20px;
             }
 
-            .event-info p {
-                font-size: 14px;
+            .event-info-item {
+                font-size: 13px;
+            }
+
+            .featured-title {
+                font-size: 24px;
+                padding: 12px 20px;
             }
         }
     </style>
-} 
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add fade-in animation to event cards
+            const cards = document.querySelectorAll('.event-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Add hover effects to event info items
+            const infoItems = document.querySelectorAll('.event-info-item');
+            infoItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    const icon = this.querySelector('i');
+                    icon.style.transform = 'scale(1.1)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    const icon = this.querySelector('i');
+                    icon.style.transform = 'scale(1)';
+                });
+            });
+
+            // Add click effect to buttons
+            const buttons = document.querySelectorAll('.admin-action-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mousedown', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                button.addEventListener('mouseup', function() {
+                    this.style.transform = '';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                });
+            });
+
+            // Show success message if present in TempData
+            if (document.querySelector('.success-message')) {
+                setTimeout(() => {
+                    const message = document.querySelector('.success-message');
+                    message.style.opacity = '0';
+                    setTimeout(() => message.remove(), 300);
+                }, 3000);
+            }
+        });
+    </script>
+}

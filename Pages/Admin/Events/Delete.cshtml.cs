@@ -38,9 +38,17 @@ namespace soft20181_starter.Pages.Admin.Events
             {
                 _logger.LogInformation("Loading event for deletion. ID: {EventId}", id);
 
-                Event = await _context.Events
+                var eventToDelete = await _context.Events
                     .AsNoTracking()
                     .FirstOrDefaultAsync(e => e.id == id);
+
+                if (eventToDelete == null)
+                {
+                    _logger.LogWarning("Event with ID {EventId} not found for deletion", id);
+                    return RedirectToPage("/Admin", new { error = "not_found" });
+                }
+
+                Event = eventToDelete;
 
                 if (Event == null)
                 {
@@ -125,7 +133,7 @@ namespace soft20181_starter.Pages.Admin.Events
                             EntityName = "Event",
                             EntityId = eventId.ToString(),
                             Action = "SoftDelete",
-                            UserId = User.Identity?.Name,
+                            UserId = User.Identity?.Name ?? "System",
                             Changes = $"Soft deleted event: {eventToDelete.title} (ID: {eventId}) due to existing attendees",
                             Timestamp = DateTime.UtcNow
                         };
@@ -178,7 +186,7 @@ namespace soft20181_starter.Pages.Admin.Events
                             EntityName = "Event",
                             EntityId = eventId.ToString(),
                             Action = "HardDelete",
-                            UserId = User.Identity?.Name,
+                            UserId = User.Identity?.Name ?? "System",
                             Changes = $"Hard deleted event: {eventToDelete.title} (ID: {eventId})",
                             Timestamp = DateTime.UtcNow
                         };

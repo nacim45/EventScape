@@ -10,16 +10,16 @@ namespace soft20181_starter.Models
         public int Id { get; set; }
         
         [Required]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
         
         [Required]
         public int EventId { get; set; }
         
         [ForeignKey("UserId")]
-        public AppUser User { get; set; }
+        public AppUser User { get; set; } = null!;
         
         [ForeignKey("EventId")]
-        public TheEvent Event { get; set; }
+        public TheEvent Event { get; set; } = null!;
         
         public DateTime RegisteredDate { get; set; } = DateTime.Now;
         

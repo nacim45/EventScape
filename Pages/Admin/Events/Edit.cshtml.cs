@@ -46,6 +46,18 @@ namespace soft20181_starter.Pages.Admin.Events
         [BindProperty]
         public string? EventTags { get; set; }
 
+        public List<string> AvailableCategories { get; } = new List<string> 
+        { 
+            "Music", 
+            "Sports", 
+            "Arts", 
+            "Food", 
+            "Business", 
+            "Education", 
+            "Social", 
+            "Other" 
+        };
+
         public async Task<IActionResult> OnGetAsync(int id)
         {
             try
@@ -354,7 +366,7 @@ namespace soft20181_starter.Pages.Admin.Events
                             EntityName = "Event",
                             EntityId = Event.id.ToString(),
                             Action = "Update",
-                            UserId = User.Identity?.Name,
+                            UserId = User.Identity?.Name ?? "System",
                             Changes = string.Join("; ", changes),
                             Timestamp = DateTime.UtcNow
                         };

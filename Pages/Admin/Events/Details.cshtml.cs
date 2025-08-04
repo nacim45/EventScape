@@ -23,7 +23,7 @@ namespace soft20181_starter.Pages.Admin.Events
             _logger = logger;
         }
 
-        public TheEvent Event { get; set; }
+        public TheEvent Event { get; set; } = new TheEvent();
         public List<EventAttendance> Attendees { get; set; } = new List<EventAttendance>();
         public int AttendeeCount { get; set; }
 

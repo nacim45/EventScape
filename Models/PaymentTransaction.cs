@@ -10,21 +10,21 @@ namespace soft20181_starter.Models
         public int Id { get; set; }
 
         [Required]
-        public string PaymentIntentId { get; set; }
+        public string PaymentIntentId { get; set; } = string.Empty;
 
         public string? PayPalOrderId { get; set; }
 
         [Required]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         [ForeignKey("UserId")]
-        public AppUser User { get; set; }
+        public AppUser User { get; set; } = null!;
 
         [Required]
-        public string UserName { get; set; }
+        public string UserName { get; set; } = string.Empty;
 
         [Required]
-        public string UserEmail { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
@@ -34,14 +34,14 @@ namespace soft20181_starter.Models
         public string Currency { get; set; } = "GBP";
 
         [Required]
-        public string Status { get; set; }
+        public string Status { get; set; } = "pending";
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
 
-        public string EventIds { get; set; }
+        public string EventIds { get; set; } = string.Empty;
 
         public string? RefundReason { get; set; }
 
