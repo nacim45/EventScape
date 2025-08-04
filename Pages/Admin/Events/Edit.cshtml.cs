@@ -67,7 +67,28 @@ namespace soft20181_starter.Pages.Admin.Events
                 Event = await _context.Events
                     .Include(e => e.Attendances)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(e => e.id == id);
+                    .Where(e => e.id == id && !e.IsDeleted)
+                    .Select(e => new TheEvent
+                    {
+                        id = e.id,
+                        title = e.title ?? string.Empty,
+                        description = e.description ?? string.Empty,
+                        location = e.location ?? string.Empty,
+                        date = e.date ?? string.Empty,
+                        price = e.price ?? string.Empty,
+                        link = e.link ?? string.Empty,
+                        images = e.images ?? new List<string>(),
+                        Category = e.Category,
+                        Capacity = e.Capacity,
+                        StartTime = e.StartTime,
+                        EndTime = e.EndTime,
+                        Tags = e.Tags,
+                        IsDeleted = e.IsDeleted,
+                        CreatedAt = e.CreatedAt,
+                        UpdatedAt = e.UpdatedAt,
+                        Attendances = e.Attendances
+                    })
+                    .FirstOrDefaultAsync();
 
                 if (Event == null)
                 {
@@ -77,6 +98,10 @@ namespace soft20181_starter.Pages.Admin.Events
                 }
 
                 // Set initial values for additional properties
+                Event.description = Event.description ?? string.Empty;
+                Event.title = Event.title ?? string.Empty;
+                Event.link = Event.link ?? string.Empty;
+                Event.images ??= new List<string>();
                 EventCategory = Event.Category ?? "Other";
                 EventCapacity = Event.Capacity;
                 EventStartTime = Event.StartTime;
@@ -354,6 +379,11 @@ namespace soft20181_starter.Pages.Admin.Events
                     // Update audit fields
                     Event.UpdatedAt = DateTime.UtcNow;
 
+                // Preserve existing values that shouldn't be changed
+                Event.CreatedAt = existingEvent.CreatedAt;
+                Event.images = existingEvent.images ?? new List<string>();
+                Event.IsDeleted = existingEvent.IsDeleted;
+                
                 // Update the event
                 _context.Attach(Event).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
