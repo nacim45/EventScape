@@ -24,7 +24,18 @@ namespace soft20181_starter.Pages.Admin.Events
         }
 
         [BindProperty]
-        public TheEvent Event { get; set; } = new TheEvent();
+        public TheEvent Event { get; set; } = new TheEvent
+        {
+            title = string.Empty,
+            description = string.Empty,
+            location = string.Empty,
+            date = string.Empty,
+            price = string.Empty,
+            link = string.Empty,
+            images = new List<string>(),
+            Category = "Other",
+            Attendances = new List<EventAttendance>()
+        };
 
         [BindProperty]
         public string ImageUrls { get; set; } = string.Empty;
@@ -38,13 +49,13 @@ namespace soft20181_starter.Pages.Admin.Events
         public int? EventCapacity { get; set; }
 
         [BindProperty]
-        public string? EventStartTime { get; set; }
+        public string EventStartTime { get; set; } = string.Empty;
 
         [BindProperty]
-        public string? EventEndTime { get; set; }
+        public string EventEndTime { get; set; } = string.Empty;
 
         [BindProperty]
-        public string? EventTags { get; set; }
+        public string EventTags { get; set; } = string.Empty;
 
         public List<string> AvailableCategories { get; } = new List<string> 
         { 
@@ -71,69 +82,61 @@ namespace soft20181_starter.Pages.Admin.Events
 
                 _logger.LogInformation("Loading event for editing. ID: {EventId}", id);
 
-                Event = await _context.Events
+                var eventFromDb = await _context.Events
                     .Include(e => e.Attendances)
                     .AsNoTracking()
-                    .Where(e => e.id == id && !e.IsDeleted)
-                    .Select(e => new TheEvent
-                    {
-                        id = e.id,
-                        title = e.title ?? string.Empty,
-                        description = e.description ?? string.Empty,
-                        location = e.location ?? string.Empty,
-                        date = e.date ?? string.Empty,
-                        price = e.price ?? string.Empty,
-                        link = e.link ?? string.Empty,
-                        images = e.images ?? new List<string>(),
-                        Category = e.Category,
-                        Capacity = e.Capacity,
-                        StartTime = e.StartTime,
-                        EndTime = e.EndTime,
-                        Tags = e.Tags,
-                        IsDeleted = e.IsDeleted,
-                        CreatedAt = e.CreatedAt,
-                        UpdatedAt = e.UpdatedAt,
-                        Attendances = e.Attendances
-                    })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(e => e.id == id);
 
-                if (Event == null)
+                if (eventFromDb == null)
                 {
-                    _logger.LogWarning("Event with ID {EventId} not found for editing", id);
-                    TempData["ErrorMessage"] = "Event not found or has been deleted.";
+                    _logger.LogWarning("Event with ID {EventId} not found", id);
+                    TempData["ErrorMessage"] = "Event not found.";
                     return RedirectToPage("/Admin");
                 }
 
-                if (Event.IsDeleted)
+                if (eventFromDb.IsDeleted)
                 {
                     _logger.LogWarning("Attempted to edit deleted event: {EventId}", id);
                     TempData["ErrorMessage"] = "Cannot edit a deleted event.";
                     return RedirectToPage("/Admin");
                 }
 
-                // Set initial values for additional properties
-                Event.description = Event.description ?? string.Empty;
-                Event.title = Event.title ?? string.Empty;
-                Event.link = Event.link ?? string.Empty;
-                Event.images ??= new List<string>();
+                // Initialize Event with non-null values
+                Event = new TheEvent
+                {
+                    id = eventFromDb.id,
+                    title = eventFromDb.title ?? string.Empty,
+                    description = eventFromDb.description ?? string.Empty,
+                    location = eventFromDb.location ?? string.Empty,
+                    date = eventFromDb.date ?? string.Empty,
+                    price = eventFromDb.price ?? string.Empty,
+                    link = eventFromDb.link ?? string.Empty,
+                    images = eventFromDb.images ?? new List<string>(),
+                    Category = eventFromDb.Category ?? "Other",
+                    Capacity = eventFromDb.Capacity,
+                    StartTime = eventFromDb.StartTime,
+                    EndTime = eventFromDb.EndTime,
+                    Tags = eventFromDb.Tags,
+                    IsDeleted = eventFromDb.IsDeleted,
+                    CreatedAt = eventFromDb.CreatedAt,
+                    UpdatedAt = eventFromDb.UpdatedAt,
+                    Attendances = eventFromDb.Attendances ?? new List<EventAttendance>()
+                };
+
+                // Set form values
                 EventCategory = Event.Category ?? "Other";
                 EventCapacity = Event.Capacity;
-                EventStartTime = Event.StartTime;
-                EventEndTime = Event.EndTime;
-                EventTags = Event.Tags;
+                EventStartTime = Event.StartTime ?? string.Empty;
+                EventEndTime = Event.EndTime ?? string.Empty;
+                EventTags = Event.Tags ?? string.Empty;
+                ImageUrlsString = Event.images != null && Event.images.Any() 
+                    ? string.Join(Environment.NewLine, Event.images) 
+                    : string.Empty;
 
-                // Event null check is already done above
-
-                // Convert image list to string for textarea
-                if (Event.images != null && Event.images.Any())
-                {
-                    ImageUrlsString = string.Join(Environment.NewLine, Event.images);
-                }
-
-                // Retrieve any saved event properties from TempData
+                // Restore any values from TempData if they exist
                 if (TempData.ContainsKey("EventCategory_" + id))
                 {
-                    EventCategory = TempData["EventCategory_" + id]?.ToString();
+                    EventCategory = TempData["EventCategory_" + id]?.ToString() ?? "Other";
                 }
 
                 if (TempData.ContainsKey("EventCapacity_" + id))
@@ -146,19 +149,20 @@ namespace soft20181_starter.Pages.Admin.Events
 
                 if (TempData.ContainsKey("EventStartTime_" + id))
                 {
-                    EventStartTime = TempData["EventStartTime_" + id]?.ToString();
+                    EventStartTime = TempData["EventStartTime_" + id]?.ToString() ?? string.Empty;
                 }
 
                 if (TempData.ContainsKey("EventEndTime_" + id))
                 {
-                    EventEndTime = TempData["EventEndTime_" + id]?.ToString();
+                    EventEndTime = TempData["EventEndTime_" + id]?.ToString() ?? string.Empty;
                 }
 
                 if (TempData.ContainsKey("EventTags_" + id))
                 {
-                    EventTags = TempData["EventTags_" + id]?.ToString();
+                    EventTags = TempData["EventTags_" + id]?.ToString() ?? string.Empty;
                 }
 
+                _logger.LogInformation("Successfully loaded event {EventId} for editing", id);
                 return Page();
             }
             catch (Exception ex)
