@@ -62,6 +62,13 @@ namespace soft20181_starter.Pages.Admin.Events
         {
             try
             {
+                if (id <= 0)
+                {
+                    _logger.LogWarning("Invalid event ID provided: {EventId}", id);
+                    TempData["ErrorMessage"] = "Invalid event ID provided.";
+                    return RedirectToPage("/Admin");
+                }
+
                 _logger.LogInformation("Loading event for editing. ID: {EventId}", id);
 
                 Event = await _context.Events

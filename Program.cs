@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using soft20181_starter.Services;
+using soft20181_starter.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -112,6 +113,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Add custom error handling middleware
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

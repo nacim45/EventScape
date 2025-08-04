@@ -131,9 +131,11 @@
                                 </div>
                             </div>
                             <div class="event-actions">
-                                <a asp-page="/Admin/Events/Edit" asp-route-id="@eventItem.id" class="admin-action-btn admin-edit-btn">
-                                    <i class="fas fa-edit"></i> Edit Event
-                                </a>
+                                <form method="get" action="/Admin/Events/Edit/@eventItem.id" style="display: inline;">
+                                    <button type="submit" class="admin-action-btn admin-edit-btn">
+                                        <i class="fas fa-edit"></i> Edit Event
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     }
