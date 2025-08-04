@@ -1,4 +1,4 @@
-@page "/Admin/Events/Edit/{id:int}"
+@page "{id:int}"
 @model soft20181_starter.Pages.Admin.Events.EditModel
 @{
     ViewData["Title"] = "Edit Event - EventScape";
@@ -302,8 +302,22 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('.event-edit-form');
             const inputs = form.querySelectorAll('.form-control');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
             
-            form.addEventListener('submit', function(e) {
+            // Add error handling for the entire page
+            window.addEventListener('error', function(e) {
+                console.error('Page Error:', e.error);
+                showErrorMessage('An unexpected error occurred. Please try again.');
+            });
+
+            // Add error handling for unhandled promise rejections
+            window.addEventListener('unhandledrejection', function(e) {
+                console.error('Unhandled Promise Rejection:', e.reason);
+                showErrorMessage('An unexpected error occurred. Please try again.');
+            });
+            
+            form.addEventListener('submit', async function(e) {
                 if (!form.checkValidity()) {
                     e.preventDefault();
                     
@@ -318,6 +332,18 @@
                         invalidInputs[0].focus();
                         invalidInputs[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
+                    return;
+                }
+
+                try {
+                    // Show loading state
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                } catch (error) {
+                    console.error('Error:', error);
+                    showErrorMessage('An error occurred while saving. Please try again.');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
                 }
             });
             
@@ -332,6 +358,28 @@
                     }
                 });
             });
+
+            // Function to show error message
+            function showErrorMessage(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger mt-3';
+                errorDiv.role = 'alert';
+                errorDiv.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span class="ml-2">${message}</span>
+                `;
+                form.insertBefore(errorDiv, form.firstChild);
+                
+                setTimeout(() => {
+                    errorDiv.remove();
+                }, 5000);
+            }
+
+            // Handle any error messages from the server
+            const errorMessage = '@TempData["ErrorMessage"]';
+            if (errorMessage) {
+                showErrorMessage(errorMessage);
+            }
         });
     </script>
     <style>
@@ -343,6 +391,27 @@
         
         .shake {
             animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert i {
+            margin-right: 10px;
+        }
+
+        .fa-spinner {
+            margin-right: 8px;
         }
     </style>
 }
