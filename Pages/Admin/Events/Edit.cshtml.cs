@@ -104,6 +104,13 @@ namespace soft20181_starter.Pages.Admin.Events
                     return RedirectToPage("/Admin");
                 }
 
+                if (Event.IsDeleted)
+                {
+                    _logger.LogWarning("Attempted to edit deleted event: {EventId}", id);
+                    TempData["ErrorMessage"] = "Cannot edit a deleted event.";
+                    return RedirectToPage("/Admin");
+                }
+
                 // Set initial values for additional properties
                 Event.description = Event.description ?? string.Empty;
                 Event.title = Event.title ?? string.Empty;
@@ -341,40 +348,59 @@ namespace soft20181_starter.Pages.Admin.Events
                     // Process image URLs
                     var newImages = new List<string>();
                     
-                    // Keep existing data URLs and external URLs
-                    if (existingEvent.images != null)
+                    try
                     {
-                        newImages.AddRange(existingEvent.images.Where(img => 
-                            img.StartsWith("data:") || 
-                            (img.StartsWith("http") && Uri.TryCreate(img, UriKind.Absolute, out _)) ||
-                            img.StartsWith("images/events/")));
-                    }
-                    
-                    // Add new URLs
-                    if (!string.IsNullOrWhiteSpace(ImageUrls))
-                    {
-                        var urls = ImageUrls
-                            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(url => url.Trim())
-                            .Where(url => !string.IsNullOrWhiteSpace(url))
-                            .ToList();
-                        
-                        foreach (var url in urls)
+                        // Keep existing data URLs and external URLs
+                        if (existingEvent.images != null)
                         {
-                            if (url.StartsWith("data:") || 
-                                url.StartsWith("images/events/") ||
-                                (url.StartsWith("http") && Uri.TryCreate(url, UriKind.Absolute, out _)))
+                            newImages.AddRange(existingEvent.images.Where(img => 
+                                img != null && (
+                                    img.StartsWith("data:") || 
+                                    (img.StartsWith("http") && Uri.TryCreate(img, UriKind.Absolute, out _)) ||
+                                    img.StartsWith("images/events/")
+                                )));
+                        }
+                        
+                        // Add new URLs
+                        if (!string.IsNullOrWhiteSpace(ImageUrls))
+                        {
+                            var urls = ImageUrls
+                                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Select(url => url?.Trim())
+                                .Where(url => !string.IsNullOrWhiteSpace(url))
+                                .ToList();
+                        
+                            foreach (var url in urls)
                             {
-                                if (!newImages.Contains(url))
+                                try
                                 {
-                                    newImages.Add(url);
+                                    if (url != null && (
+                                        url.StartsWith("data:") || 
+                                        url.StartsWith("images/events/") ||
+                                        (url.StartsWith("http") && Uri.TryCreate(url, UriKind.Absolute, out _))))
+                                    {
+                                        if (!newImages.Contains(url))
+                                        {
+                                            newImages.Add(url);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        _logger.LogWarning("Skipping invalid URL: {Url}", url);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Error processing image URL: {Url}", url);
                                 }
                             }
-                            else
-                            {
-                                _logger.LogWarning("Skipping invalid URL: {Url}", url);
-                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error processing image URLs");
+                        // Continue with empty images list rather than failing the entire update
+                        newImages = new List<string>();
                     }
 
                     if (!newImages.SequenceEqual(existingEvent.images ?? new List<string>()))
@@ -390,7 +416,7 @@ namespace soft20181_starter.Pages.Admin.Events
                 Event.CreatedAt = existingEvent.CreatedAt;
                 Event.images = existingEvent.images ?? new List<string>();
                 Event.IsDeleted = existingEvent.IsDeleted;
-                
+
                 // Update the event
                 _context.Attach(Event).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
@@ -429,17 +455,19 @@ namespace soft20181_starter.Pages.Admin.Events
                     ModelState.AddModelError(string.Empty, "The event was modified by another user. Please refresh and try again.");
                         return Page();
                     }
-                catch
+                catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    throw;
+                    _logger.LogError(ex, "Error during event update transaction for event {EventId}. Error: {Error}", Event.id, ex.Message);
+                    ModelState.AddModelError(string.Empty, "An error occurred while saving changes. Please try again.");
+                    return Page();
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating event: {Title}. Error: {Error}", 
                     Event.title, ex.Message);
-                ModelState.AddModelError(string.Empty, $"An error occurred while updating the event: {ex.Message}");
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again.");
                 return Page();
             }
         }
