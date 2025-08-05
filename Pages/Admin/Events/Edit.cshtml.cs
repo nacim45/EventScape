@@ -101,32 +101,49 @@ namespace soft20181_starter.Pages.Admin.Events
                     return RedirectToPage("/Admin");
                 }
 
-                // Initialize Event with non-null values
-                Event = new TheEvent
+                try
                 {
-                    id = eventFromDb.id,
-                    title = eventFromDb.title ?? string.Empty,
-                    description = eventFromDb.description ?? string.Empty,
-                    location = eventFromDb.location ?? string.Empty,
-                    date = eventFromDb.date ?? string.Empty,
-                    price = eventFromDb.price ?? string.Empty,
-                    link = eventFromDb.link ?? string.Empty,
-                    images = eventFromDb.images ?? new List<string>(),
-                    Category = eventFromDb.Category ?? "Other",
-                    Capacity = eventFromDb.Capacity,
-                    StartTime = eventFromDb.StartTime,
-                    EndTime = eventFromDb.EndTime,
-                    Tags = eventFromDb.Tags,
-                    IsDeleted = eventFromDb.IsDeleted,
-                    CreatedAt = eventFromDb.CreatedAt,
-                    UpdatedAt = eventFromDb.UpdatedAt,
-                    Attendances = eventFromDb.Attendances ?? new List<EventAttendance>()
-                };
+                    // Initialize Event with non-null values
+                    Event = new TheEvent
+                    {
+                        id = eventFromDb.id,
+                        title = eventFromDb.title ?? string.Empty,
+                        description = eventFromDb.description ?? string.Empty,
+                        location = eventFromDb.location ?? string.Empty,
+                        date = eventFromDb.date ?? string.Empty,
+                        price = eventFromDb.price ?? string.Empty,
+                        link = eventFromDb.link ?? string.Empty,
+                        images = eventFromDb.images ?? new List<string>(),
+                        Category = eventFromDb.Category ?? "Other",
+                        Capacity = eventFromDb.Capacity,
+                        StartTime = eventFromDb.StartTime ?? string.Empty,
+                        EndTime = eventFromDb.EndTime ?? string.Empty,
+                        Tags = eventFromDb.Tags ?? string.Empty,
+                        IsDeleted = eventFromDb.IsDeleted,
+                        CreatedAt = eventFromDb.CreatedAt,
+                        UpdatedAt = eventFromDb.UpdatedAt,
+                        Attendances = eventFromDb.Attendances ?? new List<EventAttendance>()
+                    };
 
-                // Set form values
-                EventCategory = Event.Category ?? "Other";
-                EventCapacity = Event.Capacity;
-                EventStartTime = Event.StartTime ?? string.Empty;
+                    // Set form values
+                    EventCategory = Event.Category ?? "Other";
+                    EventCapacity = Event.Capacity;
+                    EventStartTime = Event.StartTime ?? string.Empty;
+                    EventEndTime = Event.EndTime ?? string.Empty;
+                    EventTags = Event.Tags ?? string.Empty;
+                    ImageUrlsString = Event.images != null && Event.images.Any() 
+                        ? string.Join(Environment.NewLine, Event.images) 
+                        : string.Empty;
+
+                    _logger.LogInformation("Successfully loaded event {EventId} for editing", id);
+                    return Page();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error initializing event data for editing. Event ID: {EventId}", id);
+                    TempData["ErrorMessage"] = "An error occurred while loading the event data. Please try again.";
+                    return RedirectToPage("/Admin");
+                }
                 EventEndTime = Event.EndTime ?? string.Empty;
                 EventTags = Event.Tags ?? string.Empty;
                 ImageUrlsString = Event.images != null && Event.images.Any() 

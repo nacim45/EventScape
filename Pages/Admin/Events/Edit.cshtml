@@ -1,4 +1,4 @@
-@page "{id:int}"
+@page "/Admin/Events/Edit/{id:int}"
 @model soft20181_starter.Pages.Admin.Events.EditModel
 @{
     ViewData["Title"] = "Edit Event - EventScape";
@@ -9,18 +9,18 @@
     <div class="featured-events-header">
         <h2 class="featured-title">Edit events results</h2>
     </div>
-
+    
     <div class="admin-navigation-container">
         <a href="/Admin" class="admin-nav-btn">
-            <i class="fas fa-tachometer-alt"></i> Dashboard
-        </a>
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
     </div>
 
     <div class="edit-form-container">
         <div class="event-title">@Model.Event?.title</div>
 
         <form method="post" class="event-edit-form" novalidate>
-            <input type="hidden" asp-for="Event.id" />
+                    <input type="hidden" asp-for="Event.id" />
             <input type="hidden" asp-for="Event.title" />
 
             <div class="form-grid">
@@ -28,49 +28,49 @@
                     <label>Description</label>
                     <textarea asp-for="Event.description" class="form-control" required minlength="10" rows="4"></textarea>
                     <div class="invalid-feedback">Please provide a description (at least 10 characters).</div>
-                </div>
-
+                    </div>
+                    
                 <div class="form-group">
                     <label>Location</label>
                     <input asp-for="Event.location" class="form-control" required />
                     <div class="invalid-feedback">Please provide a location.</div>
-                </div>
-
+                        </div>
+                        
                 <div class="form-group">
                     <label>Date</label>
                     <input asp-for="Event.date" type="date" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
                     <div class="invalid-feedback">Please select a future date.</div>
-                </div>
-
+                            </div>
+                            
                 <div class="form-group">
                     <label>Time</label>
                     <input asp-for="EventStartTime" type="time" class="form-control" />
                     <div class="invalid-feedback">Please provide a valid time.</div>
-                </div>
-
+                            </div>
+                            
                 <div class="form-group">
                     <label>Price</label>
                     <input asp-for="Event.price" class="form-control" required pattern="^(\d+(\.\d{1,2})?|Free)$" />
                     <div class="invalid-feedback">Price must be a number (e.g., 10.00) or 'Free'.</div>
-                </div>
-
+                            </div>
+                            
                 <div class="form-group">
                     <label>Tag</label>
                     <input asp-for="EventTags" class="form-control" />
                     <div class="invalid-feedback">Please provide valid tags.</div>
-                </div>
-
+                        </div>
+                        
                 <div class="form-group">
                     <label>Capacity</label>
                     <input asp-for="EventCapacity" type="number" class="form-control" min="1" />
                     <div class="invalid-feedback">Capacity must be a positive number.</div>
-                </div>
-            </div>
-
+                                    </div>
+                                </div>
+                                
             <div class="confirmation-message">
                 Are you sure you want to save these event details?
-            </div>
-
+                    </div>
+                    
             <div class="form-actions">
                 <button type="submit" class="btn-edit">Edit Event</button>
                 <a asp-page="/Admin" class="btn-cancel">Cancel</a>
@@ -80,7 +80,7 @@
         <a asp-page="/Admin/Events/SearchForEdit" class="back-to-search">
             <i class="fas fa-arrow-left"></i> Back to Search
         </a>
-    </div>
+        </div>
 </div>
 
 @section Styles {
@@ -106,12 +106,12 @@
             text-align: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
-
+        
         .featured-events-header {
             text-align: center;
             margin-bottom: 30px;
         }
-
+        
         .admin-navigation-container {
             display: flex;
             justify-content: center;
@@ -138,7 +138,7 @@
             color: white;
             text-decoration: none;
         }
-
+        
         .admin-nav-btn i {
             margin-right: 8px;
             font-size: 16px;
@@ -178,7 +178,7 @@
             font-weight: 600;
             margin-bottom: 8px;
         }
-
+        
         .form-control {
             width: 100%;
             padding: 12px;
@@ -187,7 +187,7 @@
             font-size: 16px;
             transition: all 0.3s ease;
         }
-
+        
         .form-control:focus {
             border-color: #522B5B;
             box-shadow: 0 0 0 4px rgba(82, 43, 91, 0.1);
@@ -227,7 +227,7 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(82, 43, 91, 0.2);
         }
-
+        
         .btn-cancel {
             padding: 12px 30px;
             background-color: #f8f9fa;
@@ -239,7 +239,7 @@
             transition: all 0.3s ease;
             text-decoration: none;
         }
-
+        
         .btn-cancel:hover {
             background-color: #e9ecef;
             color: #495057;
@@ -287,7 +287,7 @@
             .form-actions {
                 flex-direction: column;
             }
-
+            
             .btn-edit,
             .btn-cancel {
                 width: 100%;
@@ -415,7 +415,7 @@
         }
     </style>
 }
-                    
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>

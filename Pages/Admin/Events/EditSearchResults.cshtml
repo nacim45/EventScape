@@ -12,11 +12,11 @@
     
     <div class="admin-navigation-container">
         <a href="/Admin" class="admin-nav-btn">
-            <i class="fas fa-tachometer-alt"></i> Dashboard
-        </a>
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
         <a href="/Admin/Events" class="admin-nav-btn">
-            <i class="fas fa-calendar-alt"></i> All Events
-        </a>
+                    <i class="fas fa-calendar-alt"></i> All Events
+                </a>
     </div>
 
     <div class="user-form-container">
@@ -47,7 +47,7 @@
                                 @if (eventItem.images != null && eventItem.images.Any())
                                 {
                                     <div class="event-thumbnail-container">
-                                        <img src="/@eventItem.images.First()" alt="@eventItem.title" class="event-thumbnail">
+                                    <img src="/@eventItem.images.First()" alt="@eventItem.title" class="event-thumbnail">
                                     </div>
                                 }
                                 else
@@ -131,7 +131,7 @@
                                 </div>
                             </div>
                             <div class="event-actions">
-                                <a asp-page="./Edit" asp-route-id="@eventItem.id" class="admin-action-btn admin-edit-btn">
+                                <a href="/Admin/Events/Edit/@eventItem.id" class="admin-action-btn admin-edit-btn">
                                     <i class="fas fa-edit"></i> Edit Event
                                 </a>
                             </div>
@@ -511,7 +511,7 @@
             }
         }
     </style>
-}
+} 
 
 @section Scripts {
     <script>
