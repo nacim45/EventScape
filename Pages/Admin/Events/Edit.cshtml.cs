@@ -69,7 +69,7 @@ namespace soft20181_starter.Pages.Admin.Events
             "Other" 
         };
 
-        public async Task<IActionResult> OnGetAsync(int id, string location)
+        public async Task<IActionResult> OnGetAsync(int id)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace soft20181_starter.Pages.Admin.Events
                 {
                     _logger.LogWarning("Invalid event ID provided: {EventId}", id);
                     TempData["ErrorMessage"] = "Invalid event ID provided.";
-                    return RedirectToPage("/Admin/Index", new { error = "invalid_id" });
+                    return RedirectToPage("/Admin", new { error = "invalid_id" });
                 }
 
                 var eventFromDb = await _context.Events
@@ -91,14 +91,14 @@ namespace soft20181_starter.Pages.Admin.Events
                 {
                     _logger.LogWarning("Event with ID {EventId} not found", id);
                     TempData["ErrorMessage"] = "Event not found.";
-                    return RedirectToPage("/Admin/Index", new { error = "not_found" });
+                    return RedirectToPage("/Admin", new { error = "not_found" });
                 }
 
                 if (eventFromDb.IsDeleted)
                 {
                     _logger.LogWarning("Attempted to edit deleted event: {EventId}", id);
                     TempData["ErrorMessage"] = "Cannot edit a deleted event.";
-                    return RedirectToPage("/Admin/Index", new { error = "deleted" });
+                    return RedirectToPage("/Admin", new { error = "deleted" });
                 }
 
                 // Initialize Event with non-null values
@@ -169,7 +169,7 @@ namespace soft20181_starter.Pages.Admin.Events
             {
                 _logger.LogError(ex, "Error loading event {EventId} for editing: {Error}", id, ex.Message);
                 TempData["ErrorMessage"] = "An error occurred while loading the event. Please try again.";
-                return RedirectToPage("/Admin/Index", new { error = "error" });
+                return RedirectToPage("/Admin", new { error = "error" });
             }
         }
 
@@ -450,7 +450,7 @@ namespace soft20181_starter.Pages.Admin.Events
                     TempData["SuccessMessage"] = $"Event '{Event.title}' was updated successfully! All changes have been saved to the database.";
                     
                     // Redirect to Admin page with success indicator
-                    return RedirectToPage("/Admin/Index", new { updated = true, location = Event.location });
+                    return RedirectToPage("/Admin", new { updated = true });
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
