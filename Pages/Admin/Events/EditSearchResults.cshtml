@@ -170,7 +170,7 @@
                         <div class="form-fields-section">
                             <div class="form-group">
                                 <label>Location</label>
-                                <input id="editEventLocation" name="EventLocation" class="form-control" required />
+                                <input id="editEventLocation" name="EventLocation" class="form-control" required placeholder="Enter event location" />
                                 <div class="invalid-feedback">Please provide a location.</div>
                             </div>
                             
@@ -182,25 +182,25 @@
                             
                             <div class="form-group">
                                 <label>Time</label>
-                                <input id="editEventStartTime" name="EventStartTime" type="time" class="form-control" />
+                                <input id="editEventStartTime" name="EventStartTime" type="time" class="form-control" placeholder="Enter event time" />
                                 <div class="invalid-feedback">Please provide a valid time.</div>
                             </div>
                             
                             <div class="form-group">
                                 <label>Price</label>
-                                <input id="editEventPrice" name="EventPrice" class="form-control" required pattern="^(\d+(\.\d{1,2})?|Free)$" />
+                                <input id="editEventPrice" name="EventPrice" class="form-control" required pattern="^(\d+(\.\d{1,2})?|Free)$" placeholder="Enter price (e.g., 10.00 or Free)" />
                                 <div class="invalid-feedback">Price must be a number (e.g., 10.00) or 'Free'.</div>
                             </div>
                             
                             <div class="form-group">
                                 <label>Tag</label>
-                                <input id="editEventTags" name="EventTags" class="form-control" />
+                                <input id="editEventTags" name="EventTags" class="form-control" placeholder="Enter event tags" />
                                 <div class="invalid-feedback">Please provide valid tags.</div>
                             </div>
                             
                             <div class="form-group">
                                 <label>Capacity</label>
-                                <input id="editEventCapacity" name="EventCapacity" type="number" class="form-control" min="1" />
+                                <input id="editEventCapacity" name="EventCapacity" type="number" class="form-control" min="1" placeholder="Enter event capacity" />
                                 <div class="invalid-feedback">Capacity must be a positive number.</div>
                             </div>
                         </div>
@@ -701,6 +701,9 @@
             color: #522B5B;
             font-weight: 600;
             margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .form-control {
@@ -710,12 +713,26 @@
             border-radius: 8px;
             font-size: 16px;
             transition: all 0.3s ease;
+            background-color: white;
+            color: #333;
+            min-height: 45px;
+            box-sizing: border-box;
         }
 
         .form-control:focus {
             border-color: #522B5B;
             box-shadow: 0 0 0 4px rgba(82, 43, 91, 0.1);
             outline: none;
+            background-color: #fff;
+        }
+
+        .form-control::placeholder {
+            color: #999;
+            opacity: 1;
+        }
+
+        .form-control:focus::placeholder {
+            color: #ccc;
         }
 
         .confirmation-message {
@@ -791,6 +808,23 @@
 
         .form-control.is-invalid ~ .invalid-feedback {
             display: block;
+        }
+
+        /* Visual feedback for form fields */
+        .form-control:valid {
+            border-color: #28a745;
+            background-color: #f8fff8;
+        }
+
+        .form-control:invalid:not(:placeholder-shown) {
+            border-color: #dc3545;
+            background-color: #fff8f8;
+        }
+
+        /* Hover effects */
+        .form-control:hover {
+            border-color: #854F6C;
+            box-shadow: 0 2px 8px rgba(133, 79, 108, 0.1);
         }
 
         @@keyframes fadeIn {
