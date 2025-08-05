@@ -72,14 +72,11 @@ namespace soft20181_starter.Pages.Admin.Events
                 // Get form data
                 var eventId = int.Parse(Request.Form["EventId"]);
                 var eventTitle = Request.Form["EventTitle"].ToString();
-                var eventDescription = Request.Form["EventDescription"].ToString();
                 var eventLocation = Request.Form["EventLocation"].ToString();
                 var eventDate = Request.Form["EventDate"].ToString();
                 var eventPrice = Request.Form["EventPrice"].ToString();
-                var eventCategory = Request.Form["EventCategory"].ToString();
                 var eventCapacity = Request.Form["EventCapacity"].ToString();
                 var eventStartTime = Request.Form["EventStartTime"].ToString();
-                var eventEndTime = Request.Form["EventEndTime"].ToString();
                 var eventTags = Request.Form["EventTags"].ToString();
 
                 _logger.LogInformation("Updating event {EventId} with title: {EventTitle}", eventId, eventTitle);
@@ -136,19 +133,9 @@ namespace soft20181_starter.Pages.Admin.Events
                         changes.Add($"Location changed from '{existingEvent.location}' to '{newLocation}'");
                     }
 
-                    if (eventDescription != existingEvent.description)
-                    {
-                        changes.Add("Description updated");
-                    }
-
                     if (eventPrice != existingEvent.price)
                     {
                         changes.Add($"Price changed from '{existingEvent.price}' to '{eventPrice}'");
-                    }
-
-                    if (eventCategory != existingEvent.Category)
-                    {
-                        changes.Add($"Category changed from '{existingEvent.Category}' to '{eventCategory}'");
                     }
 
                     int? newCapacity = null;
@@ -167,11 +154,6 @@ namespace soft20181_starter.Pages.Admin.Events
                         changes.Add($"Start time changed from '{existingEvent.StartTime}' to '{eventStartTime}'");
                     }
 
-                    if (eventEndTime != existingEvent.EndTime)
-                    {
-                        changes.Add($"End time changed from '{existingEvent.EndTime}' to '{eventEndTime}'");
-                    }
-
                     if (eventTags != existingEvent.Tags)
                     {
                         changes.Add($"Tags changed from '{existingEvent.Tags}' to '{eventTags}'");
@@ -182,16 +164,16 @@ namespace soft20181_starter.Pages.Admin.Events
                     {
                         id = existingEvent.id,
                         title = eventTitle,
-                        description = eventDescription,
+                        description = existingEvent.description,
                         location = newLocation,
                         date = newDate,
                         price = eventPrice,
                         link = existingEvent.link,
                         images = existingEvent.images,
-                        Category = eventCategory,
+                        Category = existingEvent.Category,
                         Capacity = newCapacity,
                         StartTime = eventStartTime,
-                        EndTime = eventEndTime,
+                        EndTime = existingEvent.EndTime,
                         Tags = eventTags,
                         IsDeleted = existingEvent.IsDeleted,
                         CreatedAt = existingEvent.CreatedAt,
