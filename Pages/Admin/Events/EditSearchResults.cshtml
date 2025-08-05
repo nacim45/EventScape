@@ -170,37 +170,37 @@
                         <div class="form-fields-section">
                             <div class="form-group">
                                 <label>Location</label>
-                                <input id="editEventLocation" name="EventLocation" class="form-control" required placeholder="Enter event location" />
+                                <input id="editEventLocation" name="EventLocation" class="form-control" required placeholder="Enter event location" style="background: white; border: 2px solid red; padding: 10px; width: 100%;" />
                                 <div class="invalid-feedback">Please provide a location.</div>
                             </div>
                             
                             <div class="form-group">
                                 <label>Date</label>
-                                <input id="editEventDate" name="EventDate" type="date" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                <input id="editEventDate" name="EventDate" type="date" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" style="background: white; border: 2px solid #BFACB5; padding: 10px; width: 100%;" />
                                 <div class="invalid-feedback">Please select a future date.</div>
                             </div>
                             
                             <div class="form-group">
                                 <label>Time</label>
-                                <input id="editEventStartTime" name="EventStartTime" type="time" class="form-control" placeholder="Enter event time" />
+                                <input id="editEventStartTime" name="EventStartTime" type="time" class="form-control" placeholder="Enter event time" style="background: white; border: 2px solid #BFACB5; padding: 10px; width: 100%;" />
                                 <div class="invalid-feedback">Please provide a valid time.</div>
                             </div>
                             
                             <div class="form-group">
                                 <label>Price</label>
-                                <input id="editEventPrice" name="EventPrice" class="form-control" required pattern="^(\d+(\.\d{1,2})?|Free)$" placeholder="Enter price (e.g., 10.00 or Free)" />
+                                <input id="editEventPrice" name="EventPrice" class="form-control" required pattern="^(\d+(\.\d{1,2})?|Free)$" placeholder="Enter price (e.g., 10.00 or Free)" style="background: white; border: 2px solid #BFACB5; padding: 10px; width: 100%;" />
                                 <div class="invalid-feedback">Price must be a number (e.g., 10.00) or 'Free'.</div>
                             </div>
                             
                             <div class="form-group">
                                 <label>Tag</label>
-                                <input id="editEventTags" name="EventTags" class="form-control" placeholder="Enter event tags" />
+                                <input id="editEventTags" name="EventTags" class="form-control" placeholder="Enter event tags" style="background: white; border: 2px solid #BFACB5; padding: 10px; width: 100%;" />
                                 <div class="invalid-feedback">Please provide valid tags.</div>
                             </div>
                             
                             <div class="form-group">
                                 <label>Capacity</label>
-                                <input id="editEventCapacity" name="EventCapacity" type="number" class="form-control" min="1" placeholder="Enter event capacity" />
+                                <input id="editEventCapacity" name="EventCapacity" type="number" class="form-control" min="1" placeholder="Enter event capacity" style="background: white; border: 2px solid #BFACB5; padding: 10px; width: 100%;" />
                                 <div class="invalid-feedback">Capacity must be a positive number.</div>
                             </div>
                         </div>
@@ -679,10 +679,12 @@
         }
 
         .form-fields-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 20px !important;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
 
         .confirmation-section {
@@ -693,7 +695,10 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 20px !important;
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
 
         .form-group label {
@@ -707,16 +712,19 @@
         }
 
         .form-control {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #BFACB5;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background-color: white;
-            color: #333;
-            min-height: 45px;
-            box-sizing: border-box;
+            width: 100% !important;
+            padding: 12px !important;
+            border: 2px solid #BFACB5 !important;
+            border-radius: 8px !important;
+            font-size: 16px !important;
+            transition: all 0.3s ease !important;
+            background-color: white !important;
+            color: #333 !important;
+            min-height: 45px !important;
+            box-sizing: border-box !important;
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
 
         .form-control:focus {
