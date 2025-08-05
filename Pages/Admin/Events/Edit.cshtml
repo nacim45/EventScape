@@ -1,4 +1,4 @@
-@page "{id:int}"
+@page "/Admin/Events/Edit/{id:int}"
 @model soft20181_starter.Pages.Admin.Events.EditModel
 @{
     ViewData["Title"] = "Edit Event - EventScape";
@@ -20,7 +20,7 @@
         <div class="event-title">@Model.Event?.title</div>
 
         <form method="post" class="event-edit-form" enctype="multipart/form-data" novalidate>
-            <input type="hidden" asp-for="Event.id" />
+                    <input type="hidden" asp-for="Event.id" />
             <input type="hidden" asp-for="Event.title" />
             @Html.AntiForgeryToken()
 
