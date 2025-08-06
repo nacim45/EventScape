@@ -147,12 +147,31 @@ namespace soft20181_starter.Pages.Admin.Events
                         return Page();
                     }
 
-                    // Validate price format
-                    if (!Event.price.Equals("Free", StringComparison.OrdinalIgnoreCase) && 
-                        !decimal.TryParse(Event.price, out _))
+                    // Format and validate price
+                    if (!string.IsNullOrEmpty(Event.price))
                     {
-                        ModelState.AddModelError("Event.price", "Price must be a number or 'Free'");
-                        return Page();
+                        var cleanPrice = Event.price.Trim();
+                        
+                        // Handle "Free" case
+                        if (cleanPrice.Equals("Free", StringComparison.OrdinalIgnoreCase))
+                        {
+                            Event.price = "Free";
+                        }
+                        else
+                        {
+                            // Remove £ symbol if present and try to parse
+                            var priceWithoutSymbol = cleanPrice.Replace("£", "").Trim();
+                            if (decimal.TryParse(priceWithoutSymbol, out var priceValue))
+                            {
+                                // Format as £{price} to match existing events
+                                Event.price = $"£{priceValue}";
+                            }
+                            else
+                            {
+                                ModelState.AddModelError("Event.price", "Price must be a number (e.g., £10 or 10) or 'Free'");
+                                return Page();
+                            }
+                        }
                     }
 
                     // Set additional event properties

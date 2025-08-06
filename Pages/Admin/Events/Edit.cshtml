@@ -51,8 +51,8 @@
                             
                 <div class="form-group">
                     <label>Price</label>
-                    <input asp-for="Event.price" class="form-control" required pattern="^(\d+(\.\d{1,2})?|Free)$" />
-                    <div class="invalid-feedback">Price must be a number (e.g., 10.00) or 'Free'.</div>
+                                                <input asp-for="Event.price" class="form-control" required pattern="^(£?\d+(\.\d{1,2})?|Free)$" placeholder="Enter price (e.g., £10 or 10 or Free)" />
+                                                <div class="invalid-feedback">Price must be a number (e.g., £10 or 10) or 'Free'.</div>
                             </div>
                             
                 <div class="form-group">

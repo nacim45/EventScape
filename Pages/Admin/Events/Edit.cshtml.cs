@@ -289,10 +289,10 @@ namespace soft20181_starter.Pages.Admin.Events
                             var priceStr = newPrice.Replace("£", "").Replace("$", "").Trim();
                             if (!decimal.TryParse(priceStr, out decimal price))
                             {
-                                ModelState.AddModelError("Event.price", "Price must be a number or 'Free'");
+                                ModelState.AddModelError("Event.price", "Price must be a number (e.g., £10 or 10) or 'Free'");
                                 return Page();
                             }
-                            newPrice = $"£{price:N2}";
+                            newPrice = $"£{price}";
                 }
                 else
                 {

@@ -28,7 +28,7 @@ public class TheEvent
     public string date { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Price is required")]
-    [RegularExpression(@"^(\d+(\.\d{1,2})?|Free)$", ErrorMessage = "Price must be a number or 'Free'")]
+    [RegularExpression(@"^(£?\d+(\.\d{1,2})?|Free)$", ErrorMessage = "Price must be a number (e.g., £10 or 10) or 'Free'")]
     public string price { get; set; } = string.Empty;
 
     [Url(ErrorMessage = "Please enter a valid URL")]

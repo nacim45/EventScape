@@ -121,6 +121,33 @@ namespace soft20181_starter.Pages.Admin.Events
                     // Format date consistently
                     var newDate = parsedDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
 
+                    // Format and validate price
+                    var formattedPrice = eventPrice;
+                    if (!string.IsNullOrEmpty(eventPrice))
+                    {
+                        var cleanPrice = eventPrice.Trim();
+                        
+                        // Handle "Free" case
+                        if (cleanPrice.Equals("Free", StringComparison.OrdinalIgnoreCase))
+                        {
+                            formattedPrice = "Free";
+                        }
+                        else
+                        {
+                            // Remove £ symbol if present and try to parse
+                            var priceWithoutSymbol = cleanPrice.Replace("£", "").Trim();
+                            if (decimal.TryParse(priceWithoutSymbol, out var priceValue))
+                            {
+                                // Format as £{price} to match existing events
+                                formattedPrice = $"£{priceValue}";
+                            }
+                            else
+                            {
+                                return BadRequest("Price must be a number (e.g., £10 or 10) or 'Free'");
+                            }
+                        }
+                    }
+
                     // Update event properties
                     if (newDate != existingEvent.date)
                     {
@@ -133,9 +160,9 @@ namespace soft20181_starter.Pages.Admin.Events
                         changes.Add($"Location changed from '{existingEvent.location}' to '{newLocation}'");
                     }
 
-                    if (eventPrice != existingEvent.price)
+                    if (formattedPrice != existingEvent.price)
                     {
-                        changes.Add($"Price changed from '{existingEvent.price}' to '{eventPrice}'");
+                        changes.Add($"Price changed from '{existingEvent.price}' to '{formattedPrice}'");
                     }
 
                     int? newCapacity = null;
@@ -167,7 +194,7 @@ namespace soft20181_starter.Pages.Admin.Events
                         description = existingEvent.description,
                         location = newLocation,
                         date = newDate,
-                        price = eventPrice,
+                        price = formattedPrice,
                         link = existingEvent.link,
                         images = existingEvent.images,
                         Category = existingEvent.Category,
