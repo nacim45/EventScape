@@ -151,19 +151,15 @@ namespace soft20181_starter.Pages.Admin.Events
                     if (!string.IsNullOrEmpty(Event.price))
                     {
                         var cleanPrice = Event.price.Trim();
-                        
-                        // Handle "Free" case
                         if (cleanPrice.Equals("Free", StringComparison.OrdinalIgnoreCase))
                         {
                             Event.price = "Free";
                         }
                         else
                         {
-                            // Remove £ symbol if present and try to parse
                             var priceWithoutSymbol = cleanPrice.Replace("£", "").Trim();
                             if (decimal.TryParse(priceWithoutSymbol, out var priceValue))
                             {
-                                // Format as £{price} to match existing events
                                 Event.price = $"£{priceValue}";
                             }
                             else
@@ -185,6 +181,7 @@ namespace soft20181_starter.Pages.Admin.Events
                     Event.CreatedAt = now;
                     Event.UpdatedAt = now;
                     _logger.LogInformation("Setting CreatedAt to: {CreatedAt}", now);
+                    
                     // Get the current user's ID for the foreign key
                     var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                     if (string.IsNullOrEmpty(userId))
@@ -196,41 +193,55 @@ namespace soft20181_starter.Pages.Admin.Events
                     Event.CreatedById = userId;
                     Event.IsDeleted = false;
 
-                // Initialize images list
-                Event.images = new List<string>();
+                    // Initialize images list
+                    Event.images = new List<string>();
 
-                // Process uploaded images
-                if (UploadedImages != null && UploadedImages.Count > 0)
-                {
-                                                    string uploadsFolder = Path.Combine(_environment.WebRootPath ?? throw new InvalidOperationException("WebRootPath is null"), "images", "events");
-                    
-                            try
-                            {
-                    // Ensure directory exists
-                    if (!Directory.Exists(uploadsFolder))
+                    // Process uploaded images
+                    if (UploadedImages != null && UploadedImages.Count > 0)
                     {
-                        Directory.CreateDirectory(uploadsFolder);
-                                }
+                        _logger.LogInformation("Processing {ImageCount} uploaded images", UploadedImages.Count);
+                        
+                        string uploadsFolder = Path.Combine(_environment.WebRootPath ?? throw new InvalidOperationException("WebRootPath is null"), "images", "events");
+                        
+                        try
+                        {
+                            // Ensure directory exists
+                            if (!Directory.Exists(uploadsFolder))
+                            {
+                                Directory.CreateDirectory(uploadsFolder);
+                                _logger.LogInformation("Created events images directory: {Directory}", uploadsFolder);
                             }
-                            catch (Exception ex)
-                            {
-                                _logger.LogWarning("Could not create events directory. Using URL storage only. Error: {Error}", ex.Message);
-                                // Continue without local file storage - we'll use URLs only
-                                uploadsFolder = null;
-                    }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning("Could not create events directory. Using data URL storage only. Error: {Error}", ex.Message);
+                            uploadsFolder = null;
+                        }
 
-                    // Process up to 3 images
-                    foreach (var image in UploadedImages.Take(3))
-                    {
-                        if (image.Length > 0)
+                        // Process up to 3 images
+                        foreach (var image in UploadedImages.Take(3))
+                        {
+                            if (image.Length > 0)
                             {
-                                                                                                                        try
+                                _logger.LogInformation("Processing image: {FileName}, Size: {Size} bytes, ContentType: {ContentType}", 
+                                    image.FileName, image.Length, image.ContentType);
+                                
+                                try
+                                {
+                                    if (uploadsFolder != null)
                                     {
-                                        // Create unique filename
-                                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                                        // Create unique filename with original extension
+                                        string extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+                                        if (string.IsNullOrEmpty(extension))
+                                        {
+                                            // Default to .jpg if no extension
+                                            extension = ".jpg";
+                                        }
+                                        
+                                        string fileName = Guid.NewGuid().ToString() + extension;
                                         string filePath = Path.Combine(uploadsFolder, fileName);
                                         
-                                        // Save image
+                                        // Save image to disk
                                         using (var stream = new FileStream(filePath, FileMode.Create))
                                         {
                                             await image.CopyToAsync(stream);
@@ -240,10 +251,9 @@ namespace soft20181_starter.Pages.Admin.Events
                                         Event.images.Add($"images/events/{fileName}");
                                         _logger.LogInformation("Successfully saved image {FileName} to disk", fileName);
                                     }
-                                    catch (Exception ex)
+                                    else
                                     {
-                                        _logger.LogWarning("Could not save image to disk. Error: {Error}", ex.Message);
-                                        // If file save fails, store the image as a data URL
+                                        // Store as data URL if file system is not available
                                         using (var memoryStream = new MemoryStream())
                                         {
                                             await image.CopyToAsync(memoryStream);
@@ -251,65 +261,76 @@ namespace soft20181_starter.Pages.Admin.Events
                                             var base64 = Convert.ToBase64String(bytes);
                                             var dataUrl = $"data:{image.ContentType};base64,{base64}";
                                             Event.images.Add(dataUrl);
-                                            _logger.LogInformation("Stored image as data URL instead");
+                                            _logger.LogInformation("Stored image as data URL: {FileName}", image.FileName);
                                         }
                                     }
-                                
-                                _logger.LogInformation("Processed image for event");
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning("Could not save image to disk. Storing as data URL instead. Error: {Error}", ex.Message);
+                                    // Fallback to data URL storage
+                                    try
+                                    {
+                                        using (var memoryStream = new MemoryStream())
+                                        {
+                                            await image.CopyToAsync(memoryStream);
+                                            var bytes = memoryStream.ToArray();
+                                            var base64 = Convert.ToBase64String(bytes);
+                                            var dataUrl = $"data:{image.ContentType};base64,{base64}";
+                                            Event.images.Add(dataUrl);
+                                            _logger.LogInformation("Stored image as data URL after disk failure: {FileName}", image.FileName);
+                                        }
+                                    }
+                                    catch (Exception dataUrlEx)
+                                    {
+                                        _logger.LogError("Failed to store image as data URL: {FileName}, Error: {Error}", image.FileName, dataUrlEx.Message);
+                                    }
+                                }
                             }
+                        }
+                        
+                        _logger.LogInformation("Completed processing {ImageCount} images. Total images in event: {TotalImages}", 
+                            UploadedImages.Count, Event.images.Count);
                     }
-                }
 
-                // Process image URLs if any
-                if (!string.IsNullOrWhiteSpace(ImageUrls))
-                {
-                    var urls = ImageUrls
-                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(url => url.Trim())
-                        .Where(url => !string.IsNullOrWhiteSpace(url))
-                        .ToList();
-                    
-                    // Add URLs to event images
-                    Event.images.AddRange(urls);
-                }
+                    // Process image URLs if any
+                    if (!string.IsNullOrWhiteSpace(ImageUrls))
+                    {
+                        var urls = ImageUrls
+                            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(url => url.Trim())
+                            .Where(url => !string.IsNullOrWhiteSpace(url))
+                            .ToList();
+                        
+                        // Add URLs to event images
+                        Event.images.AddRange(urls);
+                        _logger.LogInformation("Added {UrlCount} image URLs to event", urls.Count);
+                    }
 
-                    // Date is already formatted in the validation step above
-
-                                    // Add event to database
+                    // Add event to database
                     _logger.LogInformation("Attempting to save event to database: {Title}", Event.title);
                     _logger.LogInformation("Event details before save: Location: {Location}, Date: {Date}, Price: {Price}", 
                         Event.location, Event.date, Event.price);
                     
                     var entry = await _context.Events.AddAsync(Event);
-                    var saveResult = await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
                     
-                    // Verify the event was saved
-                    var savedEvent = await _context.Events
-                        .FirstOrDefaultAsync(e => e.id == Event.id);
+                    // Now the event has an ID, update the link and create audit log entry
+                    Event.link = $"/EventDetail?location={Event.location}&id={Event.id}";
+                    await _context.SaveChangesAsync();
                     
-                    if (savedEvent != null)
-                    {
-                        _logger.LogInformation("Event saved successfully. ID: {EventId}, Title: {Title}, Location: {Location}", 
-                            savedEvent.id, savedEvent.title, savedEvent.location);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Event not found in database after save. ID: {EventId}", Event.id);
-                    }
-
-                    // Create audit log entry
                     var auditLog = new AuditLog
                     {
                         EntityName = "Event",
                         EntityId = Event.id.ToString(),
                         Action = "Create",
-                        UserId = User.Identity?.Name,
+                        UserId = User.Identity?.Name ?? "System",
                         Changes = $"Created new event: {Event.title} (ID: {Event.id}) in location: {Event.location}",
                         Timestamp = DateTime.UtcNow
                     };
                     await _context.AuditLogs.AddAsync(auditLog);
-                await _context.SaveChangesAsync();
-                
+                    await _context.SaveChangesAsync();
+                    
                     // Commit transaction
                     await transaction.CommitAsync();
                     
@@ -324,12 +345,13 @@ namespace soft20181_starter.Pages.Admin.Events
                     // Redirect to Admin page with smooth transition
                     return RedirectToPage("/Admin", new { created = true });
                 }
-                                    catch
-                    {
-                        // Rollback transaction on error
-                        await transaction.RollbackAsync();
-                        throw;
-                    }
+                catch (Exception ex)
+                {
+                    // Rollback transaction on error
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error during transaction: {Error}", ex.Message);
+                    throw;
+                }
             }
             catch (Exception ex)
             {
