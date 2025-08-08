@@ -170,24 +170,18 @@
                     
                     <div class="form-group mt-4">
                         <label for="UploadedImages">Upload Images (Max 3)</label>
-                        <div class="image-upload-container" id="imageUploadContainer">
+                        <div class="image-upload-container">
                             <input type="file" name="UploadedImages" id="UploadedImages" accept="image/*" multiple class="form-control file-input" />
-                            <div class="image-upload-overlay" id="imageUploadOverlay">
+                            <div class="image-upload-overlay">
                                 <i class="fas fa-cloud-upload-alt"></i>
-                                <span id="upload-text">Drag & drop images here or click to browse</span>
-                                <small>(Maximum 3 images, any format, 10MB each)</small>
-                                <div class="upload-progress" id="uploadProgress" style="display: none;">
-                                    <div class="progress-bar">
-                                        <div class="progress-fill"></div>
-                                    </div>
-                                    <span class="progress-text">Processing images...</span>
-                                </div>
+                                <span id="upload-text">Drag images here or click to browse</span>
+                                <small>(Maximum 3 images, 5MB each)</small>
                             </div>
                         </div>
                         <div id="image-preview-container" class="image-preview-container"></div>
                         <div class="form-hint">
                             <i class="fas fa-info-circle"></i>
-                            Upload up to 3 high-quality images that showcase your event. Supports all image formats.
+                            Upload up to 3 high-quality images that showcase your event
                         </div>
                     </div>
                     
@@ -676,183 +670,6 @@
         .mt-3 {
             margin-top: 15px;
         }
-        
-        /* Enhanced Image Upload Styling */
-        .image-upload-container {
-            position: relative;
-            border: 3px dashed #BFACB5;
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            overflow: hidden;
-        }
-        
-        .image-upload-container:hover {
-            border-color: #854F6C;
-            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(133, 79, 108, 0.15);
-        }
-        
-        .image-upload-container.dragover {
-            border-color: #522B5B;
-            background: linear-gradient(135deg, #e8f4fd 0%, #d1ecf1 100%);
-            transform: scale(1.02);
-            box-shadow: 0 12px 35px rgba(82, 43, 91, 0.25);
-        }
-        
-        .image-upload-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            z-index: 2;
-            pointer-events: none;
-        }
-        
-        .image-upload-overlay i {
-            font-size: 48px;
-            color: #522B5B;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        .image-upload-container:hover .image-upload-overlay i {
-            color: #854F6C;
-            transform: scale(1.1);
-        }
-        
-        .image-upload-overlay span {
-            font-size: 18px;
-            font-weight: 600;
-            color: #522B5B;
-            margin-bottom: 8px;
-        }
-        
-        .image-upload-overlay small {
-            color: #6c757d;
-            font-size: 14px;
-        }
-        
-        .file-input {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-            z-index: 3;
-        }
-        
-        .image-preview-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-        
-        .image-preview {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            background: white;
-        }
-        
-        .image-preview:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-        
-        .image-preview img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            display: block;
-        }
-        
-        .image-preview .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(220, 53, 69, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .image-preview .remove-btn:hover {
-            background: rgba(220, 53, 69, 1);
-            transform: scale(1.1);
-        }
-        
-        .upload-progress {
-            margin-top: 15px;
-            width: 100%;
-            max-width: 300px;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #e9ecef;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #522B5B, #854F6C);
-            width: 0%;
-            transition: width 0.3s ease;
-            animation: progress-animation 2s ease-in-out infinite;
-        }
-        
-        @@keyframes progress-animation {
-            0% { width: 0%; }
-            50% { width: 70%; }
-            100% { width: 100%; }
-        }
-        
-        .progress-text {
-            font-size: 14px;
-            color: #522B5B;
-            font-weight: 500;
-        }
-        
-        .upload-success {
-            color: #28a745;
-            font-weight: 600;
-        }
-        
-        .upload-error {
-            color: #dc3545;
-            font-weight: 600;
-        }
     </style>
 }
 
@@ -925,17 +742,11 @@
                 });
             });
             
-            // Enhanced File upload handling
+            // File upload handling
             const uploadInput = document.getElementById('UploadedImages');
-            const uploadContainer = document.getElementById('imageUploadContainer');
-            const uploadOverlay = document.getElementById('imageUploadOverlay');
+            const uploadContainer = document.querySelector('.image-upload-container');
             const previewContainer = document.getElementById('image-preview-container');
             const uploadText = document.getElementById('upload-text');
-            const uploadProgress = document.getElementById('uploadProgress');
-            const progressFill = uploadProgress ? uploadProgress.querySelector('.progress-fill') : null;
-            const progressText = uploadProgress ? uploadProgress.querySelector('.progress-text') : null;
-            
-            let uploadedFiles = [];
             
             if (uploadInput && uploadContainer && previewContainer) {
                 // Handle drag events
@@ -958,18 +769,10 @@
                 
                 function highlight() {
                     uploadContainer.classList.add('dragover');
-                    if (uploadText) {
-                        uploadText.textContent = "Drop images here!";
-                        uploadText.classList.add('upload-success');
-                    }
                 }
                 
                 function unhighlight() {
                     uploadContainer.classList.remove('dragover');
-                    if (uploadText) {
-                        updateUploadText();
-                        uploadText.classList.remove('upload-success');
-                    }
                 }
                 
                 // Handle file selection
@@ -979,145 +782,45 @@
                 function handleDrop(e) {
                     const dt = e.dataTransfer;
                     const files = dt.files;
-                    handleFileSelection(files);
+                    uploadInput.files = files;
+                    handleFiles();
                 }
                 
                 function handleFiles() {
                     const files = uploadInput.files;
-                    handleFileSelection(files);
-                }
-                
-                function handleFileSelection(files) {
-                    if (!files || files.length === 0) return;
-                    
-                    // Show progress
-                    if (uploadProgress) {
-                        uploadProgress.style.display = 'block';
-                    }
-                    
-                    // Limit to 3 images and validate
-                    const validFiles = Array.from(files)
-                        .filter(file => file.type.startsWith('image/'))
-                        .slice(0, 3);
-                    
-                    if (validFiles.length === 0) {
-                        showError('Please select valid image files.');
-                        return;
-                    }
-                    
-                    // Clear previous previews
                     previewContainer.innerHTML = '';
-                    uploadedFiles = [];
                     
-                    // Process each file
-                    validFiles.forEach((file, index) => {
-                        const reader = new FileReader();
-                        
-                        reader.onload = function(e) {
-                            createImagePreview(e.target.result, file, index);
-                            
-                            // Update progress
-                            if (progressFill) {
-                                progressFill.style.width = `${((index + 1) / validFiles.length) * 100}%`;
-                            }
-                            
-                            // Hide progress when all files are processed
-                            if (index === validFiles.length - 1) {
-                                setTimeout(() => {
-                                    if (uploadProgress) {
-                                        uploadProgress.style.display = 'none';
-                                    }
-                                    if (progressFill) {
-                                        progressFill.style.width = '0%';
-                                    }
-                                }, 500);
-                            }
-                        };
-                        
-                        reader.onerror = function() {
-                            showError(`Error reading file: ${file.name}`);
-                        };
-                        
-                        reader.readAsDataURL(file);
-                        uploadedFiles.push(file);
-                    });
+                    // Limit to 3 images
+                    const fileArray = Array.from(files).slice(0, 3);
                     
-                    // Update file input
-                    const dataTransfer = new DataTransfer();
-                    validFiles.forEach(file => dataTransfer.items.add(file));
-                    uploadInput.files = dataTransfer.files;
-                    
-                    updateUploadText();
-                }
-                
-                function createImagePreview(src, file, index) {
-                    const preview = document.createElement('div');
-                    preview.className = 'image-preview';
-                    preview.dataset.index = index;
-                    
-                    const img = document.createElement('img');
-                    img.src = src;
-                    img.alt = file.name;
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'remove-btn';
-                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                    removeBtn.onclick = function() {
-                        removeImage(index);
-                    };
-                    
-                    preview.appendChild(img);
-                    preview.appendChild(removeBtn);
-                    previewContainer.appendChild(preview);
-                }
-                
-                function removeImage(index) {
-                    // Remove from uploadedFiles array
-                    uploadedFiles.splice(index, 1);
-                    
-                    // Update file input
-                    const dataTransfer = new DataTransfer();
-                    uploadedFiles.forEach(file => dataTransfer.items.add(file));
-                    uploadInput.files = dataTransfer.files;
-                    
-                    // Recreate previews
-                    previewContainer.innerHTML = '';
-                    uploadedFiles.forEach((file, newIndex) => {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            createImagePreview(e.target.result, file, newIndex);
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                    
-                    updateUploadText();
-                }
-                
-                function updateUploadText() {
-                    if (uploadText) {
-                        if (uploadedFiles.length > 0) {
-                            uploadText.textContent = `${uploadedFiles.length} image(s) selected`;
-                            uploadText.classList.add('upload-success');
-                        } else {
-                            uploadText.textContent = "Drag & drop images here or click to browse";
-                            uploadText.classList.remove('upload-success');
+                    fileArray.forEach(file => {
+                        // Validate file type
+                        if (!file.type.match('image.*')) {
+                            return;
                         }
+                        
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            const preview = document.createElement('div');
+                            preview.className = 'image-preview';
+                            
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            
+                            preview.appendChild(img);
+                            previewContainer.appendChild(preview);
+                        }
+                        
+                        reader.readAsDataURL(file);
+                    });
+                    
+                    if (fileArray.length > 0 && uploadText) {
+                        uploadText.textContent = `${fileArray.length} file(s) selected`;
+                    } else if (uploadText) {
+                        uploadText.textContent = "Drag images here or click to browse";
                     }
                 }
-                
-                function showError(message) {
-                    if (uploadText) {
-                        uploadText.textContent = message;
-                        uploadText.classList.add('upload-error');
-                        setTimeout(() => {
-                            uploadText.classList.remove('upload-error');
-                            updateUploadText();
-                        }, 3000);
-                    }
-                }
-                
-                // Initialize
-                updateUploadText();
             }
         });
     </script>

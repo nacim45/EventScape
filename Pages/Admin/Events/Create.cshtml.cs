@@ -54,6 +54,9 @@ namespace soft20181_starter.Pages.Admin.Events
         [BindProperty]
         public string? EventTags { get; set; }
 
+        [BindProperty]
+        public string EventId { get; set; } = string.Empty;
+
         public List<string> AvailableCategories { get; } = new List<string> 
         { 
             "Music", 
@@ -307,6 +310,13 @@ namespace soft20181_starter.Pages.Admin.Events
                         _logger.LogInformation("Added {UrlCount} image URLs to event", urls.Count);
                     }
 
+                    // Set the event ID if provided
+                    if (!string.IsNullOrEmpty(EventId) && int.TryParse(EventId, out int providedId))
+                    {
+                        Event.id = providedId;
+                        _logger.LogInformation("Using provided Event ID: {EventId}", providedId);
+                    }
+                    
                     // Add event to database
                     _logger.LogInformation("Attempting to save event to database: {Title}", Event.title);
                     _logger.LogInformation("Event details before save: Location: {Location}, Date: {Date}, Price: {Price}", 
