@@ -328,12 +328,25 @@
     <script src="~/js/javascript.js"></script>
     <script>
       async function openEventsModal(locationFilter, search) {
+        console.log('openEventsModal called with:', { locationFilter, search });
         try {
           const params = new URLSearchParams();
           if (locationFilter) params.append('locationFilter', locationFilter);
           if (search) params.append('searchString', search);
-          const resp = await fetch(`?handler=EventsJson&${params.toString()}`);
+          
+          const url = `?handler=EventsJson&${params.toString()}`;
+          console.log('Fetching from URL:', url);
+          
+          const resp = await fetch(url);
+          console.log('Response status:', resp.status);
+          
+          if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+          }
+          
           const data = await resp.json();
+          console.log('Received data:', data);
+          
           const cont = document.getElementById('eventsModalContent');
           if (!data || !data.events || data.events.length === 0) {
             cont.innerHTML = '<div class="text-center p-3">No events found</div>';
@@ -347,12 +360,29 @@
               <div class="mb-2 fw-bold">${locationFilter ? locationFilter : 'All events'}</div>
               <ul class="list-group">${items}</ul>`;
           }
-          const modal = new bootstrap.Modal(document.getElementById('eventsModal'));
-          modal.show();
+          
+          const modalElement = document.getElementById('eventsModal');
+          console.log('Modal element:', modalElement);
+          
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+          } else {
+            console.error('Bootstrap Modal not available');
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+          }
         } catch (e) {
-          document.getElementById('eventsModalContent').innerHTML = 'Error loading events';
-          const modal = new bootstrap.Modal(document.getElementById('eventsModal'));
-          modal.show();
+          console.error('Error in openEventsModal:', e);
+          document.getElementById('eventsModalContent').innerHTML = `Error loading events: ${e.message}`;
+          const modalElement = document.getElementById('eventsModal');
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+          } else {
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+          }
         }
       }
     </script>

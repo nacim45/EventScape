@@ -651,12 +651,25 @@
     <script src="~/js/javascript.js"></script>
     <script>
       async function openUsersModal(roleFilter, search) {
+        console.log('openUsersModal called with:', { roleFilter, search });
         try {
           const params = new URLSearchParams();
           if (roleFilter) params.append('roleFilter', roleFilter);
           if (search) params.append('searchString', search);
-          const resp = await fetch(`?handler=UsersJson&${params.toString()}`);
+          
+          const url = `?handler=UsersJson&${params.toString()}`;
+          console.log('Fetching from URL:', url);
+          
+          const resp = await fetch(url);
+          console.log('Response status:', resp.status);
+          
+          if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+          }
+          
           const data = await resp.json();
+          console.log('Received data:', data);
+          
           const cont = document.getElementById('usersModalContent');
           if (!data || !data.users || data.users.length === 0) {
             cont.innerHTML = '<div class="text-center p-3">No users found</div>';
@@ -676,12 +689,29 @@
               <div class="mb-2 fw-bold">${header}</div>
               <ul class="list-group">${items}</ul>`;
           }
-          const modal = new bootstrap.Modal(document.getElementById('usersModal'));
-          modal.show();
+          
+          const modalElement = document.getElementById('usersModal');
+          console.log('Modal element:', modalElement);
+          
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+          } else {
+            console.error('Bootstrap Modal not available');
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+          }
         } catch (e) {
-          document.getElementById('usersModalContent').innerHTML = 'Error loading users';
-          const modal = new bootstrap.Modal(document.getElementById('usersModal'));
-          modal.show();
+          console.error('Error in openUsersModal:', e);
+          document.getElementById('usersModalContent').innerHTML = `Error loading users: ${e.message}`;
+          const modalElement = document.getElementById('usersModal');
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+          } else {
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+          }
         }
       }
     </script>

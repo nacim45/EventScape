@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace soft20181_starter.Pages.Admin.Users
 {
@@ -47,6 +48,8 @@ namespace soft20181_starter.Pages.Admin.Users
 
         public async Task<IActionResult> OnPostAsync()
         {
+            _logger.LogInformation("OnPostAsync called for user creation");
+            
             // Re-populate available roles in case of validation errors
             AvailableRoles = new List<string>();
             foreach (var role in _roleManager.Roles)
@@ -56,8 +59,16 @@ namespace soft20181_starter.Pages.Admin.Users
 
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("ModelState is invalid");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("ModelState error: {Error}", error.ErrorMessage);
+                }
                 return Page();
             }
+
+            _logger.LogInformation("Creating user with email: {Email}, name: {Name}, surname: {Surname}", 
+                UserViewModel.Email, UserViewModel.Name, UserViewModel.Surname);
 
             var user = new AppUser
             {
@@ -70,24 +81,41 @@ namespace soft20181_starter.Pages.Admin.Users
                 Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role
             };
 
+            _logger.LogInformation("AppUser object created with ID: {Id}", user.Id);
+
             var result = await _userManager.CreateAsync(user, UserViewModel.Password);
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("User created a new account.");
+                _logger.LogInformation("User created successfully with ID: {UserId}", user.Id);
 
                 // Assign role if specified
                 if (!string.IsNullOrEmpty(UserViewModel.Role))
                 {
-                    await _userManager.AddToRoleAsync(user, UserViewModel.Role);
+                    var roleResult = await _userManager.AddToRoleAsync(user, UserViewModel.Role);
+                    if (roleResult.Succeeded)
+                    {
+                        _logger.LogInformation("Role {Role} assigned successfully to user {UserId}", UserViewModel.Role, user.Id);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to assign role {Role} to user {UserId}", UserViewModel.Role, user.Id);
+                        foreach (var error in roleResult.Errors)
+                        {
+                            _logger.LogWarning("Role assignment error: {Error}", error.Description);
+                        }
+                    }
                 }
 
                 TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully.";
-                return RedirectToPage("./Index", new { ShowModal = true });
+                _logger.LogInformation("Redirecting to Index page with success message");
+                return RedirectToPage("./Index");
             }
 
+            _logger.LogError("Failed to create user");
             foreach (var error in result.Errors)
             {
+                _logger.LogError("User creation error: {Error}", error.Description);
                 ModelState.AddModelError(string.Empty, error.Description);
             }
 
