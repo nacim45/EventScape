@@ -131,5 +131,23 @@ namespace soft20181_starter.Pages.Admin.Events
                 return new JsonResult(new { events = Array.Empty<object>() });
             }
         }
+
+        public async Task<IActionResult> OnGetLocationsJsonAsync()
+        {
+            try
+            {
+                var locations = await _context.Events
+                    .Select(e => e.location)
+                    .Distinct()
+                    .OrderBy(l => l)
+                    .ToListAsync();
+                return new JsonResult(new { locations = locations });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error building locations json");
+                return new JsonResult(new { locations = Array.Empty<string>() });
+            }
+        }
     }
 } 

@@ -64,42 +64,6 @@
         </div>
     </div>
 
-    <div class="card admin-card">
-        <div class="admin-card-header">
-            <div class="admin-card-title"><i class="fas fa-list"></i> Users</div>
-        </div>
-        <div class="table-responsive">
-            <table class="table admin-table">
-                <thead class="admin-table-header">
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Roles</th>
-                        <th>Registered</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Users.Count == 0)
-                    {
-                        <tr><td colspan="4" class="text-center">No users found</td></tr>
-                    }
-                    else
-                    {
-                        foreach (var u in Model.Users)
-                        {
-                            <tr class="admin-table-row">
-                                <td>@u.Name @u.Surname</td>
-                                <td>@u.Email</td>
-                                <td>@string.Join(", ", u.UserRoles)</td>
-                                <td>@u.RegisteredDate.ToString("yyyy-MM-dd")</td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <!-- Users Modal -->
     <div class="modal fade" id="usersModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-lg modal-dialog-centered">

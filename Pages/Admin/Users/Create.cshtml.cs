@@ -72,6 +72,14 @@ namespace soft20181_starter.Pages.Admin.Users
 
             try
             {
+                // Check if user already exists
+                var existingUser = await _userManager.FindByEmailAsync(UserViewModel.Email);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError(string.Empty, "A user with this email address already exists.");
+                    return Page();
+                }
+
                 var user = new AppUser
                 {
                     UserName = UserViewModel.Email,
@@ -81,7 +89,8 @@ namespace soft20181_starter.Pages.Admin.Users
                     PhoneNumber = UserViewModel.PhoneNumber ?? string.Empty,
                     RegisteredDate = DateTime.Now,
                     Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role,
-                    EmailConfirmed = true // Auto-confirm email for admin-created users
+                    EmailConfirmed = true, // Auto-confirm email for admin-created users
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 _logger.LogInformation("AppUser object created with ID: {Id}", user.Id);

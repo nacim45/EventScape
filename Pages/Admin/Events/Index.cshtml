@@ -41,8 +41,10 @@
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <h3>@Model.Locations.Count</h3>
-                        <p>Unique Locations (click one below)</p>
+                        <a href="#" onclick="openLocationsModal()" class="stretched-link text-decoration-none">
+                            <h3>@Model.Locations.Count</h3>
+                            <p>Unique Locations (click)</p>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -60,52 +62,6 @@
         </div>
     </div>
 
-    <div class="mt-4 mb-4">
-        @if (Model.Locations?.Count > 0)
-        {
-            foreach (var loc in Model.Locations)
-            {
-                <a href="#" onclick="openEventsModal('@loc','')" class="badge bg-secondary me-2" style="font-size: 14px; padding: 10px 14px;">@loc</a>
-            }
-        }
-    </div>
-
-    <div class="card admin-card">
-        <div class="admin-card-header">
-            <div class="admin-card-title"><i class="fas fa-list"></i> Events</div>
-        </div>
-        <div class="table-responsive">
-            <table class="table admin-table">
-                <thead class="admin-table-header">
-                    <tr>
-                        <th>Title</th>
-                        <th>Location</th>
-                        <th>Date</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Events.Count == 0)
-                    {
-                        <tr><td colspan="4" class="text-center">No events found</td></tr>
-                    }
-                    else
-                    {
-                        foreach (var e in Model.Events)
-                        {
-                            <tr class="admin-table-row">
-                                <td>@e.title</td>
-                                <td>@e.location</td>
-                                <td>@e.date</td>
-                                <td>@e.price</td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <!-- Events Modal -->
     <div class="modal fade" id="eventsModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -120,6 +76,29 @@
                 <span class="visually-hidden">Loading...</span>
               </div>
               <p class="mt-2">Loading events...</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Locations Modal -->
+    <div class="modal fade" id="locationsModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Locations</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="locationsModalContent" class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Loading locations...</p>
             </div>
           </div>
           <div class="modal-footer">
@@ -530,6 +509,81 @@
               <p class="text-muted">${e.message}</p>
             </div>`;
           const modalElement = document.getElementById('eventsModal');
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+          } else {
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+          }
+        }
+      }
+
+      async function openLocationsModal() {
+        console.log('openLocationsModal called');
+        
+        // Show loading state
+        const cont = document.getElementById('locationsModalContent');
+        cont.innerHTML = `
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading locations...</p>
+          </div>`;
+        
+        try {
+          const url = `?handler=LocationsJson`;
+          console.log('Fetching from URL:', url);
+          
+          const resp = await fetch(url);
+          console.log('Response status:', resp.status);
+          
+          if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+          }
+          
+          const data = await resp.json();
+          console.log('Received data:', data);
+          
+          if (!data || !data.locations || data.locations.length === 0) {
+            cont.innerHTML = `
+              <div class="text-center p-4">
+                <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                <h5>No locations found</h5>
+                <p class="text-muted">No locations available.</p>
+              </div>`;
+          } else {
+            const items = data.locations.map(loc => `
+              <li class="list-group-item">${loc}</li>`).join('');
+            cont.innerHTML = `
+              <div class="mb-3">
+                <h6 class="fw-bold text-primary">Locations</h6>
+                <p class="text-muted mb-0">Showing ${data.locations.length} location(s)</p>
+              </div>
+              <ul class="list-group list-group-flush">${items}</ul>`;
+          }
+          
+          const modalElement = document.getElementById('locationsModal');
+          console.log('Modal element:', modalElement);
+          
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+          } else {
+            console.error('Bootstrap Modal not available');
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+          }
+        } catch (e) {
+          console.error('Error in openLocationsModal:', e);
+          cont.innerHTML = `
+            <div class="text-center p-4">
+              <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+              <h5>Error loading locations</h5>
+              <p class="text-muted">${e.message}</p>
+            </div>`;
+          const modalElement = document.getElementById('locationsModal');
           if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
             const modal = new bootstrap.Modal(modalElement);
             modal.show();

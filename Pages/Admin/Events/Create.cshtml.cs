@@ -333,8 +333,8 @@ namespace soft20181_starter.Pages.Admin.Events
                     
                     TempData["SuccessMessage"] = successMessage;
                     
-                    // Redirect to Admin page with smooth transition
-                    return RedirectToPage("/Admin", new { created = true });
+                    // Redirect to Events Index page
+                    return RedirectToPage("./Index");
                 }
                 catch (Exception ex)
                 {
