@@ -70,54 +70,62 @@ namespace soft20181_starter.Pages.Admin.Users
             _logger.LogInformation("Creating user with email: {Email}, name: {Name}, surname: {Surname}", 
                 UserViewModel.Email, UserViewModel.Name, UserViewModel.Surname);
 
-            var user = new AppUser
+            try
             {
-                UserName = UserViewModel.Email,
-                Email = UserViewModel.Email,
-                Name = UserViewModel.Name,
-                Surname = UserViewModel.Surname,
-                PhoneNumber = UserViewModel.PhoneNumber ?? string.Empty,
-                RegisteredDate = DateTime.Now,
-                Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role,
-                EmailConfirmed = true // Auto-confirm email for admin-created users
-            };
-
-            _logger.LogInformation("AppUser object created with ID: {Id}", user.Id);
-
-            var result = await _userManager.CreateAsync(user, UserViewModel.Password);
-
-            if (result.Succeeded)
-            {
-                _logger.LogInformation("User created successfully with ID: {UserId}", user.Id);
-
-                // Assign role if specified
-                if (!string.IsNullOrEmpty(UserViewModel.Role))
+                var user = new AppUser
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(user, UserViewModel.Role);
-                    if (roleResult.Succeeded)
+                    UserName = UserViewModel.Email,
+                    Email = UserViewModel.Email,
+                    Name = UserViewModel.Name,
+                    Surname = UserViewModel.Surname,
+                    PhoneNumber = UserViewModel.PhoneNumber ?? string.Empty,
+                    RegisteredDate = DateTime.Now,
+                    Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role,
+                    EmailConfirmed = true // Auto-confirm email for admin-created users
+                };
+
+                _logger.LogInformation("AppUser object created with ID: {Id}", user.Id);
+
+                var result = await _userManager.CreateAsync(user, UserViewModel.Password);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User created successfully with ID: {UserId}", user.Id);
+
+                    // Assign role if specified
+                    if (!string.IsNullOrEmpty(UserViewModel.Role))
                     {
-                        _logger.LogInformation("Role {Role} assigned successfully to user {UserId}", UserViewModel.Role, user.Id);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Failed to assign role {Role} to user {UserId}", UserViewModel.Role, user.Id);
-                        foreach (var error in roleResult.Errors)
+                        var roleResult = await _userManager.AddToRoleAsync(user, UserViewModel.Role);
+                        if (roleResult.Succeeded)
                         {
-                            _logger.LogWarning("Role assignment error: {Error}", error.Description);
+                            _logger.LogInformation("Role {Role} assigned successfully to user {UserId}", UserViewModel.Role, user.Id);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Failed to assign role {Role} to user {UserId}", UserViewModel.Role, user.Id);
+                            foreach (var error in roleResult.Errors)
+                            {
+                                _logger.LogWarning("Role assignment error: {Error}", error.Description);
+                            }
                         }
                     }
+
+                    TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}.";
+                    _logger.LogInformation("Redirecting to Index page with success message");
+                    return RedirectToPage("./Index");
                 }
 
-                TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}.";
-                _logger.LogInformation("Redirecting to Index page with success message");
-                return RedirectToPage("./Index");
+                _logger.LogError("Failed to create user");
+                foreach (var error in result.Errors)
+                {
+                    _logger.LogError("User creation error: {Error}", error.Description);
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
-
-            _logger.LogError("Failed to create user");
-            foreach (var error in result.Errors)
+            catch (Exception ex)
             {
-                _logger.LogError("User creation error: {Error}", error.Description);
-                ModelState.AddModelError(string.Empty, error.Description);
+                _logger.LogError(ex, "Exception occurred during user creation");
+                ModelState.AddModelError(string.Empty, $"An error occurred while creating the user: {ex.Message}");
             }
 
             return Page();

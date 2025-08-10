@@ -107,7 +107,7 @@
     </div>
 
     <!-- Events Modal -->
-    <div class="modal fade" id="eventsModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal fade" id="eventsModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -240,6 +240,69 @@
             margin: 0;
             font-size: 18px;
             font-weight: 500;
+        }
+        
+        .admin-card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+            margin-top: 30px;
+            margin-bottom: 30px !important;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .admin-card-header {
+            background-color: #BFACB5;
+            color: #522B5B;
+            padding: 35px;
+            border-bottom: none;
+        }
+        
+        .admin-card-title {
+            color: #522B5B;
+            font-weight: bold;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .admin-card-title i {
+            font-size: 28px;
+            margin-right: 12px;
+        }
+        
+        .admin-table {
+            margin-bottom: 0;
+        }
+        
+        .admin-table-header {
+            background-color: #F3F3F3;
+        }
+        
+        .admin-table-header th {
+            color: #522B5B;
+            font-weight: bold;
+            padding: 20px 25px;
+            border-bottom: 2px solid #BFACB5;
+            font-size: 17px;
+        }
+        
+        .admin-table-row {
+            transition: background-color 0.3s ease;
+        }
+        
+        .admin-table-row:hover {
+            background-color: #F9F5F7;
+        }
+        
+        .admin-table-row td {
+            vertical-align: middle;
+            padding: 20px 25px;
+            color: #522B5B;
+            font-size: 16px;
         }
         
         /* User Management Action Buttons */

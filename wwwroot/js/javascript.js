@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 //dynamicaly populate the events in the home page
-fetch('events.json')
+fetch('/data/events.json')
     .then(response => response.json())
     .then(data => {
         // Randomly shuffle the events array
@@ -348,7 +348,7 @@ fetch('events.json')
 
 
 //dynamically populate the event in london structure in the home page
-fetch('events2.json')
+fetch('/data/events2.json')
     .then(response => response.json())
     .then(events => {
         // Shuffle events and select the first 3
