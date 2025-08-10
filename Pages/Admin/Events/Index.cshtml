@@ -24,7 +24,7 @@
                         <i class="fas fa-calendar-check"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <a asp-page="/Admin/Events/Index" class="stretched-link text-decoration-none">
+                        <a href="#" onclick="openEventsModal('', '')" class="stretched-link text-decoration-none">
                             <h3>@Model.Events.Count()</h3>
                             <p>Total Events (click)</p>
                         </a>
@@ -61,7 +61,7 @@
         {
             foreach (var loc in Model.Locations)
             {
-                <a asp-page="/Admin/Events/Index" asp-route-LocationFilter="@loc" class="badge bg-secondary me-2" style="font-size: 14px; padding: 10px 14px;">@loc</a>
+                <a href="#" onclick="openEventsModal('@loc','')" class="badge bg-secondary me-2" style="font-size: 14px; padding: 10px 14px;">@loc</a>
             }
         }
     </div>
@@ -100,6 +100,21 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <!-- Events Modal -->
+    <div class="modal fade" id="eventsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Events</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="eventsModalContent">Loading...</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="user-management-actions">
@@ -307,4 +322,42 @@
 
 @section Scripts {
     <script src="~/js/javascript.js"></script>
+    <script>
+      async function openEventsModal(locationFilter, search) {
+        try {
+          const params = new URLSearchParams();
+          if (locationFilter) params.append('locationFilter', locationFilter);
+          if (search) params.append('searchString', search);
+          const resp = await fetch(`?handler=EventsJson&${params.toString()}`);
+          const data = await resp.json();
+          const cont = document.getElementById('eventsModalContent');
+          if (!data || !data.events || data.events.length === 0) {
+            cont.innerHTML = '<div class="text-center p-3">No events found</div>';
+          } else {
+            const rows = data.events.map(e => `
+              <tr>
+                <td>${e.title ?? ''}</td>
+                <td>${e.location ?? ''}</td>
+                <td>${e.date ?? ''}</td>
+                <td>${e.price ?? ''}</td>
+              </tr>`).join('');
+            cont.innerHTML = `
+              <div class="table-responsive">
+                <table class="table admin-table">
+                  <thead class="admin-table-header">
+                    <tr><th>Title</th><th>Location</th><th>Date</th><th>Price</th></tr>
+                  </thead>
+                  <tbody>${rows}</tbody>
+                </table>
+              </div>`;
+          }
+          const modal = new bootstrap.Modal(document.getElementById('eventsModal'));
+          modal.show();
+        } catch (e) {
+          document.getElementById('eventsModalContent').innerHTML = 'Error loading events';
+          const modal = new bootstrap.Modal(document.getElementById('eventsModal'));
+          modal.show();
+        }
+      }
+    </script>
 } 

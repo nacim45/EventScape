@@ -81,7 +81,8 @@ namespace soft20181_starter.Pages.Admin.Users
                     await _userManager.AddToRoleAsync(user, UserViewModel.Role);
                 }
 
-                return RedirectToPage("./Index");
+                TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully.";
+                return RedirectToPage("./Index", new { ShowModal = true });
             }
 
             foreach (var error in result.Errors)

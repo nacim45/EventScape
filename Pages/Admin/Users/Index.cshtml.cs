@@ -140,5 +140,64 @@ namespace soft20181_starter.Pages.Admin.Users
                 TotalPages = 0;
             }
         }
+
+        public async Task<IActionResult> OnGetUsersJsonAsync(string? roleFilter, string? searchString)
+        {
+            try
+            {
+                var allUsers = await _userManager.Users
+                    .OrderBy(u => u.Name)
+                    .ThenBy(u => u.Surname)
+                    .ToListAsync();
+
+                var userWithRoles = new List<(AppUser User, List<string> Roles)>();
+                foreach (var user in allUsers)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    userWithRoles.Add((user, roles?.ToList() ?? new List<string>()));
+                }
+
+                if (!string.IsNullOrEmpty(roleFilter))
+                {
+                    if (string.Equals(roleFilter, "Administrator", StringComparison.OrdinalIgnoreCase))
+                    {
+                        userWithRoles = userWithRoles
+                            .Where(ur => ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
+                            .ToList();
+                    }
+                    else if (string.Equals(roleFilter, "Standard", StringComparison.OrdinalIgnoreCase))
+                    {
+                        userWithRoles = userWithRoles
+                            .Where(ur => !ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
+                            .ToList();
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    userWithRoles = userWithRoles.Where(ur =>
+                        (ur.User.Email?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        (ur.User.Name?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        (ur.User.Surname?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false)
+                    ).ToList();
+                }
+
+                var result = userWithRoles.Select(ur => new {
+                    id = ur.User.Id,
+                    name = ur.User.Name,
+                    surname = ur.User.Surname,
+                    email = ur.User.Email,
+                    roles = ur.Roles,
+                    registeredDate = ur.User.RegisteredDate
+                }).ToList();
+
+                return new JsonResult(new { users = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error building users json");
+                return new JsonResult(new { users = Array.Empty<object>() });
+            }
+        }
     }
 } 

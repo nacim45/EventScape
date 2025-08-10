@@ -104,5 +104,32 @@ namespace soft20181_starter.Pages.Admin.Events
                 TotalPages = 0;
             }
         }
+
+        public async Task<IActionResult> OnGetEventsJsonAsync(string? locationFilter, string? searchString)
+        {
+            try
+            {
+                var query = _context.Events.AsQueryable();
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    query = query.Where(e => e.title.Contains(searchString) || e.description.Contains(searchString) || e.location.Contains(searchString));
+                }
+                if (!string.IsNullOrEmpty(locationFilter))
+                {
+                    query = query.Where(e => e.location.ToLower() == locationFilter.ToLower());
+                }
+                var list = await query
+                    .OrderByDescending(e => e.id)
+                    .Take(200)
+                    .Select(e => new { e.id, e.title, e.location, e.date, e.price })
+                    .ToListAsync();
+                return new JsonResult(new { events = list });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error building events json");
+                return new JsonResult(new { events = Array.Empty<object>() });
+            }
+        }
     }
 } 

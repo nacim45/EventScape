@@ -24,7 +24,7 @@
                         <i class="fas fa-user-friends"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <a asp-page="/Admin/Users/Index" asp-route-RoleFilter="" class="stretched-link text-decoration-none">
+                        <a href="#" onclick="openUsersModal('','')" class="stretched-link text-decoration-none">
                             <h3>@Model.TotalUserCount</h3>
                             <p>Total Users (click)</p>
                         </a>
@@ -37,7 +37,7 @@
                         <i class="fas fa-user-shield"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <a asp-page="/Admin/Users/Index" asp-route-RoleFilter="Administrator" class="stretched-link text-decoration-none">
+                        <a href="#" onclick="openUsersModal('Administrator','')" class="stretched-link text-decoration-none">
                             <h3>@Model.AdminCount</h3>
                             <p>Administrators (click)</p>
                         </a>
@@ -50,7 +50,7 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <a asp-page="/Admin/Users/Index" asp-route-RoleFilter="Standard" class="stretched-link text-decoration-none">
+                        <a href="#" onclick="openUsersModal('Standard','')" class="stretched-link text-decoration-none">
                             <h3>@Model.StandardCount</h3>
                             <p>Standard Users (click)</p>
                         </a>
@@ -94,6 +94,21 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <!-- Users Modal -->
+    <div class="modal fade" id="usersModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Users</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="usersModalContent">Loading...</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="user-management-actions">
@@ -630,4 +645,42 @@
 
 @section Scripts {
     <script src="~/js/javascript.js"></script>
+    <script>
+      async function openUsersModal(roleFilter, search) {
+        try {
+          const params = new URLSearchParams();
+          if (roleFilter) params.append('roleFilter', roleFilter);
+          if (search) params.append('searchString', search);
+          const resp = await fetch(`?handler=UsersJson&${params.toString()}`);
+          const data = await resp.json();
+          const cont = document.getElementById('usersModalContent');
+          if (!data || !data.users || data.users.length === 0) {
+            cont.innerHTML = '<div class="text-center p-3">No users found</div>';
+          } else {
+            const rows = data.users.map(u => `
+              <tr>
+                <td>${u.name ?? ''} ${u.surname ?? ''}</td>
+                <td>${u.email ?? ''}</td>
+                <td>${(u.roles||[]).join(', ')}</td>
+                <td>${(u.registeredDate||'').toString().substring(0,10)}</td>
+              </tr>`).join('');
+            cont.innerHTML = `
+              <div class="table-responsive">
+                <table class="table admin-table">
+                  <thead class="admin-table-header">
+                    <tr><th>Name</th><th>Email</th><th>Roles</th><th>Registered</th></tr>
+                  </thead>
+                  <tbody>${rows}</tbody>
+                </table>
+              </div>`;
+          }
+          const modal = new bootstrap.Modal(document.getElementById('usersModal'));
+          modal.show();
+        } catch (e) {
+          document.getElementById('usersModalContent').innerHTML = 'Error loading users';
+          const modal = new bootstrap.Modal(document.getElementById('usersModal'));
+          modal.show();
+        }
+      }
+    </script>
 } 
