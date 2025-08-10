@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace soft20181_starter.Pages.Admin.Users
 {
@@ -17,15 +18,18 @@ namespace soft20181_starter.Pages.Admin.Users
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly EventAppDbContext _context;
         private readonly ILogger<CreateModel> _logger;
 
         public CreateModel(
             UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager,
+            EventAppDbContext context,
             ILogger<CreateModel> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
             _logger = logger;
         }
 
@@ -75,26 +79,76 @@ namespace soft20181_starter.Pages.Admin.Users
                 _logger.LogInformation("Email: {Email}", UserViewModel.Email);
                 _logger.LogInformation("Role: {Role}", UserViewModel.Role);
 
-                // Check if user already exists
-                var existingUser = await _userManager.FindByEmailAsync(UserViewModel.Email);
-                if (existingUser != null)
+                // Validate required fields
+                if (string.IsNullOrEmpty(UserViewModel.Name?.Trim()))
                 {
-                    _logger.LogWarning("User with email {Email} already exists", UserViewModel.Email);
-                    ModelState.AddModelError(string.Empty, "A user with this email address already exists.");
+                    ModelState.AddModelError("UserViewModel.Name", "First name is required");
+                    return Page();
+                }
+                if (string.IsNullOrEmpty(UserViewModel.Surname?.Trim()))
+                {
+                    ModelState.AddModelError("UserViewModel.Surname", "Last name is required");
+                    return Page();
+                }
+                if (string.IsNullOrEmpty(UserViewModel.Email?.Trim()))
+                {
+                    ModelState.AddModelError("UserViewModel.Email", "Email is required");
+                    return Page();
+                }
+                if (string.IsNullOrEmpty(UserViewModel.Password))
+                {
+                    ModelState.AddModelError("UserViewModel.Password", "Password is required");
+                    return Page();
+                }
+                if (string.IsNullOrEmpty(UserViewModel.ConfirmPassword))
+                {
+                    ModelState.AddModelError("UserViewModel.ConfirmPassword", "Please confirm your password");
                     return Page();
                 }
 
+                // Validate email format
+                if (!Regex.IsMatch(UserViewModel.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                {
+                    ModelState.AddModelError("UserViewModel.Email", "Please enter a valid email address");
+                    return Page();
+                }
+
+                // Validate password length
+                if (UserViewModel.Password.Length < 6)
+                {
+                    ModelState.AddModelError("UserViewModel.Password", "Password must be at least 6 characters long");
+                    return Page();
+                }
+
+                // Validate password confirmation
+                if (UserViewModel.Password != UserViewModel.ConfirmPassword)
+                {
+                    ModelState.AddModelError("UserViewModel.ConfirmPassword", "Passwords do not match");
+                    return Page();
+                }
+
+                // Check if user already exists
+                var existingUser = await _userManager.FindByEmailAsync(UserViewModel.Email.Trim());
+                if (existingUser != null)
+                {
+                    _logger.LogWarning("User with email {Email} already exists", UserViewModel.Email);
+                    ModelState.AddModelError("UserViewModel.Email", "A user with this email address already exists.");
+                    return Page();
+                }
+
+                // Create new user with all required fields
                 var user = new AppUser
                 {
-                    UserName = UserViewModel.Email,
-                    Email = UserViewModel.Email,
-                    Name = UserViewModel.Name,
-                    Surname = UserViewModel.Surname,
-                    PhoneNumber = UserViewModel.PhoneNumber ?? string.Empty,
+                    UserName = UserViewModel.Email.Trim(),
+                    Email = UserViewModel.Email.Trim(),
+                    Name = UserViewModel.Name.Trim(),
+                    Surname = UserViewModel.Surname.Trim(),
+                    PhoneNumber = UserViewModel.PhoneNumber?.Trim() ?? string.Empty,
                     RegisteredDate = DateTime.Now,
                     Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role,
                     EmailConfirmed = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    SecurityStamp = Guid.NewGuid().ToString()
                 };
 
                 _logger.LogInformation("Creating user with email: {Email}", user.Email);
@@ -115,8 +169,32 @@ namespace soft20181_starter.Pages.Admin.Users
                         }
                         else
                         {
-                            _logger.LogWarning("Failed to assign role {Role} to user {UserId}", UserViewModel.Role, user.Id);
+                            _logger.LogWarning("Failed to assign role {Role} to user {UserId}. Errors: {Errors}", 
+                                UserViewModel.Role, user.Id, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+                            // Don't fail the entire operation if role assignment fails
                         }
+                    }
+
+                    // Create audit log
+                    try
+                    {
+                        var auditLog = new AuditLog
+                        {
+                            EntityName = "User",
+                            EntityId = user.Id,
+                            Action = "Create",
+                            UserId = User.Identity?.Name ?? "System",
+                            Changes = $"Created new user: {user.Name} {user.Surname} (ID: {user.Id}) with role: {user.Role}",
+                            Timestamp = DateTime.UtcNow
+                        };
+                        await _context.AuditLogs.AddAsync(auditLog);
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation("Audit log created for user {UserId}", user.Id);
+                    }
+                    catch (Exception auditEx)
+                    {
+                        _logger.LogWarning("Failed to create audit log for user {UserId}: {Error}", user.Id, auditEx.Message);
+                        // Don't fail the entire operation if audit log fails
                     }
 
                     TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}.";

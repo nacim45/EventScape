@@ -38,13 +38,15 @@
                     <div class="form-group-row">
                         <div class="form-group">
                             <label asp-for="Event.title">Event Title</label>
-                            <input asp-for="Event.title" class="form-control" placeholder="Enter a descriptive title" required />
+                            <input asp-for="Event.title" class="form-control" placeholder="Enter a descriptive title" required 
+                                   data-val="true" data-val-required="Title is required" data-val-length-max="100" />
                             <span asp-validation-for="Event.title" class="text-danger"></span>
                         </div>
                         
                         <div class="form-group">
                             <label asp-for="Event.location">Location</label>
-                            <input asp-for="Event.location" class="form-control" placeholder="City, Venue or Address" required />
+                            <input asp-for="Event.location" class="form-control" placeholder="City, Venue or Address" required 
+                                   data-val="true" data-val-required="Location is required" />
                             <span asp-validation-for="Event.location" class="text-danger"></span>
                         </div>
                     </div>
@@ -52,15 +54,73 @@
                     <div class="form-group-row">
                         <div class="form-group">
                             <label asp-for="Event.date">Event Date</label>
-                            <input asp-for="Event.date" class="form-control" type="date" placeholder="YYYY-MM-DD" required />
+                            <input asp-for="Event.date" class="form-control" type="date" placeholder="YYYY-MM-DD" required 
+                                   min="@DateTime.Now.ToString("yyyy-MM-dd")" data-val="true" data-val-required="Date is required" />
                             <span asp-validation-for="Event.date" class="text-danger"></span>
                         </div>
                         
                         <div class="form-group">
                             <label asp-for="Event.price">Price</label>
-                            <input asp-for="Event.price" class="form-control" placeholder="£50 or Free" required />
+                            <input asp-for="Event.price" class="form-control" placeholder="£50 or Free" required 
+                                   data-val="true" data-val-required="Price is required" />
                             <span asp-validation-for="Event.price" class="text-danger"></span>
                         </div>
+                    </div>
+                </div>
+                
+                <div class="admin-form-section">
+                    <h3 class="admin-form-section-title">Event Details</h3>
+                    
+                    <div class="form-group">
+                        <label asp-for="Event.description">Description</label>
+                        <textarea asp-for="Event.description" class="form-control" rows="6" 
+                                  placeholder="Enter a detailed description of your event" required 
+                                  data-val="true" data-val-required="Description is required" data-val-length-min="10"></textarea>
+                        <span asp-validation-for="Event.description" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label asp-for="EventCategory">Category</label>
+                            <select asp-for="EventCategory" class="form-control" required data-val="true" data-val-required="Category is required">
+                                <option value="">Select a category</option>
+                                <option value="Music">Music</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Arts">Arts & Theatre</option>
+                                <option value="Food">Food & Drink</option>
+                                <option value="Business">Business</option>
+                                <option value="Education">Education</option>
+                                <option value="Social">Social</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span asp-validation-for="EventCategory" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="EventCapacity">Capacity</label>
+                            <input asp-for="EventCapacity" class="form-control" type="number" placeholder="Maximum attendees" min="1" />
+                            <span asp-validation-for="EventCapacity" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label asp-for="EventStartTime">Start Time</label>
+                            <input asp-for="EventStartTime" class="form-control" type="time" />
+                            <span asp-validation-for="EventStartTime" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="EventEndTime">End Time</label>
+                            <input asp-for="EventEndTime" class="form-control" type="time" />
+                            <span asp-validation-for="EventEndTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label asp-for="EventTags">Tags</label>
+                        <input asp-for="EventTags" class="form-control" placeholder="Enter tags separated by commas" />
+                        <span asp-validation-for="EventTags" class="text-danger"></span>
                     </div>
                 </div>
                 
@@ -68,93 +128,11 @@
                     <h3 class="admin-form-section-title">Details & Media</h3>
                     
                     <div class="form-group">
-                        <label asp-for="Event.description">Description</label>
-                        <textarea asp-for="Event.description" class="form-control" rows="6" placeholder="Enter a detailed description of your event" required></textarea>
-                        <span asp-validation-for="Event.description" class="text-danger"></span>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Event Link Details</label>
-                        <div class="form-group-row">
-                            <div class="form-group">
-                                <label for="EventLocation">Event Location</label>
-                                <input type="text" id="EventLocation" name="EventLocation" class="form-control" placeholder="london" value="@Model.Event.location?.ToLower()" />
-                                <div class="form-hint">
-                                    <i class="fas fa-info-circle"></i>
-                                    Lowercase city name (same as location field above)
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group mt-3">
-                            <label asp-for="Event.link">Generated Event Link</label>
-                            <input asp-for="Event.link" id="GeneratedLink" class="form-control" type="text" readonly />
-                            <div class="form-hint">
-                                <i class="fas fa-info-circle"></i>
-                                This link will be automatically generated after event creation
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="admin-form-section">
-                        <h3 class="admin-form-section-title">Event Properties</h3>
-                        <div class="form-group-row">
-                            <div class="form-group">
-                                <label for="EventCategory">Category</label>
-                                <select id="EventCategory" name="EventCategory" class="form-control">
-                                    <option value="">Select a category</option>
-                                    <option value="Music">Music</option>
-                                    <option value="Sports">Sports</option>
-                                    <option value="Arts">Arts & Theatre</option>
-                                    <option value="Food">Food & Drink</option>
-                                    <option value="Business">Business</option>
-                                    <option value="Education">Education</option>
-                                    <option value="Social">Social</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                                <div class="form-hint">
-                                    <i class="fas fa-info-circle"></i>
-                                    Select a category that best describes your event
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="EventCapacity">Capacity</label>
-                                <input type="number" id="EventCapacity" name="EventCapacity" class="form-control" placeholder="100" min="1" />
-                                <div class="form-hint">
-                                    <i class="fas fa-info-circle"></i>
-                                    Maximum number of attendees (optional)
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group-row">
-                            <div class="form-group">
-                                <label for="EventStartTime">Start Time</label>
-                                <input type="time" id="EventStartTime" name="EventStartTime" class="form-control" />
-                                <div class="form-hint">
-                                    <i class="fas fa-info-circle"></i>
-                                    When does the event start? (optional)
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="EventEndTime">End Time</label>
-                                <input type="time" id="EventEndTime" name="EventEndTime" class="form-control" />
-                                <div class="form-hint">
-                                    <i class="fas fa-info-circle"></i>
-                                    When does the event end? (optional)
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="EventTags">Tags</label>
-                            <input type="text" id="EventTags" name="EventTags" class="form-control" placeholder="concert, live, music" />
-                            <div class="form-hint">
-                                <i class="fas fa-info-circle"></i>
-                                Separate tags with commas (optional)
-                            </div>
+                        <label asp-for="Event.link">Generated Event Link</label>
+                        <input asp-for="Event.link" id="GeneratedLink" class="form-control" type="text" readonly />
+                        <div class="form-hint">
+                            <i class="fas fa-info-circle"></i>
+                            This link will be automatically generated after event creation
                         </div>
                     </div>
                     
