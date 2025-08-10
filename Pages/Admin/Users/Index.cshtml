@@ -24,8 +24,10 @@
                         <i class="fas fa-user-friends"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <h3>@Model.Users.Count()</h3>
-                        <p>Total Users</p>
+                        <a asp-page="/Admin/Users/Index" asp-route-RoleFilter="" class="stretched-link text-decoration-none">
+                            <h3>@Model.TotalUserCount</h3>
+                            <p>Total Users (click)</p>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -35,8 +37,10 @@
                         <i class="fas fa-user-shield"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <h3>@Model.Users.Count(u => u.UserRoles.Any(r => r.ToLower() == "administrator"))</h3>
-                        <p>Administrators</p>
+                        <a asp-page="/Admin/Users/Index" asp-route-RoleFilter="Administrator" class="stretched-link text-decoration-none">
+                            <h3>@Model.AdminCount</h3>
+                            <p>Administrators (click)</p>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -46,11 +50,49 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <h3>@Model.Users.Count(u => u.UserRoles.All(r => r.ToLower() != "administrator"))</h3>
-                        <p>Standard Users</p>
+                        <a asp-page="/Admin/Users/Index" asp-route-RoleFilter="Standard" class="stretched-link text-decoration-none">
+                            <h3>@Model.StandardCount</h3>
+                            <p>Standard Users (click)</p>
+                        </a>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="card admin-card">
+        <div class="admin-card-header">
+            <div class="admin-card-title"><i class="fas fa-list"></i> Users</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead class="admin-table-header">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Registered</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Users.Count == 0)
+                    {
+                        <tr><td colspan="4" class="text-center">No users found</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var u in Model.Users)
+                        {
+                            <tr class="admin-table-row">
+                                <td>@u.Name @u.Surname</td>
+                                <td>@u.Email</td>
+                                <td>@string.Join(", ", u.UserRoles)</td>
+                                <td>@u.RegisteredDate.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 

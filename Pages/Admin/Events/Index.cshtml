@@ -24,8 +24,10 @@
                         <i class="fas fa-calendar-check"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <h3>@Model.Events.Count()</h3>
-                        <p>Total Events</p>
+                        <a asp-page="/Admin/Events/Index" class="stretched-link text-decoration-none">
+                            <h3>@Model.Events.Count()</h3>
+                            <p>Total Events (click)</p>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -35,8 +37,8 @@
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <h3>@Model.Events.Select(e => e.location).Distinct().Count()</h3>
-                        <p>Unique Locations</p>
+                        <h3>@Model.Locations.Count</h3>
+                        <p>Unique Locations (click one below)</p>
                     </div>
                 </div>
             </div>
@@ -51,6 +53,52 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="mt-4 mb-4">
+        @if (Model.Locations?.Count > 0)
+        {
+            foreach (var loc in Model.Locations)
+            {
+                <a asp-page="/Admin/Events/Index" asp-route-LocationFilter="@loc" class="badge bg-secondary me-2" style="font-size: 14px; padding: 10px 14px;">@loc</a>
+            }
+        }
+    </div>
+
+    <div class="card admin-card">
+        <div class="admin-card-header">
+            <div class="admin-card-title"><i class="fas fa-list"></i> Events</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead class="admin-table-header">
+                    <tr>
+                        <th>Title</th>
+                        <th>Location</th>
+                        <th>Date</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Events.Count == 0)
+                    {
+                        <tr><td colspan="4" class="text-center">No events found</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var e in Model.Events)
+                        {
+                            <tr class="admin-table-row">
+                                <td>@e.title</td>
+                                <td>@e.location</td>
+                                <td>@e.date</td>
+                                <td>@e.price</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 

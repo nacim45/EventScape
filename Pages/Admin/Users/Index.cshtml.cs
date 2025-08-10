@@ -32,6 +32,9 @@ namespace soft20181_starter.Pages.Admin.Users
         [BindProperty(SupportsGet = true)]
         public string SearchString { get; set; } = string.Empty;
 
+        [BindProperty(SupportsGet = true)]
+        public string? RoleFilter { get; set; }
+
         public class UserViewModel
         {
             public string Id { get; set; } = string.Empty;
@@ -43,6 +46,9 @@ namespace soft20181_starter.Pages.Admin.Users
         }
 
         public List<UserViewModel> Users { get; set; } = new List<UserViewModel>();
+        public int TotalUserCount { get; set; }
+        public int AdminCount { get; set; }
+        public int StandardCount { get; set; }
 
         // Pagination properties
         [BindProperty(SupportsGet = true)]
@@ -54,60 +60,75 @@ namespace soft20181_starter.Pages.Admin.Users
         {
             try
             {
-                _logger.LogInformation("Loading Admin Users page. Search: {Search}, Page: {Page}",
-                    SearchString, CurrentPage);
+                _logger.LogInformation("Loading Admin Users page. Search: {Search}, Page: {Page}, RoleFilter: {Role}",
+                    SearchString, CurrentPage, RoleFilter);
 
-                // Get all users with their roles
-                var query = _userManager.Users.AsQueryable();
-
-                // Apply search filter if specified
-                if (!string.IsNullOrEmpty(SearchString))
-                {
-                    query = query.Where(u =>
-                        u.Email.Contains(SearchString) ||
-                        u.Name.Contains(SearchString) ||
-                        u.Surname.Contains(SearchString)
-                    );
-                    _logger.LogInformation("Filtered users by search: {Search}", SearchString);
-                }
-
-                // Calculate total pages for pagination
-                var totalUsers = await query.CountAsync();
-                TotalPages = (int)Math.Ceiling(totalUsers / (double)PageSize);
-
-                // Ensure current page is within valid range
-                if (CurrentPage < 1)
-                {
-                    CurrentPage = 1;
-                }
-                else if (CurrentPage > TotalPages && TotalPages > 0)
-                {
-                    CurrentPage = TotalPages;
-                }
-
-                // Get paginated results
-                var users = await query
+                // Get all users as a starting point
+                var allUsers = await _userManager.Users
                     .OrderBy(u => u.Name)
                     .ThenBy(u => u.Surname)
-                    .Skip((CurrentPage - 1) * PageSize)
-                    .Take(PageSize)
                     .ToListAsync();
 
-                // Build view models with roles
-                foreach (var user in users)
+                // Build role map for filtering and display
+                var userWithRoles = new List<(AppUser User, List<string> Roles)>();
+                foreach (var user in allUsers)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
-                    
-                    Users.Add(new UserViewModel
-                    {
-                        Id = user.Id ?? string.Empty,
-                        Name = user.Name ?? string.Empty,
-                        Surname = user.Surname ?? string.Empty,
-                        Email = user.Email ?? string.Empty,
-                        RegisteredDate = user.RegisteredDate,
-                        UserRoles = roles?.ToList() ?? new List<string>()
-                    });
+                    userWithRoles.Add((user, roles?.ToList() ?? new List<string>()));
                 }
+
+                // Totals before filters
+                TotalUserCount = userWithRoles.Count;
+                AdminCount = userWithRoles.Count(ur => ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)));
+                StandardCount = TotalUserCount - AdminCount;
+
+                // Apply role filter
+                if (!string.IsNullOrEmpty(RoleFilter))
+                {
+                    if (string.Equals(RoleFilter, "Administrator", StringComparison.OrdinalIgnoreCase))
+                    {
+                        userWithRoles = userWithRoles
+                            .Where(ur => ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
+                            .ToList();
+                    }
+                    else if (string.Equals(RoleFilter, "Standard", StringComparison.OrdinalIgnoreCase))
+                    {
+                        userWithRoles = userWithRoles
+                            .Where(ur => !ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
+                            .ToList();
+                    }
+                }
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(SearchString))
+                {
+                    userWithRoles = userWithRoles.Where(ur =>
+                        (ur.User.Email?.Contains(SearchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        (ur.User.Name?.Contains(SearchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        (ur.User.Surname?.Contains(SearchString, StringComparison.OrdinalIgnoreCase) ?? false)
+                    ).ToList();
+                }
+
+                // Pagination
+                var totalUsers = userWithRoles.Count;
+                TotalPages = (int)Math.Ceiling(totalUsers / (double)PageSize);
+                if (CurrentPage < 1) CurrentPage = 1;
+                if (CurrentPage > TotalPages && TotalPages > 0) CurrentPage = TotalPages;
+
+                var paged = userWithRoles
+                    .Skip((CurrentPage - 1) * PageSize)
+                    .Take(PageSize)
+                    .ToList();
+
+                Users = paged.Select(ur => new UserViewModel
+                {
+                    Id = ur.User.Id ?? string.Empty,
+                    Name = ur.User.Name ?? string.Empty,
+                    Surname = ur.User.Surname ?? string.Empty,
+                    Email = ur.User.Email ?? string.Empty,
+                    RegisteredDate = ur.User.RegisteredDate,
+                    UserRoles = ur.Roles
+                }).ToList();
 
                 _logger.LogInformation("Returning {Count} users for page {Page} of {TotalPages}",
                     Users.Count, CurrentPage, TotalPages);

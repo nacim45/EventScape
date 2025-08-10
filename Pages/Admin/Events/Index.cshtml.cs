@@ -26,7 +26,11 @@ namespace soft20181_starter.Pages.Admin.Events
         [BindProperty(SupportsGet = true)]
         public string SearchString { get; set; } = string.Empty;
 
+        [BindProperty(SupportsGet = true)]
+        public string? LocationFilter { get; set; }
+
         public List<TheEvent> Events { get; set; } = new List<TheEvent>();
+        public List<string> Locations { get; set; } = new List<string>();
 
         // Pagination properties
         [BindProperty(SupportsGet = true)]
@@ -42,8 +46,14 @@ namespace soft20181_starter.Pages.Admin.Events
                     SearchString, CurrentPage);
 
                 // Initialize query
-                var query = _context.Events
-                    .AsQueryable();
+                var query = _context.Events.AsQueryable();
+
+                // Load distinct locations (for chips/filters)
+                Locations = await _context.Events
+                    .Select(e => e.location)
+                    .Distinct()
+                    .OrderBy(l => l)
+                    .ToListAsync();
 
                 // Apply search filter if specified
                 if (!string.IsNullOrEmpty(SearchString))
@@ -54,6 +64,13 @@ namespace soft20181_starter.Pages.Admin.Events
                         e.description.Contains(SearchString)
                     );
                     _logger.LogInformation("Filtered by search: {Search}", SearchString);
+                }
+
+                // Apply location filter if specified
+                if (!string.IsNullOrEmpty(LocationFilter))
+                {
+                    query = query.Where(e => e.location.ToLower() == LocationFilter.ToLower());
+                    _logger.LogInformation("Filtered by location: {Location}", LocationFilter);
                 }
 
                 // Calculate total pages for pagination

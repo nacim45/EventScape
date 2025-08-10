@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("soft20181_starter")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9ee49044b44d46d01f73c88d732874f0541a2fb6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+92fcb73808e0fe7c6b25e2945b31dfeecb95e17c")]
 [assembly: System.Reflection.AssemblyProductAttribute("soft20181_starter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("soft20181_starter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

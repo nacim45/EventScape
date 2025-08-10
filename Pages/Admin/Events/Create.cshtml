@@ -74,20 +74,11 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Event Link Details (Required)</label>
+                        <label>Event Link Details</label>
                         <div class="form-group-row">
                             <div class="form-group">
-                                <label for="EventId">Event ID</label>
-                                <input type="text" id="EventId" name="EventId" class="form-control" placeholder="121" required />
-                                <div class="form-hint">
-                                    <i class="fas fa-info-circle"></i>
-                                    Enter numeric ID for this event
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
                                 <label for="EventLocation">Event Location</label>
-                                <input type="text" id="EventLocation" name="EventLocation" class="form-control" placeholder="london" value="@Model.Event.location?.ToLower()" required />
+                                <input type="text" id="EventLocation" name="EventLocation" class="form-control" placeholder="london" value="@Model.Event.location?.ToLower()" />
                                 <div class="form-hint">
                                     <i class="fas fa-info-circle"></i>
                                     Lowercase city name (same as location field above)
@@ -97,11 +88,11 @@
                         
                         <div class="form-group mt-3">
                             <label asp-for="Event.link">Generated Event Link</label>
-                            <input asp-for="Event.link" id="GeneratedLink" class="form-control" readonly required />
+                            <input asp-for="Event.link" id="GeneratedLink" class="form-control" readonly />
                             <span asp-validation-for="Event.link" class="text-danger"></span>
                             <div class="form-hint">
                                 <i class="fas fa-info-circle"></i>
-                                This link will be automatically generated - do not modify
+                                This link will be automatically generated after event creation
                             </div>
                         </div>
                     </div>
@@ -185,14 +176,7 @@
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="ImageUrls">Image URLs (Optional)</label>
-                        <textarea name="ImageUrls" id="ImageUrls" class="form-control" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
-                        <div class="form-hint">
-                            <i class="fas fa-info-circle"></i>
-                            Enter one image URL per line. Images will be displayed in the order listed.
-                        </div>
-                    </div>
+                    
                 </div>
                 
                 <div class="admin-form-actions">
@@ -678,20 +662,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Event link generation
-            const eventIdInput = document.getElementById('EventId');
             const eventLocationInput = document.getElementById('EventLocation');
             const generatedLinkInput = document.getElementById('GeneratedLink');
             const mainLocationInput = document.querySelector('input[name="Event.location"]');
             
             function updateGeneratedLink() {
-                const id = eventIdInput.value.trim();
                 const location = eventLocationInput.value.trim().toLowerCase();
-                
-                if (id && location) {
-                    generatedLinkInput.value = `http://localhost:5139/EventDetail?location=${location}&id=${id}`;
-                } else {
-                    generatedLinkInput.value = '';
-                }
+                const mainLoc = mainLocationInput ? mainLocationInput.value.trim().toLowerCase() : '';
+                const finalLoc = location || mainLoc;
+                generatedLinkInput.value = finalLoc ? `/EventDetail?location=${finalLoc}&id=NEW` : '';
             }
             
             // Auto-update event location when main location changes
@@ -702,7 +681,6 @@
                 });
             }
             
-            eventIdInput.addEventListener('input', updateGeneratedLink);
             eventLocationInput.addEventListener('input', updateGeneratedLink);
             
             // Initialize the link on page load

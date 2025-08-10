@@ -33,8 +33,7 @@ namespace soft20181_starter.Pages.Admin.Events
         [BindProperty]
         public TheEvent Event { get; set; } = new TheEvent();
 
-        [BindProperty]
-        public string ImageUrls { get; set; } = string.Empty;
+        // Removed ImageUrls to keep drag-and-drop only
 
         [BindProperty]
         public List<IFormFile> UploadedImages { get; set; } = new List<IFormFile>();
@@ -54,8 +53,7 @@ namespace soft20181_starter.Pages.Admin.Events
         [BindProperty]
         public string? EventTags { get; set; }
 
-        [BindProperty]
-        public string EventId { get; set; } = string.Empty;
+        // Removed manual EventId input – database will assign identity
 
         public List<string> AvailableCategories { get; } = new List<string> 
         { 
@@ -296,26 +294,9 @@ namespace soft20181_starter.Pages.Admin.Events
                             UploadedImages.Count, Event.images.Count);
                     }
 
-                    // Process image URLs if any
-                    if (!string.IsNullOrWhiteSpace(ImageUrls))
-                    {
-                        var urls = ImageUrls
-                            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(url => url.Trim())
-                            .Where(url => !string.IsNullOrWhiteSpace(url))
-                            .ToList();
-                        
-                        // Add URLs to event images
-                        Event.images.AddRange(urls);
-                        _logger.LogInformation("Added {UrlCount} image URLs to event", urls.Count);
-                    }
+                    // External image URLs removed for simplicity as requested
 
-                    // Set the event ID if provided
-                    if (!string.IsNullOrEmpty(EventId) && int.TryParse(EventId, out int providedId))
-                    {
-                        Event.id = providedId;
-                        _logger.LogInformation("Using provided Event ID: {EventId}", providedId);
-                    }
+                    // Let database generate the ID
                     
                     // Add event to database
                     _logger.LogInformation("Attempting to save event to database: {Title}", Event.title);
