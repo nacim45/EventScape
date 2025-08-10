@@ -49,7 +49,6 @@ namespace soft20181_starter.Pages.Admin.Users
         public async Task<IActionResult> OnPostAsync()
         {
             _logger.LogInformation("=== USER CREATION STARTED ===");
-            _logger.LogInformation("ModelState.IsValid: {IsValid}", ModelState.IsValid);
             
             // Re-populate available roles in case of validation errors
             AvailableRoles = new List<string>();
@@ -68,15 +67,14 @@ namespace soft20181_starter.Pages.Admin.Users
                 return Page();
             }
 
-            _logger.LogInformation("User data received:");
-            _logger.LogInformation("Name: {Name}", UserViewModel.Name);
-            _logger.LogInformation("Surname: {Surname}", UserViewModel.Surname);
-            _logger.LogInformation("Email: {Email}", UserViewModel.Email);
-            _logger.LogInformation("Role: {Role}", UserViewModel.Role);
-            _logger.LogInformation("Phone: {Phone}", UserViewModel.PhoneNumber);
-
             try
             {
+                _logger.LogInformation("User data received:");
+                _logger.LogInformation("Name: {Name}", UserViewModel.Name);
+                _logger.LogInformation("Surname: {Surname}", UserViewModel.Surname);
+                _logger.LogInformation("Email: {Email}", UserViewModel.Email);
+                _logger.LogInformation("Role: {Role}", UserViewModel.Role);
+
                 // Check if user already exists
                 var existingUser = await _userManager.FindByEmailAsync(UserViewModel.Email);
                 if (existingUser != null)
@@ -95,16 +93,12 @@ namespace soft20181_starter.Pages.Admin.Users
                     PhoneNumber = UserViewModel.PhoneNumber ?? string.Empty,
                     RegisteredDate = DateTime.Now,
                     Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role,
-                    EmailConfirmed = true, // Auto-confirm email for admin-created users
+                    EmailConfirmed = true,
                     CreatedAt = DateTime.UtcNow
                 };
 
-                _logger.LogInformation("AppUser object created with ID: {Id}", user.Id);
-                _logger.LogInformation("User details: Name={Name}, Surname={Surname}, Email={Email}, Role={Role}", 
-                    user.Name, user.Surname, user.Email, user.Role);
-
+                _logger.LogInformation("Creating user with email: {Email}", user.Email);
                 var result = await _userManager.CreateAsync(user, UserViewModel.Password);
-                _logger.LogInformation("UserManager.CreateAsync result: Succeeded={Succeeded}", result.Succeeded);
 
                 if (result.Succeeded)
                 {
@@ -122,10 +116,6 @@ namespace soft20181_starter.Pages.Admin.Users
                         else
                         {
                             _logger.LogWarning("Failed to assign role {Role} to user {UserId}", UserViewModel.Role, user.Id);
-                            foreach (var error in roleResult.Errors)
-                            {
-                                _logger.LogWarning("Role assignment error: {Error}", error.Description);
-                            }
                         }
                     }
 

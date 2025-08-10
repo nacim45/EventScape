@@ -83,6 +83,33 @@ builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
+// Initialize database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<EventAppDbContext>();
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var webHostEnvironment = services.GetRequiredService<IWebHostEnvironment>();
+        
+        // Ensure database is created
+        context.Database.EnsureCreated();
+        
+        // Seed the database
+        await DatabaseSeeder.SeedEvents(context, webHostEnvironment);
+        
+        var dbLogger = services.GetRequiredService<ILogger<Program>>();
+        dbLogger.LogInformation("Database initialized successfully");
+    }
+    catch (Exception ex)
+    {
+        var dbLogger = services.GetRequiredService<ILogger<Program>>();
+        dbLogger.LogError(ex, "An error occurred while initializing the database");
+    }
+}
+
 // Log payment configuration status for debugging (after app is built)
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("=== Payment Configuration Status ===");
@@ -123,121 +150,4 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapControllers();
 
-// Database initialization and seeding
-await InitializeDatabase(app);
-
 app.Run();
-
-async Task InitializeDatabase(WebApplication app)
-{
-    using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    var webHostEnvironment = services.GetRequiredService<IWebHostEnvironment>();
-
-    try
-    {
-        var context = services.GetRequiredService<EventAppDbContext>();
-
-        // Create database and tables
-        await context.Database.EnsureCreatedAsync();
-        logger.LogInformation("Database created successfully");
-
-        // Check if identity tables are properly created
-        try
-        {
-            // Check if roles are properly created already
-            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-            
-            // Initialize roles
-            string[] roleNames = { "Administrator", "ContactSubmitter", "User", "ContactManager" };
-            foreach (var roleName in roleNames)
-            {
-                if (!await roleManager.RoleExistsAsync(roleName))
-                {
-                    await roleManager.CreateAsync(new IdentityRole(roleName));
-                    logger.LogInformation("Created role {Role}", roleName);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error checking roles: {Message}", ex.Message);
-            logger.LogInformation("Skipping role creation due to error");
-        }
-
-        // Check if there are any events
-        try
-        {
-            var eventCount = await context.Events.CountAsync();
-            logger.LogInformation("Current event count in database: {Count}", eventCount);
-
-            if (eventCount == 0)
-            {
-                // If empty, seed the database
-                await DatabaseSeeder.SeedEvents(context, webHostEnvironment);
-                logger.LogInformation("Database seeded successfully");
-            }
-            else
-            {
-                logger.LogInformation("Database already contains events. Skipping seeding.");
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error checking events: {Message}", ex.Message);
-        }
-
-        // Create user accounts
-        try
-        {
-            // Create a default administrator if none exists
-            var userManager = services.GetRequiredService<UserManager<AppUser>>();
-            var adminEmail = "admin@eventscape.com";
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-            if (adminUser == null)
-            {
-                adminUser = new AppUser
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    FirstName = "Admin",
-                    LastName = "User",
-                    EmailConfirmed = true,
-                    Role = "Administrator",
-                    RegisteredDate = DateTime.Now
-                };
-
-                var createResult = await userManager.CreateAsync(adminUser, "Admin123!");
-                if (createResult.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Administrator");
-                    logger.LogInformation("Created default administrator account and assigned role");
-                }
-                else
-                {
-                    logger.LogError("Failed to create default administrator account: {Errors}", string.Join(", ", createResult.Errors.Select(e => e.Description)));
-                }
-            }
-            else
-            {
-                logger.LogInformation("Default administrator account already exists");
-                // Ensure admin role is assigned if user exists but role isn't assigned
-                if (!await userManager.IsInRoleAsync(adminUser, "Administrator"))
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Administrator");
-                    logger.LogInformation("Assigned Administrator role to existing default admin account");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error creating admin user: {Message}", ex.Message);
-        }
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "An error occurred while initializing the database");
-    }
-}
