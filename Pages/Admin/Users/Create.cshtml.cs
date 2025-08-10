@@ -30,9 +30,9 @@ namespace soft20181_starter.Pages.Admin.Users
         }
 
         [BindProperty]
-        public UserCreateViewModel UserViewModel { get; set; }
+        public UserCreateViewModel UserViewModel { get; set; } = new UserCreateViewModel();
 
-        public List<string> AvailableRoles { get; set; }
+        public List<string> AvailableRoles { get; set; } = new List<string>();
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -54,7 +54,7 @@ namespace soft20181_starter.Pages.Admin.Users
             AvailableRoles = new List<string>();
             foreach (var role in _roleManager.Roles)
             {
-                AvailableRoles.Add(role.Name);
+                AvailableRoles.Add(role.Name ?? string.Empty);
             }
 
             if (!ModelState.IsValid)
@@ -76,9 +76,10 @@ namespace soft20181_starter.Pages.Admin.Users
                 Email = UserViewModel.Email,
                 Name = UserViewModel.Name,
                 Surname = UserViewModel.Surname,
-                PhoneNumber = UserViewModel.PhoneNumber,
+                PhoneNumber = UserViewModel.PhoneNumber ?? string.Empty,
                 RegisteredDate = DateTime.Now,
-                Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role
+                Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role,
+                EmailConfirmed = true // Auto-confirm email for admin-created users
             };
 
             _logger.LogInformation("AppUser object created with ID: {Id}", user.Id);
@@ -107,7 +108,7 @@ namespace soft20181_starter.Pages.Admin.Users
                     }
                 }
 
-                TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully.";
+                TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}.";
                 _logger.LogInformation("Redirecting to Index page with success message");
                 return RedirectToPage("./Index");
             }

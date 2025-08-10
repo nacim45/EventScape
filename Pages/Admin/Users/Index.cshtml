@@ -101,15 +101,23 @@
     </div>
 
     <!-- Users Modal -->
-    <div class="modal fade" id="usersModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="usersModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Users</h5>
+            <h5 class="modal-title">Users List</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div id="usersModalContent">Loading...</div>
+            <div id="usersModalContent" class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Loading users...</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -535,6 +543,63 @@
             text-decoration: none;
         }
         
+        /* Modal styling improvements */
+        .modal-content {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #522B5B 0%, #854F6C 100%);
+            color: white;
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+            padding: 20px 25px;
+        }
+        
+        .modal-title {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .modal-body {
+            padding: 25px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 15px 25px;
+            background-color: #f8f9fa;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .list-group-item {
+            border: none;
+            border-bottom: 1px solid #e9ecef;
+            padding: 15px 0;
+            transition: background-color 0.2s ease;
+        }
+        
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+        
+        .btn-close {
+            filter: invert(1);
+            opacity: 0.8;
+        }
+        
+        .btn-close:hover {
+            opacity: 1;
+        }
+        
         .container {
             margin-bottom: 100px !important;
             max-width: 1400px;
@@ -652,6 +717,17 @@
     <script>
       async function openUsersModal(roleFilter, search) {
         console.log('openUsersModal called with:', { roleFilter, search });
+        
+        // Show loading state
+        const cont = document.getElementById('usersModalContent');
+        cont.innerHTML = `
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading users...</p>
+          </div>`;
+        
         try {
           const params = new URLSearchParams();
           if (roleFilter) params.append('roleFilter', roleFilter);
@@ -670,24 +746,48 @@
           const data = await resp.json();
           console.log('Received data:', data);
           
-          const cont = document.getElementById('usersModalContent');
           if (!data || !data.users || data.users.length === 0) {
-            cont.innerHTML = '<div class="text-center p-3">No users found</div>';
+            cont.innerHTML = `
+              <div class="text-center p-4">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5>No users found</h5>
+                <p class="text-muted">No users match the selected criteria.</p>
+              </div>`;
           } else {
             const header = roleFilter === 'Administrator' ? 'Administrators' : (roleFilter === 'Standard' ? 'Standard users' : 'All users');
             const items = data.users.map(u => {
               const roleText = (u.roles||[]).join(', ');
               if (roleFilter === 'Administrator') {
-                return `<li class="list-group-item d-flex justify-content-between align-items-center"><span>${u.name ?? ''} ${u.surname ?? ''}</span><span class="badge bg-primary">Admin</span></li>`;
+                return `<li class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>${u.name ?? ''} ${u.surname ?? ''}</strong>
+                    <br><small class="text-muted">${u.email ?? ''}</small>
+                  </div>
+                  <span class="badge bg-primary">Admin</span>
+                </li>`;
               } else if (roleFilter === 'Standard') {
-                return `<li class="list-group-item">${u.name ?? ''} ${u.surname ?? ''}</li>`;
+                return `<li class="list-group-item">
+                  <div>
+                    <strong>${u.name ?? ''} ${u.surname ?? ''}</strong>
+                    <br><small class="text-muted">${u.email ?? ''}</small>
+                  </div>
+                </li>`;
               } else {
-                return `<li class="list-group-item d-flex justify-content-between align-items-center"><span>${u.name ?? ''} ${u.surname ?? ''}</span><small class="text-muted">${roleText}</small></li>`;
+                return `<li class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>${u.name ?? ''} ${u.surname ?? ''}</strong>
+                    <br><small class="text-muted">${u.email ?? ''}</small>
+                  </div>
+                  <small class="text-muted">${roleText}</small>
+                </li>`;
               }
             }).join('');
             cont.innerHTML = `
-              <div class="mb-2 fw-bold">${header}</div>
-              <ul class="list-group">${items}</ul>`;
+              <div class="mb-3">
+                <h6 class="fw-bold text-primary">${header}</h6>
+                <p class="text-muted mb-0">Showing ${data.users.length} user(s)</p>
+              </div>
+              <ul class="list-group list-group-flush">${items}</ul>`;
           }
           
           const modalElement = document.getElementById('usersModal');
@@ -703,7 +803,12 @@
           }
         } catch (e) {
           console.error('Error in openUsersModal:', e);
-          document.getElementById('usersModalContent').innerHTML = `Error loading users: ${e.message}`;
+          cont.innerHTML = `
+            <div class="text-center p-4">
+              <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+              <h5>Error loading users</h5>
+              <p class="text-muted">${e.message}</p>
+            </div>`;
           const modalElement = document.getElementById('usersModal');
           if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
             const modal = new bootstrap.Modal(modalElement);

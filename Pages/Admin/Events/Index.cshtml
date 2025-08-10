@@ -107,15 +107,23 @@
     </div>
 
     <!-- Events Modal -->
-    <div class="modal fade" id="eventsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="eventsModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Events</h5>
+            <h5 class="modal-title">Events List</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div id="eventsModalContent">Loading...</div>
+            <div id="eventsModalContent" class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Loading events...</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -272,6 +280,63 @@
             text-decoration: none;
         }
         
+        /* Modal styling improvements */
+        .modal-content {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #522B5B 0%, #854F6C 100%);
+            color: white;
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+            padding: 20px 25px;
+        }
+        
+        .modal-title {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .modal-body {
+            padding: 25px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 15px 25px;
+            background-color: #f8f9fa;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .list-group-item {
+            border: none;
+            border-bottom: 1px solid #e9ecef;
+            padding: 15px 0;
+            transition: background-color 0.2s ease;
+        }
+        
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+        
+        .btn-close {
+            filter: invert(1);
+            opacity: 0.8;
+        }
+        
+        .btn-close:hover {
+            opacity: 1;
+        }
+        
         .container {
             margin-bottom: 100px !important;
             max-width: 1600px;
@@ -329,6 +394,17 @@
     <script>
       async function openEventsModal(locationFilter, search) {
         console.log('openEventsModal called with:', { locationFilter, search });
+        
+        // Show loading state
+        const cont = document.getElementById('eventsModalContent');
+        cont.innerHTML = `
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading events...</p>
+          </div>`;
+        
         try {
           const params = new URLSearchParams();
           if (locationFilter) params.append('locationFilter', locationFilter);
@@ -347,18 +423,28 @@
           const data = await resp.json();
           console.log('Received data:', data);
           
-          const cont = document.getElementById('eventsModalContent');
           if (!data || !data.events || data.events.length === 0) {
-            cont.innerHTML = '<div class="text-center p-3">No events found</div>';
+            cont.innerHTML = `
+              <div class="text-center p-4">
+                <i class="fas fa-calendar fa-3x text-muted mb-3"></i>
+                <h5>No events found</h5>
+                <p class="text-muted">No events match the selected criteria.</p>
+              </div>`;
           } else {
             const items = data.events.map(e => `
               <li class="list-group-item d-flex justify-content-between align-items-center">
-                 <span>${e.title ?? ''}</span>
-                 <small class="text-muted">${e.location ?? ''}</small>
+                <div>
+                  <strong>${e.title ?? ''}</strong>
+                  <br><small class="text-muted">${e.location ?? ''} • ${e.date ?? ''}</small>
+                </div>
+                <span class="badge bg-secondary">${e.price ?? 'Free'}</span>
               </li>`).join('');
             cont.innerHTML = `
-              <div class="mb-2 fw-bold">${locationFilter ? locationFilter : 'All events'}</div>
-              <ul class="list-group">${items}</ul>`;
+              <div class="mb-3">
+                <h6 class="fw-bold text-primary">${locationFilter ? locationFilter : 'All events'}</h6>
+                <p class="text-muted mb-0">Showing ${data.events.length} event(s)</p>
+              </div>
+              <ul class="list-group list-group-flush">${items}</ul>`;
           }
           
           const modalElement = document.getElementById('eventsModal');
@@ -374,7 +460,12 @@
           }
         } catch (e) {
           console.error('Error in openEventsModal:', e);
-          document.getElementById('eventsModalContent').innerHTML = `Error loading events: ${e.message}`;
+          cont.innerHTML = `
+            <div class="text-center p-4">
+              <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+              <h5>Error loading events</h5>
+              <p class="text-muted">${e.message}</p>
+            </div>`;
           const modalElement = document.getElementById('eventsModal');
           if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
             const modal = new bootstrap.Modal(modalElement);
