@@ -48,7 +48,8 @@ namespace soft20181_starter.Pages.Admin.Users
 
         public async Task<IActionResult> OnPostAsync()
         {
-            _logger.LogInformation("OnPostAsync called for user creation");
+            _logger.LogInformation("=== USER CREATION STARTED ===");
+            _logger.LogInformation("ModelState.IsValid: {IsValid}", ModelState.IsValid);
             
             // Re-populate available roles in case of validation errors
             AvailableRoles = new List<string>();
@@ -59,7 +60,7 @@ namespace soft20181_starter.Pages.Admin.Users
 
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("ModelState is invalid");
+                _logger.LogWarning("ModelState is invalid. Errors:");
                 foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
                 {
                     _logger.LogWarning("ModelState error: {Error}", error.ErrorMessage);
@@ -67,8 +68,12 @@ namespace soft20181_starter.Pages.Admin.Users
                 return Page();
             }
 
-            _logger.LogInformation("Creating user with email: {Email}, name: {Name}, surname: {Surname}", 
-                UserViewModel.Email, UserViewModel.Name, UserViewModel.Surname);
+            _logger.LogInformation("User data received:");
+            _logger.LogInformation("Name: {Name}", UserViewModel.Name);
+            _logger.LogInformation("Surname: {Surname}", UserViewModel.Surname);
+            _logger.LogInformation("Email: {Email}", UserViewModel.Email);
+            _logger.LogInformation("Role: {Role}", UserViewModel.Role);
+            _logger.LogInformation("Phone: {Phone}", UserViewModel.PhoneNumber);
 
             try
             {
@@ -76,6 +81,7 @@ namespace soft20181_starter.Pages.Admin.Users
                 var existingUser = await _userManager.FindByEmailAsync(UserViewModel.Email);
                 if (existingUser != null)
                 {
+                    _logger.LogWarning("User with email {Email} already exists", UserViewModel.Email);
                     ModelState.AddModelError(string.Empty, "A user with this email address already exists.");
                     return Page();
                 }
@@ -94,8 +100,11 @@ namespace soft20181_starter.Pages.Admin.Users
                 };
 
                 _logger.LogInformation("AppUser object created with ID: {Id}", user.Id);
+                _logger.LogInformation("User details: Name={Name}, Surname={Surname}, Email={Email}, Role={Role}", 
+                    user.Name, user.Surname, user.Email, user.Role);
 
                 var result = await _userManager.CreateAsync(user, UserViewModel.Password);
+                _logger.LogInformation("UserManager.CreateAsync result: Succeeded={Succeeded}", result.Succeeded);
 
                 if (result.Succeeded)
                 {
@@ -104,6 +113,7 @@ namespace soft20181_starter.Pages.Admin.Users
                     // Assign role if specified
                     if (!string.IsNullOrEmpty(UserViewModel.Role))
                     {
+                        _logger.LogInformation("Assigning role {Role} to user {UserId}", UserViewModel.Role, user.Id);
                         var roleResult = await _userManager.AddToRoleAsync(user, UserViewModel.Role);
                         if (roleResult.Succeeded)
                         {

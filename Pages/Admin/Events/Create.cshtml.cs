@@ -74,149 +74,68 @@ namespace soft20181_starter.Pages.Admin.Events
 
         public async Task<IActionResult> OnPostAsync()
         {
+            _logger.LogInformation("=== EVENT CREATION STARTED ===");
+            _logger.LogInformation("ModelState.IsValid: {IsValid}", ModelState.IsValid);
+            
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("ModelState is invalid. Errors:");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("ModelState error: {Error}", error.ErrorMessage);
+                }
+                return Page();
+            }
+
+            _logger.LogInformation("Event data received:");
+            _logger.LogInformation("Title: {Title}", Event.title);
+            _logger.LogInformation("Location: {Location}", Event.location);
+            _logger.LogInformation("Date: {Date}", Event.date);
+            _logger.LogInformation("Price: {Price}", Event.price);
+            _logger.LogInformation("Description: {Description}", Event.description?.Substring(0, Math.Min(50, Event.description.Length)) + "...");
+            _logger.LogInformation("Category: {Category}", Event.Category);
+            _logger.LogInformation("UploadedImages count: {Count}", UploadedImages?.Count ?? 0);
+
+            // Initialize collections if null
+            if (Event.images == null)
+            {
+                Event.images = new List<string>();
+                _logger.LogInformation("Initialized Event.images collection");
+            }
+
+            // Check if location exists
+            var existingLocation = await _context.Events
+                .Where(e => e.location.ToLower() == Event.location.ToLower())
+                .FirstOrDefaultAsync();
+            
+            bool isNewLocation = existingLocation == null;
+            _logger.LogInformation("Is new location: {IsNewLocation}", isNewLocation);
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    _logger.LogWarning("Invalid model state when creating event");
-                    return Page();
-                }
-
-                // Begin transaction
-                await using var transaction = await _context.Database.BeginTransactionAsync();
-
-                try
-                {
-                    // Validate required fields
-                    if (string.IsNullOrEmpty(Event.title))
-                    {
-                        ModelState.AddModelError("Event.title", "Title is required");
-                        return Page();
-                    }
-                    if (string.IsNullOrEmpty(Event.location))
-                    {
-                        ModelState.AddModelError("Event.location", "Location is required");
-                        return Page();
-                    }
-                    if (string.IsNullOrEmpty(Event.description))
-                    {
-                        ModelState.AddModelError("Event.description", "Description is required");
-                        return Page();
-                    }
-                    if (string.IsNullOrEmpty(Event.date))
-                    {
-                        ModelState.AddModelError("Event.date", "Date is required");
-                        return Page();
-                    }
-                    if (string.IsNullOrEmpty(Event.price))
-                    {
-                        ModelState.AddModelError("Event.price", "Price is required");
-                        return Page();
-                    }
-
-                    // Process the form data and ensure location is lowercase for consistency
-                    Event.location = Event.location.ToLower().Trim();
-                    Event.title = Event.title.Trim();
-                    Event.description = Event.description.Trim();
-
-                    // Log the location being used
-                    _logger.LogInformation("Creating event with location: {Location}", Event.location);
-
-                    // Check if this is a new location
-                    var existingLocations = await _context.Events
-                        .Where(e => !e.IsDeleted)
-                        .Select(e => e.location.ToLower())
-                        .Distinct()
-                        .ToListAsync();
-
-                    var isNewLocation = !existingLocations.Contains(Event.location);
-                    _logger.LogInformation("Location {Location} is {Status}", Event.location, isNewLocation ? "new" : "existing");
-
-                    // Validate and format date
-                    if (DateTime.TryParse(Event.date, out DateTime parsedDate))
-                    {
-                        if (parsedDate < DateTime.Today)
-                        {
-                            ModelState.AddModelError("Event.date", "Event date must be in the future");
-                            return Page();
-                        }
-                        Event.date = parsedDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("Event.date", "Invalid date format");
-                        return Page();
-                    }
-
-                    // Format and validate price
-                    if (!string.IsNullOrEmpty(Event.price))
-                    {
-                        var cleanPrice = Event.price.Trim();
-                        if (cleanPrice.Equals("Free", StringComparison.OrdinalIgnoreCase))
-                        {
-                            Event.price = "Free";
-                        }
-                        else
-                        {
-                            var priceWithoutSymbol = cleanPrice.Replace("£", "").Trim();
-                            if (decimal.TryParse(priceWithoutSymbol, out var priceValue))
-                            {
-                                Event.price = $"£{priceValue}";
-                            }
-                            else
-                            {
-                                ModelState.AddModelError("Event.price", "Price must be a number (e.g., £10 or 10) or 'Free'");
-                                return Page();
-                            }
-                        }
-                    }
-
-                    // Set additional event properties
-                    Event.Category = EventCategory ?? "Other";
-                    Event.Capacity = EventCapacity;
-                    Event.StartTime = EventStartTime;
-                    Event.EndTime = EventEndTime;
-                    Event.Tags = EventTags;
-                    Event.Status = "Active";
-                    var now = DateTime.UtcNow;
-                    Event.CreatedAt = now;
-                    Event.UpdatedAt = now;
-                    _logger.LogInformation("Setting CreatedAt to: {CreatedAt}", now);
-                    
-                    // Get the current user's ID for the foreign key
-                    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                    if (string.IsNullOrEmpty(userId))
-                    {
-                        _logger.LogError("Could not determine user ID for event creation");
-                        ModelState.AddModelError(string.Empty, "Could not determine user ID. Please try logging out and back in.");
-                        return Page();
-                    }
-                    Event.CreatedById = userId;
-                    Event.IsDeleted = false;
-
-                // Initialize images list
-                Event.images = new List<string>();
+                _logger.LogInformation("Database transaction started");
 
                 // Process uploaded images
                 if (UploadedImages != null && UploadedImages.Count > 0)
                 {
-                        _logger.LogInformation("Processing {ImageCount} uploaded images", UploadedImages.Count);
-                        
-                        string uploadsFolder = Path.Combine(_environment.WebRootPath ?? throw new InvalidOperationException("WebRootPath is null"), "images", "events");
+                    _logger.LogInformation("Processing {ImageCount} uploaded images", UploadedImages.Count);
                     
-                        try
-                        {
-                    // Ensure directory exists
-                    if (!Directory.Exists(uploadsFolder))
+                    string uploadsFolder = Path.Combine(_environment.WebRootPath ?? throw new InvalidOperationException("WebRootPath is null"), "images", "events");
+                
+                    try
                     {
-                        Directory.CreateDirectory(uploadsFolder);
-                                _logger.LogInformation("Created events images directory: {Directory}", uploadsFolder);
-                            }
-                        }
-                        catch (Exception ex)
+                        // Ensure directory exists
+                        if (!Directory.Exists(uploadsFolder))
                         {
-                            _logger.LogWarning("Could not create events directory. Using data URL storage only. Error: {Error}", ex.Message);
-                            uploadsFolder = null;
+                            Directory.CreateDirectory(uploadsFolder);
+                            _logger.LogInformation("Created events images directory: {Directory}", uploadsFolder);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning("Could not create events directory. Using data URL storage only. Error: {Error}", ex.Message);
+                        uploadsFolder = null;
                     }
 
                     // Process up to 3 images
@@ -224,130 +143,126 @@ namespace soft20181_starter.Pages.Admin.Events
                     {
                         if (image.Length > 0)
                         {
-                                _logger.LogInformation("Processing image: {FileName}, Size: {Size} bytes, ContentType: {ContentType}", 
-                                    image.FileName, image.Length, image.ContentType);
-                                
-                                try
-                                {
-                                    if (uploadsFolder != null)
-                                    {
-                                        // Create unique filename with original extension
-                                        string extension = Path.GetExtension(image.FileName).ToLowerInvariant();
-                                        if (string.IsNullOrEmpty(extension))
-                                        {
-                                            // Default to .jpg if no extension
-                                            extension = ".jpg";
-                                        }
-                                        
-                                        string fileName = Guid.NewGuid().ToString() + extension;
-                            string filePath = Path.Combine(uploadsFolder, fileName);
+                            _logger.LogInformation("Processing image: {FileName}, Size: {Size} bytes, ContentType: {ContentType}", 
+                                image.FileName, image.Length, image.ContentType);
                             
-                                        // Save image to disk
-                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            try
                             {
-                                await image.CopyToAsync(stream);
-                            }
-                            
-                            // Add relative path to event images
-                                        Event.images.Add($"images/events/{fileName}");
-                                        _logger.LogInformation("Successfully saved image {FileName} to disk", fileName);
-                                    }
-                                    else
+                                if (uploadsFolder != null)
+                                {
+                                    // Create unique filename with original extension
+                                    string extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+                                    if (string.IsNullOrEmpty(extension))
                                     {
-                                        // Store as data URL if file system is not available
-                                        using (var memoryStream = new MemoryStream())
-                                        {
-                                            await image.CopyToAsync(memoryStream);
-                                            var bytes = memoryStream.ToArray();
-                                            var base64 = Convert.ToBase64String(bytes);
-                                            var dataUrl = $"data:{image.ContentType};base64,{base64}";
-                                            Event.images.Add(dataUrl);
-                                            _logger.LogInformation("Stored image as data URL: {FileName}", image.FileName);
-                                        }
+                                        // Default to .jpg if no extension
+                                        extension = ".jpg";
+                                    }
+                                    
+                                    string fileName = Guid.NewGuid().ToString() + extension;
+                                    string filePath = Path.Combine(uploadsFolder, fileName);
+                                    
+                                    // Save image to disk
+                                    using (var stream = new FileStream(filePath, FileMode.Create))
+                                    {
+                                        await image.CopyToAsync(stream);
+                                    }
+                                    
+                                    // Add relative path to event images
+                                    Event.images.Add($"images/events/{fileName}");
+                                    _logger.LogInformation("Successfully saved image {FileName} to disk", fileName);
+                                }
+                                else
+                                {
+                                    // Store as data URL if file system is not available
+                                    using (var memoryStream = new MemoryStream())
+                                    {
+                                        await image.CopyToAsync(memoryStream);
+                                        var bytes = memoryStream.ToArray();
+                                        var base64 = Convert.ToBase64String(bytes);
+                                        var dataUrl = $"data:{image.ContentType};base64,{base64}";
+                                        Event.images.Add(dataUrl);
+                                        _logger.LogInformation("Stored image as data URL: {FileName}", image.FileName);
                                     }
                                 }
-                                catch (Exception ex)
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning("Could not save image to disk. Storing as data URL instead. Error: {Error}", ex.Message);
+                                // Fallback to data URL storage
+                                try
                                 {
-                                    _logger.LogWarning("Could not save image to disk. Storing as data URL instead. Error: {Error}", ex.Message);
-                                    // Fallback to data URL storage
-                                    try
+                                    using (var memoryStream = new MemoryStream())
                                     {
-                                        using (var memoryStream = new MemoryStream())
-                                        {
-                                            await image.CopyToAsync(memoryStream);
-                                            var bytes = memoryStream.ToArray();
-                                            var base64 = Convert.ToBase64String(bytes);
-                                            var dataUrl = $"data:{image.ContentType};base64,{base64}";
-                                            Event.images.Add(dataUrl);
-                                            _logger.LogInformation("Stored image as data URL after disk failure: {FileName}", image.FileName);
-                                        }
+                                        await image.CopyToAsync(memoryStream);
+                                        var bytes = memoryStream.ToArray();
+                                        var base64 = Convert.ToBase64String(bytes);
+                                        var dataUrl = $"data:{image.ContentType};base64,{base64}";
+                                        Event.images.Add(dataUrl);
+                                        _logger.LogInformation("Stored image as data URL after disk failure: {FileName}", image.FileName);
                                     }
-                                    catch (Exception dataUrlEx)
-                                    {
-                                        _logger.LogError("Failed to store image as data URL: {FileName}, Error: {Error}", image.FileName, dataUrlEx.Message);
-                                    }
+                                }
+                                catch (Exception dataUrlEx)
+                                {
+                                    _logger.LogError("Failed to store image as data URL: {FileName}, Error: {Error}", image.FileName, dataUrlEx.Message);
                                 }
                             }
                         }
-                        
-                        _logger.LogInformation("Completed processing {ImageCount} images. Total images in event: {TotalImages}", 
-                            UploadedImages.Count, Event.images.Count);
                     }
-
-                    // External image URLs removed for simplicity as requested
-
-                    // Let database generate the ID
                     
-                    // Add event to database
-                    _logger.LogInformation("Attempting to save event to database: {Title}", Event.title);
-                    _logger.LogInformation("Event details before save: Location: {Location}, Date: {Date}, Price: {Price}", 
-                        Event.location, Event.date, Event.price);
-                    
-                    var entry = await _context.Events.AddAsync(Event);
-                    await _context.SaveChangesAsync();
-                    
-                    // Now the event has an ID, update the link and create audit log entry
-                    Event.link = $"/EventDetail?location={Event.location}&id={Event.id}";
-                    await _context.SaveChangesAsync();
-                    
-                    var auditLog = new AuditLog
-                    {
-                        EntityName = "Event",
-                        EntityId = Event.id.ToString(),
-                        Action = "Create",
-                        UserId = User.Identity?.Name ?? "System",
-                        Changes = $"Created new event: {Event.title} (ID: {Event.id}) in location: {Event.location}",
-                        Timestamp = DateTime.UtcNow
-                    };
-                    await _context.AuditLogs.AddAsync(auditLog);
-                    await _context.SaveChangesAsync();
-                    
-                    // Commit transaction
-                    await transaction.CommitAsync();
-                    
-                    _logger.LogInformation("Event created successfully: {EventTitle} (ID: {EventId})", Event.title, Event.id);
-                    
-                    var successMessage = isNewLocation
-                        ? $"Event '{Event.title}' created successfully with new location '{Event.location}'! The event will be displayed in the Events page."
-                        : $"Event '{Event.title}' created successfully in {Event.location}! The event will be displayed in both the Events page and the {Event.location} section.";
-                    
-                    TempData["SuccessMessage"] = successMessage;
-                    
-                    // Redirect to Events Index page
-                    return RedirectToPage("./Index");
+                    _logger.LogInformation("Completed processing {ImageCount} images. Total images in event: {TotalImages}", 
+                        UploadedImages.Count, Event.images.Count);
                 }
-                catch (Exception ex)
+
+                // Add event to database
+                _logger.LogInformation("Attempting to save event to database: {Title}", Event.title);
+                _logger.LogInformation("Event details before save: Location: {Location}, Date: {Date}, Price: {Price}", 
+                    Event.location, Event.date, Event.price);
+                
+                var entry = await _context.Events.AddAsync(Event);
+                _logger.LogInformation("Event added to context. Entry state: {State}", entry.State);
+                
+                var saveResult = await _context.SaveChangesAsync();
+                _logger.LogInformation("SaveChangesAsync completed. Result: {Result}", saveResult);
+                
+                // Now the event has an ID, update the link and create audit log entry
+                Event.link = $"/EventDetail?location={Event.location}&id={Event.id}";
+                _logger.LogInformation("Updated event link: {Link}", Event.link);
+                
+                var updateResult = await _context.SaveChangesAsync();
+                _logger.LogInformation("Second SaveChangesAsync completed. Result: {Result}", updateResult);
+                
+                var auditLog = new AuditLog
                 {
-                    // Rollback transaction on error
-                    await transaction.RollbackAsync();
-                    _logger.LogError(ex, "Error during transaction: {Error}", ex.Message);
-                    throw;
-                }
+                    EntityName = "Event",
+                    EntityId = Event.id.ToString(),
+                    Action = "Create",
+                    UserId = User.Identity?.Name ?? "System",
+                    Changes = $"Created new event: {Event.title} (ID: {Event.id}) in location: {Event.location}",
+                    Timestamp = DateTime.UtcNow
+                };
+                await _context.AuditLogs.AddAsync(auditLog);
+                await _context.SaveChangesAsync();
+                
+                // Commit transaction
+                await transaction.CommitAsync();
+                _logger.LogInformation("Database transaction committed successfully");
+                
+                _logger.LogInformation("Event created successfully: {EventTitle} (ID: {EventId})", Event.title, Event.id);
+                
+                var successMessage = isNewLocation
+                    ? $"Event '{Event.title}' created successfully with new location '{Event.location}'! The event will be displayed in the Events page."
+                    : $"Event '{Event.title}' created successfully in {Event.location}! The event will be displayed in both the Events page and the {Event.location} section.";
+                
+                TempData["SuccessMessage"] = successMessage;
+                
+                // Redirect to Events Index page
+                return RedirectToPage("./Index");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating event: {Title}. Error: {Error}", 
-                    Event.title, ex.Message);
+                // Rollback transaction on error
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error during transaction: {Error}", ex.Message);
                 
                 // Get the inner exception message if available
                 var errorMessage = ex.InnerException?.Message ?? ex.Message;
