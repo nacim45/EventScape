@@ -6,6 +6,10 @@
 }
 
 <div class="container my-5">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">@TempData["SuccessMessage"]</div>
+    }
     <div class="featured-events-header">
         <h2 class="featured-title">Event Management</h2>
     </div>
@@ -334,22 +338,14 @@
           if (!data || !data.events || data.events.length === 0) {
             cont.innerHTML = '<div class="text-center p-3">No events found</div>';
           } else {
-            const rows = data.events.map(e => `
-              <tr>
-                <td>${e.title ?? ''}</td>
-                <td>${e.location ?? ''}</td>
-                <td>${e.date ?? ''}</td>
-                <td>${e.price ?? ''}</td>
-              </tr>`).join('');
+            const items = data.events.map(e => `
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                 <span>${e.title ?? ''}</span>
+                 <small class="text-muted">${e.location ?? ''}</small>
+              </li>`).join('');
             cont.innerHTML = `
-              <div class="table-responsive">
-                <table class="table admin-table">
-                  <thead class="admin-table-header">
-                    <tr><th>Title</th><th>Location</th><th>Date</th><th>Price</th></tr>
-                  </thead>
-                  <tbody>${rows}</tbody>
-                </table>
-              </div>`;
+              <div class="mb-2 fw-bold">${locationFilter ? locationFilter : 'All events'}</div>
+              <ul class="list-group">${items}</ul>`;
           }
           const modal = new bootstrap.Modal(document.getElementById('eventsModal'));
           modal.show();

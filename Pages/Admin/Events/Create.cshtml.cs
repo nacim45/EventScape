@@ -194,22 +194,22 @@ namespace soft20181_starter.Pages.Admin.Events
                     Event.CreatedById = userId;
                     Event.IsDeleted = false;
 
-                    // Initialize images list
-                    Event.images = new List<string>();
+                // Initialize images list
+                Event.images = new List<string>();
 
-                    // Process uploaded images
-                    if (UploadedImages != null && UploadedImages.Count > 0)
-                    {
+                // Process uploaded images
+                if (UploadedImages != null && UploadedImages.Count > 0)
+                {
                         _logger.LogInformation("Processing {ImageCount} uploaded images", UploadedImages.Count);
                         
                         string uploadsFolder = Path.Combine(_environment.WebRootPath ?? throw new InvalidOperationException("WebRootPath is null"), "images", "events");
-                        
+                    
                         try
                         {
-                            // Ensure directory exists
-                            if (!Directory.Exists(uploadsFolder))
-                            {
-                                Directory.CreateDirectory(uploadsFolder);
+                    // Ensure directory exists
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
                                 _logger.LogInformation("Created events images directory: {Directory}", uploadsFolder);
                             }
                         }
@@ -217,13 +217,13 @@ namespace soft20181_starter.Pages.Admin.Events
                         {
                             _logger.LogWarning("Could not create events directory. Using data URL storage only. Error: {Error}", ex.Message);
                             uploadsFolder = null;
-                        }
+                    }
 
-                        // Process up to 3 images
-                        foreach (var image in UploadedImages.Take(3))
+                    // Process up to 3 images
+                    foreach (var image in UploadedImages.Take(3))
+                    {
+                        if (image.Length > 0)
                         {
-                            if (image.Length > 0)
-                            {
                                 _logger.LogInformation("Processing image: {FileName}, Size: {Size} bytes, ContentType: {ContentType}", 
                                     image.FileName, image.Length, image.ContentType);
                                 
@@ -240,15 +240,15 @@ namespace soft20181_starter.Pages.Admin.Events
                                         }
                                         
                                         string fileName = Guid.NewGuid().ToString() + extension;
-                                        string filePath = Path.Combine(uploadsFolder, fileName);
-                                        
+                            string filePath = Path.Combine(uploadsFolder, fileName);
+                            
                                         // Save image to disk
-                                        using (var stream = new FileStream(filePath, FileMode.Create))
-                                        {
-                                            await image.CopyToAsync(stream);
-                                        }
-                                        
-                                        // Add relative path to event images
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await image.CopyToAsync(stream);
+                            }
+                            
+                            // Add relative path to event images
                                         Event.images.Add($"images/events/{fileName}");
                                         _logger.LogInformation("Successfully saved image {FileName} to disk", fileName);
                                     }

@@ -66,7 +66,8 @@ namespace soft20181_starter.Pages.Admin.Users
                 Name = UserViewModel.Name,
                 Surname = UserViewModel.Surname,
                 PhoneNumber = UserViewModel.PhoneNumber,
-                RegisteredDate = DateTime.Now
+                RegisteredDate = DateTime.Now,
+                Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role
             };
 
             var result = await _userManager.CreateAsync(user, UserViewModel.Password);
