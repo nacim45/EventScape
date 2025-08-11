@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace soft20181_starter.Pages.Admin.Events
 {
@@ -19,15 +20,18 @@ namespace soft20181_starter.Pages.Admin.Events
         private readonly EventAppDbContext _context;
         private readonly ILogger<CreateModel> _logger;
         private readonly IWebHostEnvironment _environment;
+        private readonly UserManager<AppUser> _userManager;
 
         public CreateModel(
             EventAppDbContext context, 
-            ILogger<CreateModel> logger,
-            IWebHostEnvironment environment)
+            ILogger<CreateModel> logger, 
+            IWebHostEnvironment environment,
+            UserManager<AppUser> userManager)
         {
             _context = context;
             _logger = logger;
             _environment = environment;
+            _userManager = userManager;
         }
 
         [BindProperty]
@@ -202,12 +206,15 @@ namespace soft20181_starter.Pages.Admin.Events
                 }
 
                 // Get current user ID
-                var userId = User.Identity?.Name;
-                if (string.IsNullOrEmpty(userId))
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
                 {
                     ModelState.AddModelError(string.Empty, "User not found. Please log in again.");
                     return Page();
                 }
+
+                var userId = currentUser.Id;
+                _logger.LogInformation("Creating event for user: {UserId} ({UserName})", userId, currentUser.UserName);
 
                 // Create new event with all fields
                 var newEvent = new TheEvent
