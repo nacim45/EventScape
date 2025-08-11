@@ -31,6 +31,7 @@ builder.Services.AddDbContext<EventAppDbContext>(options =>
 
 // Register application services
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, EmailSender>();
 
 // Add Identity services
@@ -97,11 +98,63 @@ using (var scope = app.Services.CreateScope())
         // Ensure database is created
         context.Database.EnsureCreated();
         
-        // Seed the database
+        // Initialize roles if they don't exist
+        string[] roleNames = { "Administrator", "Admin", "User", "Standard" };
+        foreach (var roleName in roleNames)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+                var initLogger = services.GetRequiredService<ILogger<Program>>();
+                initLogger.LogInformation("Created role: {Role}", roleName);
+            }
+        }
+        
+        // Check if default admin user exists
+        var adminEmail = "admin@eventscape.com";
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        
+        if (adminUser == null)
+        {
+            // Create default admin user
+            adminUser = new AppUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                Name = "Admin",
+                Surname = "User",
+                EmailConfirmed = true,
+                Role = "Administrator",
+                RegisteredDate = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true,
+                ReceiveNotifications = true,
+                ReceiveMarketingEmails = false,
+                PreferredLanguage = "en",
+                TimeZone = "UTC",
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+            
+            var createResult = await userManager.CreateAsync(adminUser, "Admin123!");
+            if (createResult.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Administrator");
+                var adminLogger = services.GetRequiredService<ILogger<Program>>();
+                adminLogger.LogInformation("Created default admin user: {Email}", adminEmail);
+            }
+            else
+            {
+                var errorLogger = services.GetRequiredService<ILogger<Program>>();
+                errorLogger.LogError("Failed to create default admin user: {Errors}", 
+                    string.Join(", ", createResult.Errors.Select(e => e.Description)));
+            }
+        }
+        
+        // Seed the database with events
         await DatabaseSeeder.SeedEvents(context, webHostEnvironment);
         
         var dbLogger = services.GetRequiredService<ILogger<Program>>();
-        dbLogger.LogInformation("Database initialized successfully");
+        dbLogger.LogInformation("Database initialized successfully with persistent user data");
     }
     catch (Exception ex)
     {

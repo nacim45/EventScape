@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using soft20181_starter.Services;
 
 namespace soft20181_starter.Pages.Account
 {
@@ -17,6 +18,7 @@ namespace soft20181_starter.Pages.Account
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IUserService _userService;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
@@ -24,12 +26,14 @@ namespace soft20181_starter.Pages.Account
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             RoleManager<IdentityRole> roleManager,
+            IUserService userService,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
         }
@@ -56,90 +60,62 @@ namespace soft20181_starter.Pages.Account
 
                 _logger.LogInformation("Attempting to register new user with email: {Email}", RegisterInput.Email);
 
-                // Check if email is already in use - case insensitive check
-                var normalizedEmail = RegisterInput.Email.ToUpperInvariant();
-                var existingUser = await _userManager.FindByEmailAsync(RegisterInput.Email);
+                // Check if email is already in use
+                var existingUser = await _userService.GetUserByEmailAsync(RegisterInput.Email);
                 
-                // Also check if the username exists (since we're using email as username)
-                var existingUsername = await _userManager.FindByNameAsync(RegisterInput.Email);
-                
-                if (existingUser != null || existingUsername != null)
+                if (existingUser != null)
                 {
                     _logger.LogWarning("Registration failed: Email {Email} is already in use", RegisterInput.Email);
                     ErrorMessage = "This email is already registered.";
                     return Page();
                 }
 
-                // Create the user with Identity - use the selected role from the form
+                // Create the user with all required fields
                 var user = new AppUser
                 {
-                    UserName = RegisterInput.Email, // Using email as username for simplicity
+                    UserName = RegisterInput.Email,
                     Email = RegisterInput.Email,
-                    Name = RegisterInput.FirstName,
-                    Surname = RegisterInput.LastName,
-                    PhoneNumber = RegisterInput.PhoneNumber,
-                    Role = RegisterInput.Role // Use the role from the form
+                    Name = RegisterInput.FirstName?.Trim() ?? string.Empty,
+                    Surname = RegisterInput.LastName?.Trim() ?? string.Empty,
+                    PhoneNumber = RegisterInput.PhoneNumber?.Trim() ?? string.Empty,
+                    Role = RegisterInput.Role ?? "User",
+                    RegisteredDate = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true,
+                    ReceiveNotifications = true,
+                    ReceiveMarketingEmails = false,
+                    PreferredLanguage = "en",
+                    TimeZone = "UTC",
+                    SecurityStamp = Guid.NewGuid().ToString()
                 };
 
-                var result = await _userManager.CreateAsync(user, RegisterInput.Password);
+                // Use the UserService for robust user creation
+                var createdUser = await _userService.CreateUserAsync(user, RegisterInput.Password, user.Role);
 
-                if (result.Succeeded)
+                if (createdUser != null)
                 {
-                    _logger.LogInformation("User {Email} created successfully", RegisterInput.Email);
+                    _logger.LogInformation("User {Email} created successfully with ID: {UserId}", RegisterInput.Email, createdUser.Id);
 
-                    // Ensure the required roles exist
-                    if (!await _roleManager.RoleExistsAsync("User"))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole("User"));
-                        _logger.LogInformation("Created 'User' role");
-                    }
-                    
-                    if (!await _roleManager.RoleExistsAsync("Administrator"))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole("Administrator"));
-                        _logger.LogInformation("Created 'Administrator' role");
-                    }
+                    // Sign in the user automatically
+                    await _signInManager.SignInAsync(createdUser, isPersistent: false);
 
-                    // Assign the role based on user selection
-                    if (RegisterInput.Role == "Administrator")
-                    {
-                        await _userManager.AddToRoleAsync(user, "Administrator");
-                        _logger.LogInformation("User {Email} assigned to Administrator role", RegisterInput.Email);
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, "User");
-                        _logger.LogInformation("User {Email} assigned to User role", RegisterInput.Email);
-                    }
-                    
-                    // Sign in the user immediately
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    
-                    _logger.LogInformation("User {Email} signed in after registration", RegisterInput.Email);
-                    
-                    // Redirect administrators to admin page
-                    if (RegisterInput.Role == "Administrator")
-                    {
-                        return RedirectToPage("/Admin/Index");
-                    }
-                    
+                    SuccessMessage = "Registration successful! You are now logged in.";
+                    _logger.LogInformation("User {Email} signed in successfully after registration", RegisterInput.Email);
+
+                    // Redirect to home page or dashboard
                     return RedirectToPage("/Index");
                 }
-
-                // If registration failed, add errors to ModelState
-                foreach (var error in result.Errors)
+                else
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                    _logger.LogWarning("Registration error: {Error}", error.Description);
+                    _logger.LogError("Failed to create user {Email}", RegisterInput.Email);
+                    ErrorMessage = "Registration failed. Please try again.";
+                    return Page();
                 }
-
-                ErrorMessage = "Registration failed. Please check the form and try again.";
-                return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during registration: {Message}", ex.Message);
-                ErrorMessage = "An unexpected error occurred during registration. Please try again later.";
+                _logger.LogError(ex, "Error during user registration for {Email}", RegisterInput.Email);
+                ErrorMessage = "An error occurred during registration. Please try again.";
                 return Page();
             }
         }

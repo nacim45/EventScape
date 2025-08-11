@@ -136,77 +136,101 @@ namespace soft20181_starter.Pages.Admin.Users
                     return Page();
                 }
 
-                // Create new user with all required fields
-                var user = new AppUser
+                // Begin transaction for atomic operation
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+
+                try
                 {
-                    UserName = UserViewModel.Email.Trim(),
-                    Email = UserViewModel.Email.Trim(),
-                    Name = UserViewModel.Name.Trim(),
-                    Surname = UserViewModel.Surname.Trim(),
-                    PhoneNumber = UserViewModel.PhoneNumber?.Trim() ?? string.Empty,
-                    RegisteredDate = DateTime.Now,
-                    Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role,
-                    EmailConfirmed = true,
-                    CreatedAt = DateTime.UtcNow,
-                    SecurityStamp = Guid.NewGuid().ToString()
-                };
-
-                _logger.LogInformation("Creating user with email: {Email}", user.Email);
-                var result = await _userManager.CreateAsync(user, UserViewModel.Password);
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User created successfully with ID: {UserId}", user.Id);
-
-                    // Assign role if specified
-                    if (!string.IsNullOrEmpty(UserViewModel.Role))
+                    // Create new user with all required fields
+                    var user = new AppUser
                     {
-                        _logger.LogInformation("Assigning role {Role} to user {UserId}", UserViewModel.Role, user.Id);
-                        var roleResult = await _userManager.AddToRoleAsync(user, UserViewModel.Role);
-                        if (roleResult.Succeeded)
+                        UserName = UserViewModel.Email.Trim(),
+                        Email = UserViewModel.Email.Trim(),
+                        Name = UserViewModel.Name.Trim(),
+                        Surname = UserViewModel.Surname.Trim(),
+                        PhoneNumber = UserViewModel.PhoneNumber?.Trim() ?? string.Empty,
+                        RegisteredDate = DateTime.Now,
+                        Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role,
+                        EmailConfirmed = true,
+                        CreatedAt = DateTime.UtcNow,
+                        SecurityStamp = Guid.NewGuid().ToString(),
+                        IsActive = true,
+                        ReceiveNotifications = true,
+                        ReceiveMarketingEmails = false,
+                        PreferredLanguage = "en",
+                        TimeZone = "UTC"
+                    };
+
+                    _logger.LogInformation("Creating user with email: {Email}", user.Email);
+                    var result = await _userManager.CreateAsync(user, UserViewModel.Password);
+
+                    if (result.Succeeded)
+                    {
+                        _logger.LogInformation("User created successfully with ID: {UserId}", user.Id);
+
+                        // Assign role if specified
+                        if (!string.IsNullOrEmpty(UserViewModel.Role))
                         {
-                            _logger.LogInformation("Role {Role} assigned successfully to user {UserId}", UserViewModel.Role, user.Id);
+                            _logger.LogInformation("Assigning role {Role} to user {UserId}", UserViewModel.Role, user.Id);
+                            var roleResult = await _userManager.AddToRoleAsync(user, UserViewModel.Role);
+                            if (roleResult.Succeeded)
+                            {
+                                _logger.LogInformation("Role {Role} assigned successfully to user {UserId}", UserViewModel.Role, user.Id);
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Failed to assign role {Role} to user {UserId}. Errors: {Errors}", 
+                                    UserViewModel.Role, user.Id, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+                                // Don't fail the entire operation if role assignment fails
+                            }
                         }
-                        else
+
+                        // Create audit log
+                        try
                         {
-                            _logger.LogWarning("Failed to assign role {Role} to user {UserId}. Errors: {Errors}", 
-                                UserViewModel.Role, user.Id, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
-                            // Don't fail the entire operation if role assignment fails
+                            var auditLog = new AuditLog
+                            {
+                                EntityName = "User",
+                                EntityId = user.Id,
+                                Action = "Create",
+                                UserId = User.Identity?.Name ?? "System",
+                                Changes = $"Created new user: {user.Name} {user.Surname} (ID: {user.Id}) with role: {user.Role}",
+                                Timestamp = DateTime.UtcNow
+                            };
+                            await _context.AuditLogs.AddAsync(auditLog);
+                            await _context.SaveChangesAsync();
+                            _logger.LogInformation("Audit log created for user {UserId}", user.Id);
                         }
-                    }
-
-                    // Create audit log
-                    try
-                    {
-                        var auditLog = new AuditLog
+                        catch (Exception auditEx)
                         {
-                            EntityName = "User",
-                            EntityId = user.Id,
-                            Action = "Create",
-                            UserId = User.Identity?.Name ?? "System",
-                            Changes = $"Created new user: {user.Name} {user.Surname} (ID: {user.Id}) with role: {user.Role}",
-                            Timestamp = DateTime.UtcNow
-                        };
-                        await _context.AuditLogs.AddAsync(auditLog);
-                        await _context.SaveChangesAsync();
-                        _logger.LogInformation("Audit log created for user {UserId}", user.Id);
-                    }
-                    catch (Exception auditEx)
-                    {
-                        _logger.LogWarning("Failed to create audit log for user {UserId}: {Error}", user.Id, auditEx.Message);
-                        // Don't fail the entire operation if audit log fails
+                            _logger.LogWarning("Failed to create audit log for user {UserId}: {Error}", user.Id, auditEx.Message);
+                            // Don't fail the entire operation if audit log fails
+                        }
+
+                        // Commit transaction
+                        await transaction.CommitAsync();
+                        _logger.LogInformation("Transaction committed successfully for user {UserId}", user.Id);
+
+                        TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}.";
+                        _logger.LogInformation("Redirecting to Index page with success message");
+                        return RedirectToPage("./Index");
                     }
 
-                    TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}.";
-                    _logger.LogInformation("Redirecting to Index page with success message");
-                    return RedirectToPage("./Index");
+                    // Rollback transaction if user creation failed
+                    await transaction.RollbackAsync();
+                    _logger.LogError("Failed to create user");
+                    foreach (var error in result.Errors)
+                    {
+                        _logger.LogError("User creation error: {Error}", error.Description);
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
-
-                _logger.LogError("Failed to create user");
-                foreach (var error in result.Errors)
+                catch (Exception ex)
                 {
-                    _logger.LogError("User creation error: {Error}", error.Description);
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    // Rollback transaction on any error
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error during user creation transaction");
+                    throw;
                 }
             }
             catch (Exception ex)

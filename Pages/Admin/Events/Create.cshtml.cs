@@ -33,7 +33,8 @@ namespace soft20181_starter.Pages.Admin.Events
         [BindProperty]
         public TheEvent Event { get; set; } = new TheEvent();
 
-        // Removed ImageUrls to keep drag-and-drop only
+        [BindProperty]
+        public string? ImageUrls { get; set; }
 
         [BindProperty]
         public List<IFormFile> UploadedImages { get; set; } = new List<IFormFile>();
@@ -53,20 +54,6 @@ namespace soft20181_starter.Pages.Admin.Events
         [BindProperty]
         public string? EventTags { get; set; }
 
-        // Removed manual EventId input – database will assign identity
-
-        public List<string> AvailableCategories { get; } = new List<string> 
-        { 
-            "Music", 
-            "Sports", 
-            "Arts", 
-            "Food", 
-            "Business", 
-            "Education", 
-            "Social", 
-            "Other" 
-        };
-
         public void OnGet()
         {
             _logger.LogInformation("Create event page loaded at {time}", DateTime.UtcNow);
@@ -74,223 +61,277 @@ namespace soft20181_starter.Pages.Admin.Events
 
         public async Task<IActionResult> OnPostAsync()
         {
-            _logger.LogInformation("=== EVENT CREATION STARTED ===");
-            
-            if (!ModelState.IsValid)
-            {
-                _logger.LogWarning("ModelState is invalid. Errors:");
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    _logger.LogWarning("ModelState error: {Error}", error.ErrorMessage);
-                }
-                return Page();
-            }
-
             try
             {
-                _logger.LogInformation("Event data received:");
-                _logger.LogInformation("Title: {Title}", Event.title);
-                _logger.LogInformation("Location: {Location}", Event.location);
-                _logger.LogInformation("Date: {Date}", Event.date);
-                _logger.LogInformation("Price: {Price}", Event.price);
-                _logger.LogInformation("Description: {Description}", Event.description?.Substring(0, Math.Min(50, Event.description.Length)) + "...");
-
-                // Validate required fields
-                if (string.IsNullOrEmpty(Event.title))
+                if (!ModelState.IsValid)
                 {
-                    ModelState.AddModelError("Event.title", "Title is required");
-                    return Page();
-                }
-                if (string.IsNullOrEmpty(Event.location))
-                {
-                    ModelState.AddModelError("Event.location", "Location is required");
-                    return Page();
-                }
-                if (string.IsNullOrEmpty(Event.description))
-                {
-                    ModelState.AddModelError("Event.description", "Description is required");
-                    return Page();
-                }
-                if (string.IsNullOrEmpty(Event.date))
-                {
-                    ModelState.AddModelError("Event.date", "Date is required");
-                    return Page();
-                }
-                if (string.IsNullOrEmpty(Event.price))
-                {
-                    ModelState.AddModelError("Event.price", "Price is required");
+                    _logger.LogWarning("Invalid model state when creating event");
                     return Page();
                 }
 
-                // Validate description length
-                if (Event.description.Length < 10)
-                {
-                    ModelState.AddModelError("Event.description", "Description must be at least 10 characters");
-                    return Page();
-                }
-
-                // Validate and format the date
-                if (!DateTime.TryParse(Event.date, out DateTime eventDate))
-                {
-                    ModelState.AddModelError("Event.date", "Invalid date format");
-                    return Page();
-                }
-
-                if (eventDate.Date < DateTime.Today)
-                {
-                    ModelState.AddModelError("Event.date", "Event date cannot be in the past");
-                    return Page();
-                }
-
-                // Format date in consistent format
-                Event.date = eventDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
-
-                // Process event images
-                var imageUrls = new List<string>();
-                if (UploadedImages != null && UploadedImages.Count > 0)
-                {
-                    _logger.LogInformation("Processing {ImageCount} uploaded images", UploadedImages.Count);
-                    
-                    // Only process up to 3 images
-                    foreach (var image in UploadedImages.Take(3))
-                    {
-                        if (image.Length > 0)
-                        {
-                            try
-                            {
-                                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(image.FileName);
-                                var uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "events");
-                                
-                                // Create directory if it doesn't exist
-                                if (!Directory.Exists(uploadsFolder))
-                                {
-                                    Directory.CreateDirectory(uploadsFolder);
-                                }
-                                
-                                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                                
-                                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                                {
-                                    await image.CopyToAsync(fileStream);
-                                }
-                                
-                                imageUrls.Add("images/events/" + uniqueFileName);
-                                _logger.LogInformation("Successfully saved image: {FileName}", uniqueFileName);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError("Failed to save image: {FileName}, Error: {Error}", image.FileName, ex.Message);
-                                // Continue with other images
-                            }
-                        }
-                    }
-                }
-
-                // Get current user ID
-                var userId = User.Identity?.Name;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    ModelState.AddModelError(string.Empty, "User not found. Please log in again.");
-                    return Page();
-                }
-
-                // Create new event with all fields
-                var newEvent = new TheEvent
-                {
-                    title = Event.title.Trim(),
-                    location = Event.location.ToLower().Trim(), // Store location in lowercase for consistency
-                    date = Event.date,
-                    description = Event.description.Trim(),
-                    price = Event.price.Trim(),
-                    images = imageUrls,
-                    Category = EventCategory ?? "Other",
-                    Capacity = EventCapacity,
-                    StartTime = EventStartTime,
-                    EndTime = EventEndTime,
-                    Tags = EventTags,
-                    Status = "Active",
-                    CreatedById = userId,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                // Validate time format if provided
-                if (!string.IsNullOrEmpty(newEvent.StartTime) && !TimeSpan.TryParse(newEvent.StartTime, out _))
-                {
-                    ModelState.AddModelError("EventStartTime", "Invalid start time format");
-                    return Page();
-                }
-                if (!string.IsNullOrEmpty(newEvent.EndTime) && !TimeSpan.TryParse(newEvent.EndTime, out _))
-                {
-                    ModelState.AddModelError("EventEndTime", "Invalid end time format");
-                    return Page();
-                }
-
-                // Validate capacity
-                if (newEvent.Capacity.HasValue && newEvent.Capacity.Value <= 0)
-                {
-                    ModelState.AddModelError("EventCapacity", "Capacity must be greater than 0");
-                    return Page();
-                }
+                // Begin transaction
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
                 try
                 {
-                    // Begin transaction
-                    await using var transaction = await _context.Database.BeginTransactionAsync();
-
-                    try
+                    // Validate required fields
+                    if (string.IsNullOrEmpty(Event.title))
                     {
-                        // Add to database
-                        await _context.Events.AddAsync(newEvent);
-                        
-                        // Save changes to get the event ID
-                        await _context.SaveChangesAsync();
-
-                        // Create audit log entry with the generated ID
-                        var auditLog = new AuditLog
-                        {
-                            EntityName = "Event",
-                            EntityId = newEvent.id.ToString(),
-                            Action = "Create",
-                            UserId = userId,
-                            Changes = $"Created new event: {newEvent.title} (ID: {newEvent.id}) in location: {newEvent.location}",
-                            Timestamp = DateTime.UtcNow
-                        };
-                        await _context.AuditLogs.AddAsync(auditLog);
-
-                        // Save audit log
-                        await _context.SaveChangesAsync();
-
-                        // Commit transaction
-                        await transaction.CommitAsync();
-
-                        // Log success
-                        _logger.LogInformation("Successfully created event: {EventId} - {EventTitle} in {Location}", 
-                            newEvent.id, newEvent.title, newEvent.location);
-
-                        TempData["SuccessMessage"] = $"Event '{newEvent.title}' created successfully!";
-                        return RedirectToPage("./Index");
+                        ModelState.AddModelError("Event.title", "Title is required");
+                        return Page();
                     }
-                    catch
+                    if (string.IsNullOrEmpty(Event.location))
+                    {
+                        ModelState.AddModelError("Event.location", "Location is required");
+                        return Page();
+                    }
+                    if (string.IsNullOrEmpty(Event.description))
+                    {
+                        ModelState.AddModelError("Event.description", "Description is required");
+                        return Page();
+                    }
+                    if (string.IsNullOrEmpty(Event.date))
+                    {
+                        ModelState.AddModelError("Event.date", "Date is required");
+                        return Page();
+                    }
+                    if (string.IsNullOrEmpty(Event.price))
+                    {
+                        ModelState.AddModelError("Event.price", "Price is required");
+                        return Page();
+                    }
+
+                    // Process the form data and ensure location is lowercase for consistency
+                    Event.location = Event.location.ToLower().Trim();
+                    Event.title = Event.title.Trim();
+                    Event.description = Event.description.Trim();
+
+                    // Log the location being used
+                    _logger.LogInformation("Creating event with location: {Location}", Event.location);
+
+                    // Check if this is a new location
+                    var existingLocations = await _context.Events
+                        .Where(e => !e.IsDeleted)
+                        .Select(e => e.location.ToLower())
+                        .Distinct()
+                        .ToListAsync();
+
+                    var isNewLocation = !existingLocations.Contains(Event.location);
+                    _logger.LogInformation("Location {Location} is {Status}", Event.location, isNewLocation ? "new" : "existing");
+
+                    // Validate and format date
+                    if (DateTime.TryParse(Event.date, out DateTime parsedDate))
+                    {
+                        if (parsedDate < DateTime.Today)
+                        {
+                            ModelState.AddModelError("Event.date", "Event date must be in the future");
+                            return Page();
+                        }
+                        Event.date = parsedDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Event.date", "Invalid date format");
+                        return Page();
+                    }
+
+                    // Validate price format
+                    if (!Event.price.Equals("Free", StringComparison.OrdinalIgnoreCase) && 
+                        !decimal.TryParse(Event.price, out _))
+                    {
+                        ModelState.AddModelError("Event.price", "Price must be a number or 'Free'");
+                        return Page();
+                    }
+
+                    // Set additional event properties
+                    Event.Category = EventCategory ?? "Other";
+                    Event.Capacity = EventCapacity;
+                    Event.StartTime = EventStartTime;
+                    Event.EndTime = EventEndTime;
+                    Event.Tags = EventTags;
+                    Event.Status = "Active";
+                    var now = DateTime.UtcNow;
+                    Event.CreatedAt = now;
+                    Event.UpdatedAt = now;
+                    _logger.LogInformation("Setting CreatedAt to: {CreatedAt}", now);
+                    // Get the current user's ID for the foreign key
+                    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (string.IsNullOrEmpty(userId))
+                    {
+                        _logger.LogError("Could not determine user ID for event creation");
+                        ModelState.AddModelError(string.Empty, "Could not determine user ID. Please try logging out and back in.");
+                        return Page();
+                    }
+                    Event.CreatedById = userId;
+                    Event.IsDeleted = false;
+
+                // Initialize images list
+                Event.images = new List<string>();
+
+                // Process uploaded images
+                if (UploadedImages != null && UploadedImages.Count > 0)
+                {
+                                                    string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "events");
+                    
+                            try
+                            {
+                    // Ensure directory exists
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning("Could not create events directory. Using URL storage only. Error: {Error}", ex.Message);
+                                // Continue without local file storage - we'll use URLs only
+                                uploadsFolder = null;
+                    }
+
+                    // Process up to 3 images
+                    foreach (var image in UploadedImages.Take(3))
+                    {
+                        if (image.Length > 0)
+                            {
+                                                                    if (uploadsFolder != null)
+                                    {
+                                        try
+                        {
+                            // Create unique filename
+                            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                            string filePath = Path.Combine(uploadsFolder, fileName);
+                            
+                            // Save image
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await image.CopyToAsync(stream);
+                            }
+                            
+                            // Add relative path to event images
+                                            Event.images.Add($"images/events/{fileName}");
+                                            _logger.LogInformation("Successfully saved image {FileName} to disk", fileName);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            _logger.LogWarning("Could not save image to disk. Error: {Error}", ex.Message);
+                                            // If file save fails, store the image as a data URL
+                                            using (var memoryStream = new MemoryStream())
+                                            {
+                                                await image.CopyToAsync(memoryStream);
+                                                var bytes = memoryStream.ToArray();
+                                                var base64 = Convert.ToBase64String(bytes);
+                                                var dataUrl = $"data:{image.ContentType};base64,{base64}";
+                                                Event.images.Add(dataUrl);
+                                                _logger.LogInformation("Stored image as data URL instead");
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Store image as data URL when local storage is not available
+                                        using (var memoryStream = new MemoryStream())
+                                        {
+                                            await image.CopyToAsync(memoryStream);
+                                            var bytes = memoryStream.ToArray();
+                                            var base64 = Convert.ToBase64String(bytes);
+                                            var dataUrl = $"data:{image.ContentType};base64,{base64}";
+                                            Event.images.Add(dataUrl);
+                                            _logger.LogInformation("Stored image as data URL");
+                                        }
+                                    }
+                                
+                                _logger.LogInformation("Processed image for event");
+                            }
+                    }
+                }
+
+                // Process image URLs if any
+                if (!string.IsNullOrWhiteSpace(ImageUrls))
+                {
+                    var urls = ImageUrls
+                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(url => url.Trim())
+                        .Where(url => !string.IsNullOrWhiteSpace(url))
+                        .ToList();
+                    
+                    // Add URLs to event images
+                    Event.images.AddRange(urls);
+                }
+
+                    // Date is already formatted in the validation step above
+
+                                    // Add event to database
+                    _logger.LogInformation("Attempting to save event to database: {Title}", Event.title);
+                    _logger.LogInformation("Event details before save: Location: {Location}, Date: {Date}, Price: {Price}", 
+                        Event.location, Event.date, Event.price);
+                    
+                    var entry = await _context.Events.AddAsync(Event);
+                    var saveResult = await _context.SaveChangesAsync();
+                    
+                    // Verify the event was saved
+                    var savedEvent = await _context.Events
+                        .FirstOrDefaultAsync(e => e.id == Event.id);
+                    
+                    if (savedEvent != null)
+                    {
+                        _logger.LogInformation("Event saved successfully. ID: {EventId}, Title: {Title}, Location: {Location}", 
+                            savedEvent.id, savedEvent.title, savedEvent.location);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Event not found in database after save. ID: {EventId}", Event.id);
+                    }
+
+                    // Create audit log entry
+                    var auditLog = new AuditLog
+                    {
+                        EntityName = "Event",
+                        EntityId = Event.id.ToString(),
+                        Action = "Create",
+                        UserId = User.Identity?.Name,
+                        Changes = $"Created new event: {Event.title} (ID: {Event.id}) in location: {Event.location}",
+                        Timestamp = DateTime.UtcNow
+                    };
+                    await _context.AuditLogs.AddAsync(auditLog);
+                await _context.SaveChangesAsync();
+                
+                    // Commit transaction
+                    await transaction.CommitAsync();
+                    
+                    _logger.LogInformation("Event created successfully: {EventTitle} (ID: {EventId})", Event.title, Event.id);
+                    
+                    var successMessage = isNewLocation
+                        ? $"Event '{Event.title}' created successfully with new location '{Event.location}'! The event will be displayed in the Events page."
+                        : $"Event '{Event.title}' created successfully in {Event.location}! The event will be displayed in both the Events page and the {Event.location} section.";
+                    
+                    TempData["SuccessMessage"] = successMessage;
+                    
+                    // Redirect to Admin page with smooth transition
+                    return RedirectToPage("/Admin", new { created = true });
+                }
+                                    catch
                     {
                         // Rollback transaction on error
                         await transaction.RollbackAsync();
-                        throw; // Re-throw to be caught by outer try-catch
+                        throw;
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to create event: {Title} in {Location}. Error: {Error}", 
-                        newEvent.title, newEvent.location, ex.Message);
-                    throw; // Re-throw to be handled by the calling method
-                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating event: {Title}. Error: {Error}", 
                     Event.title, ex.Message);
                 
+                // Get the inner exception message if available
                 var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                
+                // Log detailed error information
+                _logger.LogError("Detailed error information:");
+                _logger.LogError("Title: {Title}", Event.title);
+                _logger.LogError("Location: {Location}", Event.location);
+                _logger.LogError("Date: {Date}", Event.date);
+                _logger.LogError("Category: {Category}", Event.Category);
+                _logger.LogError("Stack Trace: {StackTrace}", ex.StackTrace);
+                
                 ModelState.AddModelError(string.Empty, $"An error occurred while creating the event: {errorMessage}");
                 return Page();
             }
