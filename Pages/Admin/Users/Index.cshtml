@@ -28,10 +28,8 @@
                         <i class="fas fa-user-friends"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <a href="#" onclick="openUsersModal('','')" class="stretched-link text-decoration-none">
-                            <h3>@Model.TotalUserCount</h3>
-                            <p>Total Users (click)</p>
-                        </a>
+                        <h3>@Model.TotalUserCount</h3>
+                        <p>Total Users</p>
                     </div>
                 </div>
             </div>
@@ -41,10 +39,8 @@
                         <i class="fas fa-user-shield"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <a href="#" onclick="openUsersModal('Administrator','')" class="stretched-link text-decoration-none">
-                            <h3>@Model.AdminCount</h3>
-                            <p>Administrators (click)</p>
-                        </a>
+                        <h3>@Model.AdminCount</h3>
+                        <p>Administrators</p>
                     </div>
                 </div>
             </div>
@@ -54,10 +50,8 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="admin-overview-content">
-                        <a href="#" onclick="openUsersModal('Standard','')" class="stretched-link text-decoration-none">
-                            <h3>@Model.StandardCount</h3>
-                            <p>Standard Users (click)</p>
-                        </a>
+                        <h3>@Model.StandardCount</h3>
+                        <p>Standard Users</p>
                     </div>
                 </div>
             </div>
@@ -66,27 +60,26 @@
 
     <div class="separator-spacing"></div>
 
-    <!-- Users Modal -->
-    <div class="modal fade" id="usersModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Users List</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div id="usersModalContent" class="text-center">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <p class="mt-2">Loading users...</p>
+    <!-- Users List Section -->
+    <div class="admin-users-list-section">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-users"></i>
+                    All Users (@Model.TotalUserCount)
+                </h3>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
+            <div class="admin-card-body">
+                <div id="usersListContainer">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading users...</p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
     <div class="separator-spacing"></div>
@@ -243,6 +236,18 @@
         .admin-card-title i {
             font-size: 28px;
             margin-right: 12px;
+        }
+        
+        .admin-card-body {
+            padding: 25px;
+            background-color: #f8f9fa;
+        }
+        
+        .admin-users-list-section {
+            margin: 30px 0;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .admin-search-form {
@@ -695,25 +700,18 @@
 @section Scripts {
     <script src="~/js/javascript.js"></script>
     <script>
-      async function openUsersModal(roleFilter, search) {
-        console.log('openUsersModal called with:', { roleFilter, search });
+      // Auto-load users list when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        loadUsersList();
+      });
+
+      async function loadUsersList() {
+        console.log('Loading users list...');
         
-        // Show loading state
-        const cont = document.getElementById('usersModalContent');
-        cont.innerHTML = `
-          <div class="text-center">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Loading users...</p>
-          </div>`;
+        const container = document.getElementById('usersListContainer');
         
         try {
-          const params = new URLSearchParams();
-          if (roleFilter) params.append('roleFilter', roleFilter);
-          if (search) params.append('searchString', search);
-          
-          const url = `?handler=UsersJson&${params.toString()}`;
+          const url = `?handler=UsersJson`;
           console.log('Fetching from URL:', url);
           
           const resp = await fetch(url);
@@ -727,76 +725,40 @@
           console.log('Received data:', data);
           
           if (!data || !data.users || data.users.length === 0) {
-            cont.innerHTML = `
+            container.innerHTML = `
               <div class="text-center p-4">
                 <i class="fas fa-users fa-3x text-muted mb-3"></i>
                 <h5>No users found</h5>
-                <p class="text-muted">No users match the selected criteria.</p>
+                <p class="text-muted">No users are currently available.</p>
               </div>`;
           } else {
-            const header = roleFilter === 'Administrator' ? 'Administrators' : (roleFilter === 'Standard' ? 'Standard users' : 'All users');
             const items = data.users.map(u => {
               const roleText = (u.roles||[]).join(', ');
-              if (roleFilter === 'Administrator') {
-                return `<li class="list-group-item d-flex justify-content-between align-items-center">
+              const isAdmin = roleText.toLowerCase().includes('admin') || roleText.toLowerCase().includes('administrator');
+              return `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
                   <div>
                     <strong>${u.name ?? ''} ${u.surname ?? ''}</strong>
                     <br><small class="text-muted">${u.email ?? ''}</small>
                   </div>
-                  <span class="badge bg-primary">Admin</span>
-                </li>`;
-              } else if (roleFilter === 'Standard') {
-                return `<li class="list-group-item">
-                  <div>
-                    <strong>${u.name ?? ''} ${u.surname ?? ''}</strong>
-                    <br><small class="text-muted">${u.email ?? ''}</small>
-                  </div>
-                </li>`;
-              } else {
-                return `<li class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>${u.name ?? ''} ${u.surname ?? ''}</strong>
-                    <br><small class="text-muted">${u.email ?? ''}</small>
-                  </div>
-                  <small class="text-muted">${roleText}</small>
-                </li>`;
-              }
+                  <span class="badge ${isAdmin ? 'bg-primary' : 'bg-secondary'}">${roleText || 'User'}</span>
+                </div>`;
             }).join('');
-            cont.innerHTML = `
+            container.innerHTML = `
               <div class="mb-3">
-                <h6 class="fw-bold text-primary">${header}</h6>
+                <h6 class="fw-bold text-primary">All Users</h6>
                 <p class="text-muted mb-0">Showing ${data.users.length} user(s)</p>
               </div>
-              <ul class="list-group list-group-flush">${items}</ul>`;
-          }
-          
-          const modalElement = document.getElementById('usersModal');
-          console.log('Modal element:', modalElement);
-          
-          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            const modal = new bootstrap.Modal(modalElement);
-            modal.show();
-          } else {
-            console.error('Bootstrap Modal not available');
-            modalElement.style.display = 'block';
-            modalElement.classList.add('show');
+              <div class="list-group list-group-flush">${items}</div>`;
           }
         } catch (e) {
-          console.error('Error in openUsersModal:', e);
-          cont.innerHTML = `
+          console.error('Error loading users list:', e);
+          container.innerHTML = `
             <div class="text-center p-4">
               <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
               <h5>Error loading users</h5>
               <p class="text-muted">${e.message}</p>
             </div>`;
-          const modalElement = document.getElementById('usersModal');
-          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            const modal = new bootstrap.Modal(modalElement);
-            modal.show();
-          } else {
-            modalElement.style.display = 'block';
-            modalElement.classList.add('show');
-          }
         }
       }
     </script>

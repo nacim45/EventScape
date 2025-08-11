@@ -213,7 +213,7 @@ namespace soft20181_starter.Pages.Admin.Users
 
                         TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}.";
                         _logger.LogInformation("Redirecting to Index page with success message");
-                        return RedirectToPage("./Index");
+                        return RedirectToPage("/Admin/Users/Index");
                     }
 
                     // Rollback transaction if user creation failed

@@ -97,84 +97,76 @@ namespace soft20181_starter.Pages.Admin.Users
                 return Page();
             }
 
-            var user = await _userManager.FindByIdAsync(UserId);
-            if (user == null)
+            try
             {
-                _logger.LogWarning("User with ID {UserId} not found during update", UserId);
-                TempData["ErrorMessage"] = "User not found";
-                return RedirectToPage("./Index");
-            }
+                _logger.LogInformation("=== USER UPDATE STARTED ===");
+                _logger.LogInformation("Updating user with ID: {UserId}", UserId);
 
-            // Check if current user is trying to edit themselves and change their role
-            var currentUser = await _userManager.GetUserAsync(User);
-            var userRoles = await _userManager.GetRolesAsync(user);
-            var currentRole = userRoles.FirstOrDefault() ?? "";
-
-            if (currentUser?.Id == user.Id && currentRole != UserEdit.Role)
-            {
-                _logger.LogWarning("User attempted to change their own role");
-                TempData["ErrorMessage"] = "You cannot change your own role";
-                LoadRoles();
-                return Page();
-            }
-
-            // Update basic user properties
-            user.Name = UserEdit.Name;
-            user.Surname = UserEdit.Surname;
-            user.Email = UserEdit.Email;
-            user.PhoneNumber = UserEdit.PhoneNumber;
-            user.UserName = UserEdit.Email; // Keep username synced with email
-
-            // Try to update the user
-            var updateResult = await _userManager.UpdateAsync(user);
-            if (!updateResult.Succeeded)
-            {
-                foreach (var error in updateResult.Errors)
+                var user = await _userManager.FindByIdAsync(UserId);
+                if (user == null)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                LoadRoles();
-                return Page();
-            }
-
-            // Handle role changes
-            if (currentRole != UserEdit.Role)
-            {
-                // Remove existing roles
-                if (!string.IsNullOrEmpty(currentRole))
-                {
-                    await _userManager.RemoveFromRoleAsync(user, currentRole);
+                    _logger.LogWarning("User with ID {UserId} not found for update", UserId);
+                    TempData["ErrorMessage"] = "User not found";
+                    return RedirectToPage("/Admin/Users/Index");
                 }
 
-                // Add new role
-                if (!string.IsNullOrEmpty(UserEdit.Role))
-                {
-                    await _userManager.AddToRoleAsync(user, UserEdit.Role);
-                }
-            }
+                // Update user properties
+                user.Name = UserEdit.Name?.Trim() ?? string.Empty;
+                user.Surname = UserEdit.Surname?.Trim() ?? string.Empty;
+                user.Email = UserEdit.Email?.Trim() ?? string.Empty;
+                user.UserName = UserEdit.Email?.Trim() ?? string.Empty;
+                user.PhoneNumber = UserEdit.PhoneNumber?.Trim() ?? string.Empty;
+                user.Role = UserEdit.Role ?? "User";
+                user.UpdatedAt = DateTime.UtcNow;
+                user.UpdatedBy = User.Identity?.Name ?? "System";
 
-            // Handle password change if provided
-            if (!string.IsNullOrEmpty(UserEdit.Password))
-            {
-                // Remove the existing password
-                await _userManager.RemovePasswordAsync(user);
-
-                // Add the new password
-                var passwordResult = await _userManager.AddPasswordAsync(user, UserEdit.Password);
-                if (!passwordResult.Succeeded)
+                // Update the user
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
                 {
-                    foreach (var error in passwordResult.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to update user {UserId}: {Errors}", UserId, errors);
+                    ModelState.AddModelError(string.Empty, $"Failed to update user: {errors}");
                     LoadRoles();
                     return Page();
                 }
-            }
 
-            _logger.LogInformation("User {UserId} updated successfully", UserId);
-            TempData["SuccessMessage"] = "User updated successfully";
-            return RedirectToPage("./Index");
+                // Update user role if changed
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                var currentRole = currentRoles.FirstOrDefault() ?? "";
+                
+                if (currentRole != UserEdit.Role)
+                {
+                    // Remove current role
+                    if (!string.IsNullOrEmpty(currentRole))
+                    {
+                        await _userManager.RemoveFromRoleAsync(user, currentRole);
+                    }
+                    
+                    // Add new role
+                    if (!string.IsNullOrEmpty(UserEdit.Role))
+                    {
+                        var roleResult = await _userManager.AddToRoleAsync(user, UserEdit.Role);
+                        if (!roleResult.Succeeded)
+                        {
+                            _logger.LogWarning("Failed to assign role {Role} to user {UserId}", UserEdit.Role, UserId);
+                        }
+                    }
+                }
+
+                _logger.LogInformation("Successfully updated user: {UserId} - {Name} {Surname}", 
+                    UserId, user.Name, user.Surname);
+
+                TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' updated successfully!";
+                return RedirectToPage("/Admin/Users/Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user {UserId}", UserId);
+                ModelState.AddModelError(string.Empty, $"An error occurred while updating the user: {ex.Message}");
+                LoadRoles();
+                return Page();
+            }
         }
 
         private void LoadRoles()
