@@ -163,19 +163,20 @@ namespace soft20181_starter.Pages.Admin.Events
                 // Format date in consistent format
                 Event.date = eventDate.ToString("dddd, dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
 
-                // Process event images with enhanced error handling
+                // Process event images with enhanced error handling and UI integration
                 var imageUrls = new List<string>();
                 if (UploadedImages != null && UploadedImages.Count > 0)
                 {
-                    _logger.LogInformation("Processing {ImageCount} uploaded images", UploadedImages.Count);
+                    _logger.LogInformation("Processing {ImageCount} uploaded images for UI integration", UploadedImages.Count);
                     
-                    // Only process up to 3 images
+                    // Only process up to 3 images for optimal UI display
                     foreach (var image in UploadedImages.Take(3))
                     {
                         if (image.Length > 0)
                         {
                             try
                             {
+                                // Generate unique filename for database storage
                                 var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(image.FileName);
                                 var uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "events");
                                 
@@ -188,21 +189,28 @@ namespace soft20181_starter.Pages.Admin.Events
                                 
                                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
                                 
+                                // Save image to file system for UI display
                                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                                 {
                                     await image.CopyToAsync(fileStream);
                                 }
                                 
-                                imageUrls.Add("images/events/" + uniqueFileName);
-                                _logger.LogInformation("Successfully saved image: {FileName} to {FilePath}", uniqueFileName, filePath);
+                                // Add to imageUrls list for database storage and UI integration
+                                var imageUrl = "images/events/" + uniqueFileName;
+                                imageUrls.Add(imageUrl);
+                                _logger.LogInformation("Successfully integrated image: {FileName} -> {ImageUrl} for UI display", uniqueFileName, imageUrl);
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError("Failed to save image: {FileName}, Error: {Error}", image.FileName, ex.Message);
+                                _logger.LogError("Failed to integrate image: {FileName}, Error: {Error}", image.FileName, ex.Message);
                                 // Continue with other images
                             }
                         }
                     }
+                }
+                else
+                {
+                    _logger.LogInformation("No images uploaded - event will be created without images");
                 }
 
                 // Get current user ID
@@ -258,18 +266,33 @@ namespace soft20181_starter.Pages.Admin.Events
 
                 try
                 {
-                    // Begin transaction
+                    // Begin transaction for atomic database operations
                     await using var transaction = await _context.Database.BeginTransactionAsync();
-
                     try
                     {
-                        // Add to database
-                        await _context.Events.AddAsync(newEvent);
-                        
-                        // Save changes to get the event ID
-                        await _context.SaveChangesAsync();
+                        _logger.LogInformation("=== DATABASE INSERTION STARTED ===");
+                        _logger.LogInformation("Event data to insert:");
+                        _logger.LogInformation("- Title: {Title}", newEvent.title);
+                        _logger.LogInformation("- Location: {Location}", newEvent.location);
+                        _logger.LogInformation("- Date: {Date}", newEvent.date);
+                        _logger.LogInformation("- Price: {Price}", newEvent.price);
+                        _logger.LogInformation("- Description: {Description}", newEvent.description?.Substring(0, Math.Min(50, newEvent.description.Length)) + "...");
+                        _logger.LogInformation("- Images: {ImageCount} images", newEvent.images.Count);
+                        _logger.LogInformation("- CreatedBy: {UserId}", newEvent.CreatedById);
+                        _logger.LogInformation("- Category: {Category}", newEvent.Category);
+                        _logger.LogInformation("- Capacity: {Capacity}", newEvent.Capacity);
+                        _logger.LogInformation("- Status: {Status}", newEvent.Status);
 
-                        _logger.LogInformation("Event saved to database with ID: {EventId}", newEvent.id);
+                        // Add event to database context
+                        await _context.Events.AddAsync(newEvent);
+                        _logger.LogInformation("Event added to DbContext - preparing for database insertion");
+
+                        // Save changes to database - this executes the INSERT query
+                        var saveResult = await _context.SaveChangesAsync();
+                        _logger.LogInformation("Database INSERT completed successfully. Rows affected: {RowsAffected}", saveResult);
+
+                        // Log the generated event ID
+                        _logger.LogInformation("Event created with ID: {EventId}", newEvent.id);
 
                         // Create audit log entry with the generated ID
                         var auditLog = new AuditLog
@@ -278,35 +301,36 @@ namespace soft20181_starter.Pages.Admin.Events
                             EntityId = newEvent.id.ToString(),
                             Action = "Create",
                             UserId = userId,
-                            Changes = $"Created new event: {newEvent.title} (ID: {newEvent.id}) in location: {newEvent.location} with price: {newEvent.price}",
+                            Changes = $"Created new event: {newEvent.title} (ID: {newEvent.id}) in location: {newEvent.location} with price: {newEvent.price} and {newEvent.images.Count} images",
                             Timestamp = DateTime.UtcNow
                         };
+                        
                         await _context.AuditLogs.AddAsync(auditLog);
-
-                        // Save audit log
-                        await _context.SaveChangesAsync();
+                        var auditSaveResult = await _context.SaveChangesAsync();
+                        _logger.LogInformation("Audit log INSERT completed. Rows affected: {RowsAffected}", auditSaveResult);
 
                         // Commit transaction
                         await transaction.CommitAsync();
+                        _logger.LogInformation("=== DATABASE TRANSACTION COMMITTED SUCCESSFULLY ===");
 
                         // Log success
-                        _logger.LogInformation("Successfully created event: {EventId} - {EventTitle} in {Location} with price {Price}", 
-                            newEvent.id, newEvent.title, newEvent.location, newEvent.price);
-
+                        _logger.LogInformation("Successfully created event: {EventId} - {EventTitle} in {Location} with {ImageCount} images", 
+                            newEvent.id, newEvent.title, newEvent.location, newEvent.images.Count);
+                        
                         TempData["SuccessMessage"] = $"Event '{newEvent.title}' created successfully with ID: {newEvent.id}!";
                         return RedirectToPage("/Admin/Events/Index");
                     }
-                    catch
+                    catch (Exception dbEx)
                     {
                         // Rollback transaction on error
                         await transaction.RollbackAsync();
+                        _logger.LogError(dbEx, "Database INSERT failed - transaction rolled back. Error: {Error}", dbEx.Message);
                         throw; // Re-throw to be caught by outer try-catch
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to create event: {Title} in {Location}. Error: {Error}", 
-                        newEvent.title, newEvent.location, ex.Message);
+                    _logger.LogError(ex, "Failed to create event: {Title} in {Location}. Error: {Error}", newEvent.title, newEvent.location, ex.Message);
                     throw; // Re-throw to be handled by the calling method
                 }
             }
