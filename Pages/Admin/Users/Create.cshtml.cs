@@ -163,13 +163,13 @@ namespace soft20181_starter.Pages.Admin.Users
 
                     _logger.LogInformation("Creating user with email: {Email}", user.Email);
                         
-                        // Execute the INSERT query to AspNetUsers table
+                        // Execute the INSERT query to AspNetUsers table with form data
                         var result = await _userManager.CreateAsync(user, UserViewModel.Password);
                         
                         if (result.Succeeded)
                         {
-                            _logger.LogInformation("=== USER DATABASE INSERTION SUCCESSFUL ===");
-                            _logger.LogInformation("User data inserted into AspNetUsers table:");
+                            _logger.LogInformation("=== USER DATABASE INSERT OPERATION SUCCESSFUL ===");
+                            _logger.LogInformation("Form data inserted into AspNetUsers table:");
                             _logger.LogInformation("- User ID: {UserId}", user.Id);
                             _logger.LogInformation("- Name: {Name}", user.Name);
                             _logger.LogInformation("- Surname: {Surname}", user.Surname);
@@ -178,7 +178,9 @@ namespace soft20181_starter.Pages.Admin.Users
                             _logger.LogInformation("- Role: {Role}", user.Role);
                             _logger.LogInformation("- Created At: {CreatedAt}", user.CreatedAt);
                             _logger.LogInformation("- Is Active: {IsActive}", user.IsActive);
-                            _logger.LogInformation("Database INSERT completed successfully for user {UserId}", user.Id);
+                            _logger.LogInformation("- Email Confirmed: {EmailConfirmed}", user.EmailConfirmed);
+                            _logger.LogInformation("- Security Stamp: {SecurityStamp}", user.SecurityStamp);
+                            _logger.LogInformation("INSERT INTO AspNetUsers table completed successfully for user {UserId}", user.Id);
 
                             // Assign role if specified
                             if (!string.IsNullOrEmpty(UserViewModel.Role))
@@ -207,12 +209,12 @@ namespace soft20181_starter.Pages.Admin.Users
                                     EntityId = user.Id,
                                     Action = "Create",
                                     UserId = User.Identity?.Name ?? "System",
-                                    Changes = $"Created new user: {user.Name} {user.Surname} (ID: {user.Id}) with role: {user.Role}",
+                                    Changes = $"INSERT INTO AspNetUsers: {user.Name} {user.Surname} (ID: {user.Id}) with role: {user.Role}",
                                     Timestamp = DateTime.UtcNow
                                 };
                                 await _context.AuditLogs.AddAsync(auditLog);
                                 var auditSaveResult = await _context.SaveChangesAsync();
-                                _logger.LogInformation("Audit log INSERT completed. Rows affected: {RowsAffected}", auditSaveResult);
+                                _logger.LogInformation("INSERT INTO AuditLogs table completed. Rows affected: {RowsAffected}", auditSaveResult);
                                 _logger.LogInformation("Audit log created for user {UserId}", user.Id);
                             }
                             catch (Exception auditEx)
@@ -224,9 +226,13 @@ namespace soft20181_starter.Pages.Admin.Users
                             // Commit transaction
                             await transaction.CommitAsync();
                             _logger.LogInformation("=== USER DATABASE TRANSACTION COMMITTED SUCCESSFULLY ===");
-                            _logger.LogInformation("Transaction committed successfully for user {UserId}", user.Id);
+                            _logger.LogInformation("Database INSERT operations completed successfully:");
+                            _logger.LogInformation("- User record inserted into AspNetUsers table with ID: {UserId}", user.Id);
+                            _logger.LogInformation("- Role assigned to user");
+                            _logger.LogInformation("- Audit log record inserted into AuditLogs table");
+                            _logger.LogInformation("- All form data successfully persisted to database");
 
-                            TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}.";
+                            TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}. Database INSERT completed.";
                             _logger.LogInformation("Redirecting to Index page with success message");
                             return RedirectToPage("/Admin/Users/Index");
                         }
@@ -234,8 +240,8 @@ namespace soft20181_starter.Pages.Admin.Users
                         {
                             // Rollback transaction if user creation failed
                             await transaction.RollbackAsync();
-                            _logger.LogError("=== USER DATABASE INSERTION FAILED ===");
-                            _logger.LogError("Failed to create user in AspNetUsers table");
+                            _logger.LogError("=== USER DATABASE INSERT OPERATION FAILED ===");
+                            _logger.LogError("Failed to execute INSERT INTO AspNetUsers table");
                             foreach (var error in result.Errors)
                             {
                                 _logger.LogError("User creation error: {Error}", error.Description);

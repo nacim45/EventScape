@@ -60,30 +60,6 @@
 
     <div class="separator-spacing"></div>
 
-    <!-- Events List Section -->
-    <div class="admin-events-list-section">
-        <div class="admin-card">
-            <div class="admin-card-header">
-                <h3 class="admin-card-title">
-                    <i class="fas fa-calendar-alt"></i>
-                    All Events (@Model.Events.Count())
-                </h3>
-            </div>
-            <div class="admin-card-body">
-                <div id="eventsListContainer">
-                    <div class="text-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Loading events...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="separator-spacing"></div>
-
     <!-- Locations List Section -->
     <div class="admin-locations-list-section">
         <div class="admin-card">
@@ -265,13 +241,6 @@
         .admin-card-body {
             padding: 25px;
             background-color: #f8f9fa;
-        }
-        
-        .admin-events-list-section {
-            margin: 30px 0;
-            max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
         }
         
         .admin-locations-list-section {
@@ -467,62 +436,8 @@
     <script>
       // Auto-load events and locations lists when page loads
       document.addEventListener('DOMContentLoaded', function() {
-        loadEventsList();
         loadLocationsList();
       });
-
-      async function loadEventsList() {
-        console.log('Loading events list...');
-        
-        const container = document.getElementById('eventsListContainer');
-        
-        try {
-          const url = `?handler=EventsJson`;
-          console.log('Fetching from URL:', url);
-          
-          const resp = await fetch(url);
-          console.log('Response status:', resp.status);
-          
-          if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
-          }
-          
-          const data = await resp.json();
-          console.log('Received data:', data);
-          
-          if (!data || !data.events || data.events.length === 0) {
-            container.innerHTML = `
-              <div class="text-center p-4">
-                <i class="fas fa-calendar fa-3x text-muted mb-3"></i>
-                <h5>No events found</h5>
-                <p class="text-muted">No events are currently available.</p>
-              </div>`;
-          } else {
-            const items = data.events.map(e => `
-              <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>${e.title ?? ''}</strong>
-                  <br><small class="text-muted">${e.location ?? ''} • ${e.date ?? ''}</small>
-                </div>
-                <span class="badge bg-secondary">${e.price ?? 'Free'}</span>
-              </div>`).join('');
-            container.innerHTML = `
-              <div class="mb-3">
-                <h6 class="fw-bold text-primary">All Events</h6>
-                <p class="text-muted mb-0">Showing ${data.events.length} event(s)</p>
-              </div>
-              <div class="list-group list-group-flush">${items}</div>`;
-          }
-        } catch (e) {
-          console.error('Error loading events list:', e);
-          container.innerHTML = `
-            <div class="text-center p-4">
-              <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-              <h5>Error loading events</h5>
-              <p class="text-muted">${e.message}</p>
-            </div>`;
-        }
-      }
 
       async function loadLocationsList() {
         console.log('Loading locations list...');

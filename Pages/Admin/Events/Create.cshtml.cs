@@ -270,8 +270,8 @@ namespace soft20181_starter.Pages.Admin.Events
                     await using var transaction = await _context.Database.BeginTransactionAsync();
                     try
                     {
-                        _logger.LogInformation("=== DATABASE INSERTION STARTED ===");
-                        _logger.LogInformation("Event data to insert:");
+                        _logger.LogInformation("=== DATABASE INSERT OPERATION STARTED ===");
+                        _logger.LogInformation("Form data to be inserted into Events table:");
                         _logger.LogInformation("- Title: {Title}", newEvent.title);
                         _logger.LogInformation("- Location: {Location}", newEvent.location);
                         _logger.LogInformation("- Date: {Date}", newEvent.date);
@@ -282,17 +282,20 @@ namespace soft20181_starter.Pages.Admin.Events
                         _logger.LogInformation("- Category: {Category}", newEvent.Category);
                         _logger.LogInformation("- Capacity: {Capacity}", newEvent.Capacity);
                         _logger.LogInformation("- Status: {Status}", newEvent.Status);
+                        _logger.LogInformation("- StartTime: {StartTime}", newEvent.StartTime);
+                        _logger.LogInformation("- EndTime: {EndTime}", newEvent.EndTime);
+                        _logger.LogInformation("- Tags: {Tags}", newEvent.Tags);
 
-                        // Add event to database context
+                        // Add event to database context - this prepares the INSERT statement
                         await _context.Events.AddAsync(newEvent);
-                        _logger.LogInformation("Event added to DbContext - preparing for database insertion");
+                        _logger.LogInformation("Event added to DbContext - preparing INSERT INTO Events table");
 
-                        // Save changes to database - this executes the INSERT query
+                        // Execute the INSERT query - this actually inserts the record into the database
                         var saveResult = await _context.SaveChangesAsync();
-                        _logger.LogInformation("Database INSERT completed successfully. Rows affected: {RowsAffected}", saveResult);
+                        _logger.LogInformation("INSERT INTO Events table completed successfully. Rows affected: {RowsAffected}", saveResult);
 
-                        // Log the generated event ID
-                        _logger.LogInformation("Event created with ID: {EventId}", newEvent.id);
+                        // Log the generated event ID from the database
+                        _logger.LogInformation("Event record inserted with auto-generated ID: {EventId}", newEvent.id);
 
                         // Create audit log entry with the generated ID
                         var auditLog = new AuditLog
@@ -301,36 +304,38 @@ namespace soft20181_starter.Pages.Admin.Events
                             EntityId = newEvent.id.ToString(),
                             Action = "Create",
                             UserId = userId,
-                            Changes = $"Created new event: {newEvent.title} (ID: {newEvent.id}) in location: {newEvent.location} with price: {newEvent.price} and {newEvent.images.Count} images",
+                            Changes = $"INSERT INTO Events: {newEvent.title} (ID: {newEvent.id}) in location: {newEvent.location} with price: {newEvent.price} and {newEvent.images.Count} images",
                             Timestamp = DateTime.UtcNow
                         };
                         
                         await _context.AuditLogs.AddAsync(auditLog);
                         var auditSaveResult = await _context.SaveChangesAsync();
-                        _logger.LogInformation("Audit log INSERT completed. Rows affected: {RowsAffected}", auditSaveResult);
+                        _logger.LogInformation("INSERT INTO AuditLogs table completed. Rows affected: {RowsAffected}", auditSaveResult);
 
                         // Commit transaction
                         await transaction.CommitAsync();
                         _logger.LogInformation("=== DATABASE TRANSACTION COMMITTED SUCCESSFULLY ===");
 
-                        // Log success
-                        _logger.LogInformation("Successfully created event: {EventId} - {EventTitle} in {Location} with {ImageCount} images", 
-                            newEvent.id, newEvent.title, newEvent.location, newEvent.images.Count);
+                        // Log success with database confirmation
+                        _logger.LogInformation("Database INSERT operations completed successfully:");
+                        _logger.LogInformation("- Event record inserted into Events table with ID: {EventId}", newEvent.id);
+                        _logger.LogInformation("- Audit log record inserted into AuditLogs table");
+                        _logger.LogInformation("- All form data successfully persisted to database");
                         
-                        TempData["SuccessMessage"] = $"Event '{newEvent.title}' created successfully with ID: {newEvent.id}!";
+                        TempData["SuccessMessage"] = $"Event '{newEvent.title}' created successfully with ID: {newEvent.id}! Database INSERT completed.";
                         return RedirectToPage("/Admin/Events/Index");
                     }
                     catch (Exception dbEx)
                     {
                         // Rollback transaction on error
                         await transaction.RollbackAsync();
-                        _logger.LogError(dbEx, "Database INSERT failed - transaction rolled back. Error: {Error}", dbEx.Message);
+                        _logger.LogError(dbEx, "Database INSERT operation failed - transaction rolled back. Error: {Error}", dbEx.Message);
                         throw; // Re-throw to be caught by outer try-catch
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to create event: {Title} in {Location}. Error: {Error}", newEvent.title, newEvent.location, ex.Message);
+                    _logger.LogError(ex, "Failed to execute INSERT operation for event: {Title} in {Location}. Error: {Error}", newEvent.title, newEvent.location, ex.Message);
                     throw; // Re-throw to be handled by the calling method
                 }
             }

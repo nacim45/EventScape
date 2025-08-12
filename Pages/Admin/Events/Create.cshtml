@@ -557,41 +557,52 @@
             flex-wrap: wrap;
             gap: 15px;
             margin-top: 15px;
+            min-height: 50px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #f8f9fa;
         }
         
         .image-preview {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             border-radius: 8px;
             overflow: hidden;
             position: relative;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 2px solid #522B5B;
+            background-color: white;
         }
         
         .image-preview img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
         }
         
         .remove-image {
             position: absolute;
             top: 5px;
             right: 5px;
-            width: 20px;
-            height: 20px;
-            background-color: rgba(220, 53, 69, 0.8);
+            width: 24px;
+            height: 24px;
+            background-color: rgba(220, 53, 69, 0.9);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
         }
         
         .remove-image:hover {
             background-color: rgba(220, 53, 69, 1);
+            transform: scale(1.1);
         }
         
         /* Responsive adjustments */
@@ -748,7 +759,16 @@
             const previewContainer = document.getElementById('image-preview-container');
             const uploadText = document.getElementById('upload-text');
             
+            console.log('Image upload elements found:', {
+                uploadInput: !!uploadInput,
+                uploadContainer: !!uploadContainer,
+                previewContainer: !!previewContainer,
+                uploadText: !!uploadText
+            });
+            
             if (uploadInput && uploadContainer && previewContainer) {
+                console.log('Initializing image upload functionality...');
+                
                 // Handle drag events
                 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                     uploadContainer.addEventListener(eventName, preventDefaults, false);
@@ -780,6 +800,7 @@
                 uploadContainer.addEventListener('drop', handleDrop, false);
                 
                 function handleDrop(e) {
+                    console.log('Files dropped:', e.dataTransfer.files.length);
                     const dt = e.dataTransfer;
                     const files = dt.files;
                     uploadInput.files = files;
@@ -788,28 +809,60 @@
                 
                 function handleFiles() {
                     const files = uploadInput.files;
+                    console.log('Handling files:', files.length);
+                    
                     previewContainer.innerHTML = '';
                     
                     // Limit to 3 images
                     const fileArray = Array.from(files).slice(0, 3);
+                    console.log('Processing files:', fileArray.length);
                     
-                    fileArray.forEach(file => {
+                    if (fileArray.length === 0) {
+                        console.log('No files to process');
+                        if (uploadText) {
+                            uploadText.textContent = "Drag images here or click to browse";
+                        }
+                        return;
+                    }
+                    
+                    fileArray.forEach((file, index) => {
+                        console.log('Processing file:', file.name, 'Type:', file.type);
+                        
                         // Validate file type
                         if (!file.type.match('image.*')) {
+                            console.log('Invalid file type:', file.type);
                             return;
                         }
                         
                         const reader = new FileReader();
                         
                         reader.onload = function(e) {
+                            console.log('File loaded successfully:', file.name);
                             const preview = document.createElement('div');
                             preview.className = 'image-preview';
+                            preview.setAttribute('data-index', index);
                             
                             const img = document.createElement('img');
                             img.src = e.target.result;
+                            img.alt = `Preview ${index + 1}`;
+                            
+                            const removeBtn = document.createElement('div');
+                            removeBtn.className = 'remove-image';
+                            removeBtn.innerHTML = '×';
+                            removeBtn.onclick = function() {
+                                preview.remove();
+                                updateFileList();
+                            };
                             
                             preview.appendChild(img);
+                            preview.appendChild(removeBtn);
                             previewContainer.appendChild(preview);
+                            
+                            console.log('Image preview created for:', file.name);
+                        }
+                        
+                        reader.onerror = function() {
+                            console.error('Error reading file:', file.name);
                         }
                         
                         reader.readAsDataURL(file);
@@ -817,8 +870,26 @@
                     
                     if (fileArray.length > 0 && uploadText) {
                         uploadText.textContent = `${fileArray.length} file(s) selected`;
-                    } else if (uploadText) {
+                    }
+                }
+                
+                function updateFileList() {
+                    const previews = previewContainer.querySelectorAll('.image-preview');
+                    const newFiles = new DataTransfer();
+                    
+                    previews.forEach((preview, index) => {
+                        const fileIndex = parseInt(preview.getAttribute('data-index'));
+                        if (uploadInput.files[fileIndex]) {
+                            newFiles.items.add(uploadInput.files[fileIndex]);
+                        }
+                    });
+                    
+                    uploadInput.files = newFiles.files;
+                    
+                    if (newFiles.files.length === 0 && uploadText) {
                         uploadText.textContent = "Drag images here or click to browse";
+                    } else if (uploadText) {
+                        uploadText.textContent = `${newFiles.files.length} file(s) selected`;
                     }
                 }
             }
