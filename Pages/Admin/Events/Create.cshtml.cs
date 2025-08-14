@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
+using soft20181_starter.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,17 +22,20 @@ namespace soft20181_starter.Pages.Admin.Events
         private readonly ILogger<CreateModel> _logger;
         private readonly IWebHostEnvironment _environment;
         private readonly UserManager<AppUser> _userManager;
+        private readonly SimpleAuditService _auditService;
 
         public CreateModel(
             EventAppDbContext context, 
             ILogger<CreateModel> logger, 
             IWebHostEnvironment environment,
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            SimpleAuditService auditService)
         {
             _context = context;
             _logger = logger;
             _environment = environment;
             _userManager = userManager;
+            _auditService = auditService;
         }
 
         [BindProperty]
@@ -297,20 +301,17 @@ namespace soft20181_starter.Pages.Admin.Events
                         // Log the generated event ID from the database
                         _logger.LogInformation("Event record inserted with auto-generated ID: {EventId}", newEvent.id);
 
-                        // Create audit log entry with the generated ID
-                        var auditLog = new AuditLog
+                        // Create audit log using the audit service
+                        try
                         {
-                            EntityName = "Event",
-                            EntityId = newEvent.id.ToString(),
-                            Action = "Create",
-                            UserId = userId,
-                            Changes = $"INSERT INTO Events: {newEvent.title} (ID: {newEvent.id}) in location: {newEvent.location} with price: {newEvent.price} and {newEvent.images.Count} images",
-                            Timestamp = DateTime.UtcNow
-                        };
-                        
-                        await _context.AuditLogs.AddAsync(auditLog);
-                        var auditSaveResult = await _context.SaveChangesAsync();
-                        _logger.LogInformation("INSERT INTO AuditLogs table completed. Rows affected: {RowsAffected}", auditSaveResult);
+                            await _auditService.LogCreateAsync(newEvent);
+                            _logger.LogInformation("Audit log created for event {EventId}", newEvent.id);
+                        }
+                        catch (Exception auditEx)
+                        {
+                            _logger.LogWarning("Failed to create audit log for event {EventId}: {Error}", newEvent.id, auditEx.Message);
+                            // Don't fail the entire operation if audit log fails
+                        }
 
                         // Commit transaction
                         await transaction.CommitAsync();

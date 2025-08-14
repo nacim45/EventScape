@@ -4,210 +4,624 @@
     ViewData["Title"] = "Audit Logs";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-history"></i> Audit Logs
-                    </h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
+<style>
+    .audit-logs-container {
+        padding: 40px 0;
+        min-height: 80vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .audit-logs-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin: 20px 0;
+    }
+
+    .audit-logs-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px 20px 0 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .audit-logs-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .audit-logs-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        position: relative;
+        z-index: 1;
+    }
+
+    .audit-logs-header .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-top: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .audit-logs-body {
+        padding: 40px;
+    }
+
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 40px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-section h3 {
+        color: #495057;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        text-align: center;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 15px;
+    }
+
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .filter-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn-filter {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-clear {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-clear:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        color: white;
+    }
+
+    .table-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+    }
+
+    .table-section h3 {
+        color: #495057;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        text-align: center;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 15px;
+    }
+
+    .audit-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .audit-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .audit-table th {
+        padding: 20px 15px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-align: left;
+        border: none;
+    }
+
+    .audit-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .audit-table tbody tr:hover {
+        background: #f8f9fa;
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .audit-table td {
+        padding: 20px 15px;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .entity-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+
+    .action-badge {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .action-create {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .action-update {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: white;
+    }
+
+    .action-delete {
+        background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+        color: white;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .user-role {
+        font-size: 0.85rem;
+        color: #6c757d;
+        background: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 10px;
+        display: inline-block;
+    }
+
+    .changes-text {
+        max-width: 250px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #495057;
+    }
+
+    .btn-view {
+        background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+        border: none;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(23, 162, 184, 0.3);
+    }
+
+    .btn-view:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+        color: white;
+    }
+
+    .pagination-section {
+        display: flex;
+        justify-content: center;
+        margin: 40px 0;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .page-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, #495057 0%, #6c757d 100%);
+        box-shadow: 0 5px 15px rgba(73, 80, 87, 0.4);
+    }
+
+    .summary-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #e9ecef;
+    }
+
+    .summary-text {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .btn-export {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: #495057;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        opacity: 0.8;
+    }
+
+    @@media (max-width: 768px) {
+        .audit-logs-body {
+            padding: 20px;
+        }
+        
+        .filter-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .summary-section {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .audit-table {
+            font-size: 0.9rem;
+        }
+        
+        .audit-table th,
+        .audit-table td {
+            padding: 15px 10px;
+        }
+    }
+</style>
+
+<div class="audit-logs-container">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-11">
+                <div class="audit-logs-card">
+                    <!-- Header Section -->
+                    <div class="audit-logs-header">
+                        <h1><i class="fas fa-history"></i> Audit Logs</h1>
+                        <div class="subtitle">Track and monitor all system activities and data changes</div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <!-- Filter Form -->
-                    <form method="get" class="mb-4">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label asp-for="EntityName">Entity Type</label>
-                                    <select asp-for="EntityName" class="form-control">
-                                        <option value="">All Entities</option>
-                                        <option value="TheEvent">Events</option>
-                                        <option value="AppUser">Users</option>
-                                        <option value="Contact">Contacts</option>
-                                        <option value="Feedback">Feedback</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label asp-for="Action">Action</label>
-                                    <select asp-for="Action" class="form-control">
-                                        <option value="">All Actions</option>
-                                        <option value="Create">Create</option>
-                                        <option value="Update">Update</option>
-                                        <option value="Delete">Delete</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label asp-for="UserId">User ID</label>
-                                    <input asp-for="UserId" class="form-control" placeholder="Enter User ID" />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label asp-for="FromDate">From Date</label>
-                                    <input asp-for="FromDate" type="date" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label asp-for="ToDate">To Date</label>
-                                    <input asp-for="ToDate" type="date" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>&nbsp;</label>
-                                    <div>
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-search"></i> Filter
-                                        </button>
-                                        <a asp-page="./AuditLogs" class="btn btn-secondary">
-                                            <i class="fas fa-times"></i> Clear
-                                        </a>
+
+                    <!-- Body Section -->
+                    <div class="audit-logs-body">
+                        <!-- Filter Section -->
+                        <div class="filter-section">
+                            <h3><i class="fas fa-filter"></i> Filter Audit Logs</h3>
+                            <form method="get">
+                                <div class="filter-row">
+                                    <div class="filter-group">
+                                        <label asp-for="EntityName">Entity Type</label>
+                                        <select asp-for="EntityName" class="form-control">
+                                            <option value="">All Entities</option>
+                                            <option value="TheEvent">Events</option>
+                                            <option value="AppUser">Users</option>
+                                            <option value="Contact">Contacts</option>
+                                            <option value="Feedback">Feedback</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <label asp-for="Action">Action</label>
+                                        <select asp-for="Action" class="form-control">
+                                            <option value="">All Actions</option>
+                                            <option value="Create">Create</option>
+                                            <option value="Update">Update</option>
+                                            <option value="Delete">Delete</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <label asp-for="UserId">User ID</label>
+                                        <input asp-for="UserId" class="form-control" placeholder="Enter User ID" />
+                                    </div>
+                                    <div class="filter-group">
+                                        <label asp-for="FromDate">From Date</label>
+                                        <input asp-for="FromDate" type="date" class="form-control" />
+                                    </div>
+                                    <div class="filter-group">
+                                        <label asp-for="ToDate">To Date</label>
+                                        <input asp-for="ToDate" type="date" class="form-control" />
                                     </div>
                                 </div>
-                            </div>
+                                <div class="filter-actions">
+                                    <button type="submit" class="btn btn-filter">
+                                        <i class="fas fa-search"></i> Apply Filters
+                                    </button>
+                                    <a asp-page="./AuditLogs" class="btn btn-clear">
+                                        <i class="fas fa-times"></i> Clear Filters
+                                    </a>
+                                </div>
+                            </form>
                         </div>
-                    </form>
 
-                    <!-- Audit Logs Table -->
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>Entity</th>
-                                    <th>Action</th>
-                                    <th>User</th>
-                                    <th>Changes</th>
-                                    <th>IP Address</th>
-                                    <th>Details</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var log in Model.AuditLogs)
+                        <!-- Table Section -->
+                        <div class="table-section">
+                            <h3><i class="fas fa-table"></i> Audit Log Entries</h3>
+                            
+                            @if (Model.AuditLogs?.Any() == true)
+                            {
+                                <div class="table-responsive">
+                                    <table class="audit-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Timestamp</th>
+                                                <th>Entity</th>
+                                                <th>Action</th>
+                                                <th>User</th>
+                                                <th>Changes</th>
+                                                <th>IP Address</th>
+                                                <th>Details</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var log in Model.AuditLogs)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="text-muted">
+                                                            <strong>@log.GetFormattedTimestamp()</strong>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="entity-badge">@log.EntityName</div>
+                                                        <div class="text-muted">ID: @log.EntityId</div>
+                                                    </td>
+                                                    <td>
+                                                        @{
+                                                            var actionClass = log.Action switch
+                                                            {
+                                                                "Create" => "action-create",
+                                                                "Update" => "action-update",
+                                                                "Delete" => "action-delete",
+                                                                _ => "action-badge"
+                                                            };
+                                                        }
+                                                        <span class="@actionClass">@log.Action</span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="user-info">
+                                                            <div class="user-name">@log.UserName</div>
+                                                            <div class="user-role">@log.UserRole</div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        @if (!string.IsNullOrEmpty(log.Changes))
+                                                        {
+                                                            <div class="changes-text" title="@log.Changes">
+                                                                @log.Changes
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">No changes recorded</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <div class="text-muted">@log.IpAddress</div>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-view" 
+                                                                data-toggle="modal" data-target="#auditDetailModal" 
+                                                                data-log-id="@log.Id">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                @if (Model.TotalPages > 1)
                                 {
-                                    <tr>
-                                        <td>
-                                            <small class="text-muted">
-                                                @log.GetFormattedTimestamp()
-                                            </small>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-info">@log.EntityName</span>
-                                            <br />
-                                            <small class="text-muted">ID: @log.EntityId</small>
-                                        </td>
-                                        <td>
-                                            @{
-                                                var actionClass = log.Action switch
+                                    <div class="pagination-section">
+                                        <nav aria-label="Audit logs pagination">
+                                            <ul class="pagination">
+                                                @if (Model.CurrentPage > 1)
                                                 {
-                                                    "Create" => "badge-success",
-                                                    "Update" => "badge-warning",
-                                                    "Delete" => "badge-danger",
-                                                    _ => "badge-secondary"
-                                                };
-                                            }
-                                            <span class="badge @actionClass">@log.Action</span>
-                                        </td>
-                                        <td>
-                                            <strong>@log.UserName</strong>
-                                            <br />
-                                            <small class="text-muted">@log.UserRole</small>
-                                        </td>
-                                        <td>
-                                            @if (!string.IsNullOrEmpty(log.Changes))
-                                            {
-                                                <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@log.Changes">
-                                                    @log.Changes
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">No changes recorded</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">@log.IpAddress</small>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-sm btn-outline-info" 
-                                                    data-toggle="modal" data-target="#auditDetailModal" 
-                                                    data-log-id="@log.Id">
-                                                <i class="fas fa-eye"></i> View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                                    <li class="page-item">
+                                                        <a class="page-link" asp-page="./AuditLogs" asp-route-page="@(Model.CurrentPage - 1)" 
+                                                           asp-route-entityName="@Model.EntityName" asp-route-action="@Model.Action" 
+                                                           asp-route-userId="@Model.UserId" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" 
+                                                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")">
+                                                            <i class="fas fa-chevron-left"></i> Previous
+                                                        </a>
+                                                    </li>
+                                                }
 
-                    <!-- Pagination -->
-                    @if (Model.TotalPages > 1)
-                    {
-                        <nav aria-label="Audit logs pagination">
-                            <ul class="pagination justify-content-center">
-                                @if (Model.CurrentPage > 1)
-                                {
-                                    <li class="page-item">
-                                        <a class="page-link" asp-page="./AuditLogs" asp-route-page="@(Model.CurrentPage - 1)" 
-                                           asp-route-entityName="@Model.EntityName" asp-route-action="@Model.Action" 
-                                           asp-route-userId="@Model.UserId" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" 
-                                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")">
-                                            Previous
-                                        </a>
-                                    </li>
+                                                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                                                {
+                                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                                        <a class="page-link" asp-page="./AuditLogs" asp-route-page="@i" 
+                                                           asp-route-entityName="@Model.EntityName" asp-route-action="@Model.Action" 
+                                                           asp-route-userId="@Model.UserId" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" 
+                                                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")">
+                                                            @i
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                @if (Model.CurrentPage < Model.TotalPages)
+                                                {
+                                                    <li class="page-item">
+                                                        <a class="page-link" asp-page="./AuditLogs" asp-route-page="@(Model.CurrentPage + 1)" 
+                                                           asp-route-entityName="@Model.EntityName" asp-route-action="@Model.Action" 
+                                                           asp-route-userId="@Model.UserId" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" 
+                                                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")">
+                                                            Next <i class="fas fa-chevron-right"></i>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </nav>
+                                    </div>
                                 }
 
-                                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
-                                {
-                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                                        <a class="page-link" asp-page="./AuditLogs" asp-route-page="@i" 
-                                           asp-route-entityName="@Model.EntityName" asp-route-action="@Model.Action" 
-                                           asp-route-userId="@Model.UserId" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" 
-                                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")">
-                                            @i
-                                        </a>
-                                    </li>
-                                }
-
-                                @if (Model.CurrentPage < Model.TotalPages)
-                                {
-                                    <li class="page-item">
-                                        <a class="page-link" asp-page="./AuditLogs" asp-route-page="@(Model.CurrentPage + 1)" 
-                                           asp-route-entityName="@Model.EntityName" asp-route-action="@Model.Action" 
-                                           asp-route-userId="@Model.UserId" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" 
-                                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")">
-                                            Next
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </nav>
-                    }
-
-                    <!-- Summary -->
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <p class="text-muted">
-                                Showing @((Model.CurrentPage - 1) * Model.PageSize + 1) to @Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount) 
-                                of @Model.TotalCount audit logs
-                            </p>
-                        </div>
-                        <div class="col-md-6 text-right">
-                            <a href="@Url.Page("./AuditLogs", new { export = "csv" })" class="btn btn-success">
-                                <i class="fas fa-download"></i> Export CSV
-                            </a>
+                                <!-- Summary Section -->
+                                <div class="summary-section">
+                                    <p class="summary-text">
+                                        <i class="fas fa-info-circle"></i>
+                                        Showing @((Model.CurrentPage - 1) * Model.PageSize + 1) to @Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount) 
+                                        of @Model.TotalCount audit logs
+                                    </p>
+                                    <a href="@Url.Page("./AuditLogs", new { export = "csv" })" class="btn btn-export">
+                                        <i class="fas fa-download"></i> Export to CSV
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="empty-state">
+                                    <i class="fas fa-search"></i>
+                                    <h4>No Audit Logs Found</h4>
+                                    <p>No audit logs match your current filter criteria. Try adjusting your filters or create some test data to see audit logs in action.</p>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -221,7 +635,9 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Audit Log Details</h5>
+                <h5 class="modal-title">
+                    <i class="fas fa-eye"></i> Audit Log Details
+                </h5>
                 <button type="button" class="close" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
@@ -245,9 +661,14 @@
                 var logId = button.data('log-id');
                 var modal = $(this);
                 
+                // Show loading state
+                modal.find('#auditDetailContent').html('<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Loading...</p></div>');
+                
                 // Load audit log details via AJAX
                 $.get('/Admin/AuditLogs/Details/' + logId, function(data) {
                     modal.find('#auditDetailContent').html(data);
+                }).fail(function() {
+                    modal.find('#auditDetailContent').html('<div class="alert alert-danger">Failed to load audit log details.</div>');
                 });
             });
         });

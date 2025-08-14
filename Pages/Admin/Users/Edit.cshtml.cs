@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
 using soft20181_starter.ViewModels;
+using soft20181_starter.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -20,15 +21,18 @@ namespace soft20181_starter.Pages.Admin.Users
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<EditModel> _logger;
+        private readonly SimpleAuditService _auditService;
 
         public EditModel(
             UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ILogger<EditModel> logger)
+            ILogger<EditModel> logger,
+            SimpleAuditService auditService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
+            _auditService = auditService;
         }
 
         [TempData]
@@ -152,6 +156,36 @@ namespace soft20181_starter.Pages.Admin.Users
                             _logger.LogWarning("Failed to assign role {Role} to user {UserId}", UserEdit.Role, UserId);
                         }
                     }
+                }
+
+                // Create audit log for user update
+                try
+                {
+                    var oldValues = new Dictionary<string, object?>
+                    {
+                        ["Name"] = user.Name,
+                        ["Surname"] = user.Surname,
+                        ["Email"] = user.Email,
+                        ["PhoneNumber"] = user.PhoneNumber,
+                        ["Role"] = currentRole
+                    };
+
+                    var newValues = new Dictionary<string, object?>
+                    {
+                        ["Name"] = UserEdit.Name?.Trim() ?? string.Empty,
+                        ["Surname"] = UserEdit.Surname?.Trim() ?? string.Empty,
+                        ["Email"] = UserEdit.Email?.Trim() ?? string.Empty,
+                        ["PhoneNumber"] = UserEdit.PhoneNumber?.Trim() ?? string.Empty,
+                        ["Role"] = UserEdit.Role ?? "User"
+                    };
+
+                    await _auditService.LogUpdateAsync(user, oldValues, newValues);
+                    _logger.LogInformation("Audit log created for user update {UserId}", UserId);
+                }
+                catch (Exception auditEx)
+                {
+                    _logger.LogWarning("Failed to create audit log for user update {UserId}: {Error}", UserId, auditEx.Message);
+                    // Don't fail the entire operation if audit log fails
                 }
 
                 _logger.LogInformation("Successfully updated user: {UserId} - {Name} {Surname}", 

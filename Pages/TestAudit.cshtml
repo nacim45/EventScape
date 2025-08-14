@@ -1,0 +1,120 @@
+@page
+@model soft20181_starter.Pages.TestAuditModel
+@{
+    ViewData["Title"] = "Test Audit Logging";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Test Audit Logging System</h3>
+                </div>
+                <div class="card-body">
+                    <p>This page helps you test the audit logging system. Click the buttons below to create test records and verify that audit logs are being generated.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Test Contact Creation</h5>
+                            <form method="post" asp-page-handler="CreateContact">
+                                <div class="form-group">
+                                    <label>Name:</label>
+                                    <input type="text" name="name" class="form-control" value="Test User" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Surname:</label>
+                                    <input type="text" name="surname" class="form-control" value="Test Surname" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Email:</label>
+                                    <input type="email" name="email" class="form-control" value="test@example.com" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone:</label>
+                                    <input type="text" name="phone" class="form-control" value="1234567890" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Message:</label>
+                                    <textarea name="message" class="form-control" rows="3">This is a test contact message for audit logging verification.</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Create Test Contact</button>
+                            </form>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>Test Feedback Creation</h5>
+                            <form method="post" asp-page-handler="CreateFeedback">
+                                <div class="form-group">
+                                    <label>Feedback Message:</label>
+                                    <textarea name="message" class="form-control" rows="5">This is a test feedback message for audit logging verification. The system should log this creation.</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success">Create Test Feedback</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <hr />
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Test Results</h5>
+                            @if (!string.IsNullOrEmpty(Model.TestMessage))
+                            {
+                                <div class="alert alert-info">
+                                    @Model.TestMessage
+                                </div>
+                            }
+                            
+                            @if (Model.RecentAuditLogs?.Any() == true)
+                            {
+                                <h6>Recent Audit Logs:</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Timestamp</th>
+                                                <th>Entity</th>
+                                                <th>Action</th>
+                                                <th>User</th>
+                                                <th>Changes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var log in Model.RecentAuditLogs)
+                                            {
+                                                <tr>
+                                                    <td>@log.GetFormattedTimestamp()</td>
+                                                    <td><span class="badge badge-info">@log.EntityName</span></td>
+                                                    <td><span class="badge badge-success">@log.Action</span></td>
+                                                    <td>@log.UserName</td>
+                                                    <td>@log.Changes</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted">No recent audit logs found. Create some test records to see audit logs here.</p>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Next Steps</h5>
+                            <ol>
+                                <li>Click the buttons above to create test records</li>
+                                <li>Check that audit logs appear in the table above</li>
+                                <li>Go to <a href="/Admin/AuditLogs">Admin Audit Logs</a> to see the full audit log interface</li>
+                                <li>Test creating, updating, and deleting events and users through the admin interface</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

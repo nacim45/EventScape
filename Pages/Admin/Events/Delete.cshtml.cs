@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
+using soft20181_starter.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,15 +17,18 @@ namespace soft20181_starter.Pages.Admin.Events
         private readonly EventAppDbContext _context;
         private readonly ILogger<DeleteModel> _logger;
         private readonly IWebHostEnvironment _environment;
+        private readonly SimpleAuditService _auditService;
 
         public DeleteModel(
             EventAppDbContext context, 
             ILogger<DeleteModel> logger,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            SimpleAuditService auditService)
         {
             _context = context;
             _logger = logger;
             _environment = environment;
+            _auditService = auditService;
         }
 
         [BindProperty]
@@ -128,16 +132,16 @@ namespace soft20181_starter.Pages.Admin.Events
                         _context.Events.Update(eventToDelete);
                         
                         // Create audit log for soft delete
-                        var softDeleteAudit = new AuditLog
+                        try
                         {
-                            EntityName = "Event",
-                            EntityId = eventId.ToString(),
-                            Action = "SoftDelete",
-                            UserId = User.Identity?.Name ?? "System",
-                            Changes = $"Soft deleted event: {eventToDelete.title} (ID: {eventId}) due to existing attendees",
-                            Timestamp = DateTime.UtcNow
-                        };
-                        await _context.AuditLogs.AddAsync(softDeleteAudit);
+                            await _auditService.LogDeleteAsync(eventToDelete);
+                            _logger.LogInformation("Audit log created for soft delete of event {EventId}", eventId);
+                        }
+                        catch (Exception auditEx)
+                        {
+                            _logger.LogWarning("Failed to create audit log for soft delete of event {EventId}: {Error}", eventId, auditEx.Message);
+                            // Don't fail the entire operation if audit log fails
+                        }
                     }
                     else
                     {
@@ -181,16 +185,16 @@ namespace soft20181_starter.Pages.Admin.Events
                         _context.Events.Remove(eventToDelete);
                         
                         // Create audit log for hard delete
-                        var hardDeleteAudit = new AuditLog
+                        try
                         {
-                            EntityName = "Event",
-                            EntityId = eventId.ToString(),
-                            Action = "HardDelete",
-                            UserId = User.Identity?.Name ?? "System",
-                            Changes = $"Hard deleted event: {eventToDelete.title} (ID: {eventId})",
-                            Timestamp = DateTime.UtcNow
-                        };
-                        await _context.AuditLogs.AddAsync(hardDeleteAudit);
+                            await _auditService.LogDeleteAsync(eventToDelete);
+                            _logger.LogInformation("Audit log created for hard delete of event {EventId}", eventId);
+                        }
+                        catch (Exception auditEx)
+                        {
+                            _logger.LogWarning("Failed to create audit log for hard delete of event {EventId}: {Error}", eventId, auditEx.Message);
+                            // Don't fail the entire operation if audit log fails
+                        }
                     }
 
                     // Save all changes

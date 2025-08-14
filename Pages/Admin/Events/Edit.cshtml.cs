@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
+using soft20181_starter.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,13 @@ namespace soft20181_starter.Pages.Admin.Events
     {
         private readonly EventAppDbContext _context;
         private readonly ILogger<EditModel> _logger;
+        private readonly SimpleAuditService _auditService;
 
-        public EditModel(EventAppDbContext context, ILogger<EditModel> logger)
+        public EditModel(EventAppDbContext context, ILogger<EditModel> logger, SimpleAuditService auditService)
         {
             _context = context;
             _logger = logger;
+            _auditService = auditService;
         }
 
         [BindProperty]
@@ -428,17 +431,44 @@ namespace soft20181_starter.Pages.Admin.Events
                     // Create audit log if there were changes
                     if (changes.Any())
                     {
-                        var auditLog = new AuditLog
+                        try
                         {
-                            EntityName = "Event",
-                            EntityId = Event.id.ToString(),
-                            Action = "Update",
-                            UserId = User.Identity?.Name ?? "System",
-                            Changes = string.Join("; ", changes),
-                            Timestamp = DateTime.UtcNow
-                        };
-                        await _context.AuditLogs.AddAsync(auditLog);
-                        await _context.SaveChangesAsync();
+                            var oldValues = new Dictionary<string, object?>
+                            {
+                                ["title"] = existingEvent.title,
+                                ["description"] = existingEvent.description,
+                                ["location"] = existingEvent.location,
+                                ["date"] = existingEvent.date,
+                                ["price"] = existingEvent.price,
+                                ["Category"] = existingEvent.Category,
+                                ["Capacity"] = existingEvent.Capacity,
+                                ["StartTime"] = existingEvent.StartTime,
+                                ["EndTime"] = existingEvent.EndTime,
+                                ["Tags"] = existingEvent.Tags
+                            };
+
+                            var newValues = new Dictionary<string, object?>
+                            {
+                                ["title"] = Event.title,
+                                ["description"] = Event.description,
+                                ["location"] = Event.location,
+                                ["date"] = Event.date,
+                                ["price"] = Event.price,
+                                ["Category"] = Event.Category,
+                                ["Capacity"] = Event.Capacity,
+                                ["StartTime"] = Event.StartTime,
+                                ["EndTime"] = Event.EndTime,
+                                ["Tags"] = Event.Tags
+                            };
+
+                            await _auditService.LogUpdateAsync(Event, oldValues, newValues);
+                            _logger.LogInformation("Audit log created for event update {EventId}", Event.id);
+                        }
+                        catch (Exception auditEx)
+                        {
+                            _logger.LogWarning("Failed to create audit log for event update {EventId}: {Error}", Event.id, auditEx.Message);
+                            // Don't fail the entire operation if audit log fails
+                        }
                     }
 
                     // Commit transaction

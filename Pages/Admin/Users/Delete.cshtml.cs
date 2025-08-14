@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
 using soft20181_starter.ViewModels;
+using soft20181_starter.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace soft20181_starter.Pages.Admin.Users
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<DeleteModel> _logger;
+        private readonly SimpleAuditService _auditService;
 
         [BindProperty]
         public string UserId { get; set; } = string.Empty;
@@ -31,10 +33,12 @@ namespace soft20181_starter.Pages.Admin.Users
 
         public DeleteModel(
             UserManager<AppUser> userManager,
-            ILogger<DeleteModel> logger)
+            ILogger<DeleteModel> logger,
+            SimpleAuditService auditService)
         {
             _userManager = userManager;
             _logger = logger;
+            _auditService = auditService;
         }
 
         public async Task<IActionResult> OnGetAsync(string id, string name, string surname)
@@ -89,6 +93,18 @@ namespace soft20181_starter.Pages.Admin.Users
                 var result = await _userManager.DeleteAsync(user);
                 if (result.Succeeded)
                 {
+                    // Create audit log for user deletion
+                    try
+                    {
+                        await _auditService.LogDeleteAsync(user);
+                        _logger.LogInformation("Audit log created for user deletion {UserId}", UserId);
+                    }
+                    catch (Exception auditEx)
+                    {
+                        _logger.LogWarning("Failed to create audit log for user deletion {UserId}: {Error}", UserId, auditEx.Message);
+                        // Don't fail the entire operation if audit log fails
+                    }
+
                     _logger.LogInformation("User {UserId} deleted successfully.", UserId);
                     StatusMessage = "User was successfully deleted.";
                     return RedirectToPage("./Index");
