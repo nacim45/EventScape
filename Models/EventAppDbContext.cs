@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using soft20181_starter.Services;
 
 namespace soft20181_starter.Models
 {
@@ -27,6 +28,16 @@ namespace soft20181_starter.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Configure AuditLog entity
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.HasIndex(e => e.EntityName);
+                entity.HasIndex(e => e.EntityId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.Timestamp);
+                entity.HasIndex(e => e.Action);
+            });
 
             modelBuilder.Entity<TheEvent>(entity =>
             {
@@ -76,6 +87,8 @@ namespace soft20181_starter.Models
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }
+
+
     }
 }
 

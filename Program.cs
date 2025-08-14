@@ -34,6 +34,10 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, EmailSender>();
 
+// Register audit services
+builder.Services.AddScoped<SimpleAuditService>();
+builder.Services.AddHttpContextAccessor();
+
 // Add Identity services
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {

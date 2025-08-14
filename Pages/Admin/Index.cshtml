@@ -138,6 +138,32 @@
                 <a asp-page="/Admin/Users/Index" class="auth-button logout-button full-width-btn">Manage Users</a>
             </div>
         </div>
+        
+        <div class="admin-panel">
+            <div class="panel-header">
+                <h2>Audit Logs</h2>
+            </div>
+            <div class="panel-body">
+                <div class="panel-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="panel-content">
+                    <h3>Audit Logs</h3>
+                    <p>Track all changes made to events, users, contacts, and feedback. Monitor system activity and user actions.</p>
+                    <ul class="admin-list">
+                        <li>
+                            <i class="fas fa-clipboard-list"></i>
+                            <a asp-page="/Admin/AuditLogs">View Audit Logs</a>
+                        </li>
+                        <li>
+                            <i class="fas fa-download"></i>
+                            <a asp-page="/Admin/AuditLogs" asp-route-export="csv">Export to CSV</a>
+                        </li>
+                    </ul>
+                </div>
+                <a asp-page="/Admin/AuditLogs" class="auth-button logout-button full-width-btn">View Audit Logs</a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -253,7 +279,8 @@
         }
         
         .admin-panels {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 50px;
             margin-bottom: 200px; /* Increased bottom margin */
         }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using soft20181_starter.Models;
 
@@ -10,9 +11,11 @@ using soft20181_starter.Models;
 namespace soft20181_starter.Migrations
 {
     [DbContext(typeof(EventAppDbContext))]
-    partial class EventAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250814111359_EnhancedAuditLogging")]
+    partial class EnhancedAuditLogging
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
+using soft20181_starter.Services;
 using System.Threading.Tasks;
 
 namespace soft20181_starter.Pages
@@ -11,11 +12,13 @@ namespace soft20181_starter.Pages
     {
         private readonly EventAppDbContext _context;
         private readonly ILogger<ContactModel> _logger;
+        private readonly SimpleAuditService _auditService;
 
-        public ContactModel(EventAppDbContext context, ILogger<ContactModel> logger)
+        public ContactModel(EventAppDbContext context, ILogger<ContactModel> logger, SimpleAuditService auditService)
         {
             _context = context;
             _logger = logger;
+            _auditService = auditService;
         }
 
         [BindProperty]
@@ -81,6 +84,9 @@ namespace soft20181_starter.Pages
                 _logger.LogInformation("Contact form submitted successfully with ID {Id} for {Name} {Surname}",
                     ContactInfo.Id, ContactInfo.Name, ContactInfo.Surname);
 
+                // Audit log the contact creation
+                await _auditService.LogCreateAsync(ContactInfo);
+
                 // Show success message
                 TempData["SuccessMessage"] = "Thank you for contacting us!";
                 TempData["Name"] = ContactInfo.Name;
@@ -117,6 +123,9 @@ namespace soft20181_starter.Pages
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Feedback submitted successfully with ID {Id}", feedback.Id);
+
+                // Audit log the feedback creation
+                await _auditService.LogCreateAsync(feedback);
 
                 TempData["SuccessMessage"] = "Thank you for your feedback!";
                 return RedirectToPage();

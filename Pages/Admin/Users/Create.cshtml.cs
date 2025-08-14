@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
+using soft20181_starter.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -20,17 +21,20 @@ namespace soft20181_starter.Pages.Admin.Users
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly EventAppDbContext _context;
         private readonly ILogger<CreateModel> _logger;
+        private readonly SimpleAuditService _auditService;
 
         public CreateModel(
             UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager,
             EventAppDbContext context,
-            ILogger<CreateModel> logger)
+            ILogger<CreateModel> logger,
+            SimpleAuditService auditService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
             _logger = logger;
+            _auditService = auditService;
         }
 
         [BindProperty]
@@ -200,21 +204,10 @@ namespace soft20181_starter.Pages.Admin.Users
                                 }
                             }
 
-                            // Create audit log
+                            // Create audit log using the audit service
                             try
                             {
-                                var auditLog = new AuditLog
-                                {
-                                    EntityName = "User",
-                                    EntityId = user.Id,
-                                    Action = "Create",
-                                    UserId = User.Identity?.Name ?? "System",
-                                    Changes = $"INSERT INTO AspNetUsers: {user.Name} {user.Surname} (ID: {user.Id}) with role: {user.Role}",
-                                    Timestamp = DateTime.UtcNow
-                                };
-                                await _context.AuditLogs.AddAsync(auditLog);
-                                var auditSaveResult = await _context.SaveChangesAsync();
-                                _logger.LogInformation("INSERT INTO AuditLogs table completed. Rows affected: {RowsAffected}", auditSaveResult);
+                                await _auditService.LogCreateAsync(user);
                                 _logger.LogInformation("Audit log created for user {UserId}", user.Id);
                             }
                             catch (Exception auditEx)

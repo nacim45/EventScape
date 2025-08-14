@@ -1,0 +1,155 @@
+@model soft20181_starter.Models.AuditLog
+
+<div class="row">
+    <div class="col-md-6">
+        <h6>Basic Information</h6>
+        <table class="table table-sm">
+            <tr>
+                <td><strong>Timestamp:</strong></td>
+                <td>@Model.GetFormattedTimestamp()</td>
+            </tr>
+            <tr>
+                <td><strong>Entity:</strong></td>
+                <td><span class="badge badge-info">@Model.EntityName</span></td>
+            </tr>
+            <tr>
+                <td><strong>Entity ID:</strong></td>
+                <td>@Model.EntityId</td>
+            </tr>
+            <tr>
+                <td><strong>Action:</strong></td>
+                <td>
+                    @{
+                        var actionClass = Model.Action switch
+                        {
+                            "Create" => "badge-success",
+                            "Update" => "badge-warning",
+                            "Delete" => "badge-danger",
+                            _ => "badge-secondary"
+                        };
+                    }
+                    <span class="badge @actionClass">@Model.Action</span>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Table:</strong></td>
+                <td>@Model.TableName</td>
+            </tr>
+            <tr>
+                <td><strong>Schema:</strong></td>
+                <td>@Model.Schema</td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h6>User Information</h6>
+        <table class="table table-sm">
+            <tr>
+                <td><strong>User ID:</strong></td>
+                <td>@Model.UserId</td>
+            </tr>
+            <tr>
+                <td><strong>User Name:</strong></td>
+                <td>@Model.UserName</td>
+            </tr>
+            <tr>
+                <td><strong>User Role:</strong></td>
+                <td>@Model.UserRole</td>
+            </tr>
+            <tr>
+                <td><strong>IP Address:</strong></td>
+                <td>@Model.IpAddress</td>
+            </tr>
+            <tr>
+                <td><strong>Session ID:</strong></td>
+                <td>@Model.SessionId</td>
+            </tr>
+            <tr>
+                <td><strong>User Agent:</strong></td>
+                <td><small class="text-muted">@Model.UserAgent</small></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <h6>Request Information</h6>
+        <table class="table table-sm">
+            <tr>
+                <td><strong>Controller:</strong></td>
+                <td>@Model.ControllerName</td>
+            </tr>
+            <tr>
+                <td><strong>Action:</strong></td>
+                <td>@Model.ActionName</td>
+            </tr>
+            <tr>
+                <td><strong>Request URL:</strong></td>
+                <td>@Model.RequestUrl</td>
+            </tr>
+            <tr>
+                <td><strong>Success:</strong></td>
+                <td>
+                    @if (Model.IsSuccessful)
+                    {
+                        <span class="badge badge-success">Yes</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">No</span>
+                    }
+                </td>
+            </tr>
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <tr>
+                    <td><strong>Error:</strong></td>
+                    <td class="text-danger">@Model.ErrorMessage</td>
+                </tr>
+            }
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h6>Changes Summary</h6>
+        @if (!string.IsNullOrEmpty(Model.Changes))
+        {
+            <div class="alert alert-info">
+                <strong>Changes:</strong><br />
+                @Model.Changes
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.AffectedColumns))
+        {
+            <div class="alert alert-warning">
+                <strong>Affected Columns:</strong><br />
+                @Model.AffectedColumns
+            </div>
+        }
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.OldValues) || !string.IsNullOrEmpty(Model.NewValues))
+{
+    <div class="row mt-3">
+        <div class="col-12">
+            <h6>Detailed Changes</h6>
+            <div class="row">
+                @if (!string.IsNullOrEmpty(Model.OldValues))
+                {
+                    <div class="col-md-6">
+                        <h6 class="text-danger">Old Values</h6>
+                        <pre class="bg-light p-2 rounded"><code>@Model.OldValues</code></pre>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.NewValues))
+                {
+                    <div class="col-md-6">
+                        <h6 class="text-success">New Values</h6>
+                        <pre class="bg-light p-2 rounded"><code>@Model.NewValues</code></pre>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
