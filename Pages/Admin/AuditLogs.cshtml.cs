@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
 using soft20181_starter.Services;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace soft20181_starter.Pages.Admin
 {
@@ -11,10 +16,12 @@ namespace soft20181_starter.Pages.Admin
     public class AuditLogsModel : PageModel
     {
         private readonly SimpleAuditService _auditService;
+        private readonly ILogger<AuditLogsModel> _logger;
 
-        public AuditLogsModel(SimpleAuditService auditService)
+        public AuditLogsModel(SimpleAuditService auditService, ILogger<AuditLogsModel> logger)
         {
             _auditService = auditService;
+            _logger = logger;
         }
 
         [BindProperty(SupportsGet = true)]
@@ -50,7 +57,7 @@ namespace soft20181_starter.Pages.Admin
             // Get audit logs with filtering
             AuditLogs = await _auditService.GetAuditLogsAsync(
                 entityName: EntityName,
-                entityId: null,
+                action: Action,
                 userId: UserId,
                 fromDate: FromDate,
                 toDate: ToDate,
@@ -61,7 +68,7 @@ namespace soft20181_starter.Pages.Admin
             // Get total count for pagination
             TotalCount = await _auditService.GetAuditLogsCountAsync(
                 entityName: EntityName,
-                entityId: null,
+                action: Action,
                 userId: UserId,
                 fromDate: FromDate,
                 toDate: ToDate
@@ -94,7 +101,7 @@ namespace soft20181_starter.Pages.Admin
         {
             var auditLogs = await _auditService.GetAuditLogsAsync(
                 entityName: EntityName,
-                entityId: null,
+                action: Action,
                 userId: UserId,
                 fromDate: FromDate,
                 toDate: ToDate,

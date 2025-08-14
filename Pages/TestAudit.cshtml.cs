@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using soft20181_starter.Models;
 using soft20181_starter.Services;
-using System.Security.Claims;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace soft20181_starter.Pages
 {
@@ -10,28 +14,45 @@ namespace soft20181_starter.Pages
     {
         private readonly EventAppDbContext _context;
         private readonly SimpleAuditService _auditService;
+        private readonly ILogger<TestAuditModel> _logger;
 
-        public TestAuditModel(EventAppDbContext context, SimpleAuditService auditService)
+        public TestAuditModel(EventAppDbContext context, SimpleAuditService auditService, ILogger<TestAuditModel> logger)
         {
             _context = context;
             _auditService = auditService;
+            _logger = logger;
         }
 
-        [TempData]
-        public string TestMessage { get; set; } = string.Empty;
+        [BindProperty]
+        public string StatusMessage { get; set; } = string.Empty;
 
-        public IEnumerable<AuditLog> RecentAuditLogs { get; set; } = new List<AuditLog>();
+        public List<AuditLog> RecentLogs { get; set; } = new List<AuditLog>();
 
         public async Task OnGetAsync()
         {
-            // Load recent audit logs for display
-            RecentAuditLogs = await _auditService.GetAuditLogsAsync(pageSize: 10);
+            try
+            {
+                // Load recent audit logs
+                RecentLogs = await _context.AuditLogs
+                    .OrderByDescending(a => a.Timestamp)
+                    .Take(10)
+                    .ToListAsync();
+
+                _logger.LogInformation("Loaded {Count} recent audit logs", RecentLogs.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading audit logs");
+                StatusMessage = $"Error loading audit logs: {ex.Message}";
+            }
         }
 
         public async Task<IActionResult> OnPostCreateContactAsync(string name, string surname, string email, string phone, string message)
         {
             try
             {
+                _logger.LogInformation("Creating test contact: {Name} {Surname}", name, surname);
+
                 var contact = new Contact
                 {
                     Name = name,
@@ -45,19 +66,26 @@ namespace soft20181_starter.Pages
                 _context.Contacts.Add(contact);
                 await _context.SaveChangesAsync();
 
-                // Audit log the contact creation
-                await _auditService.LogCreateAsync(contact);
+                _logger.LogInformation("Contact created with ID: {Id}", contact.Id);
 
-                TestMessage = $"Test contact created successfully with ID: {contact.Id}. Audit log should be generated.";
-                
-                // Reload recent audit logs
-                RecentAuditLogs = await _auditService.GetAuditLogsAsync(pageSize: 10);
-                
+                // Create audit log
+                try
+                {
+                    await _auditService.LogCreateAsync(contact);
+                    _logger.LogInformation("Audit log created successfully for contact {Id}", contact.Id);
+                }
+                catch (Exception auditEx)
+                {
+                    _logger.LogError(auditEx, "Failed to create audit log for contact {Id}", contact.Id);
+                }
+
+                StatusMessage = $"Test contact created successfully with ID: {contact.Id}";
                 return RedirectToPage();
             }
             catch (Exception ex)
             {
-                TestMessage = $"Error creating test contact: {ex.Message}";
+                _logger.LogError(ex, "Error creating test contact");
+                StatusMessage = $"Error creating test contact: {ex.Message}";
                 return RedirectToPage();
             }
         }
@@ -66,6 +94,8 @@ namespace soft20181_starter.Pages
         {
             try
             {
+                _logger.LogInformation("Creating test feedback: {Length} characters", message.Length);
+
                 var feedback = new Feedback
                 {
                     Message = message,
@@ -75,19 +105,26 @@ namespace soft20181_starter.Pages
                 _context.Feedbacks.Add(feedback);
                 await _context.SaveChangesAsync();
 
-                // Audit log the feedback creation
-                await _auditService.LogCreateAsync(feedback);
+                _logger.LogInformation("Feedback created with ID: {Id}", feedback.Id);
 
-                TestMessage = $"Test feedback created successfully with ID: {feedback.Id}. Audit log should be generated.";
-                
-                // Reload recent audit logs
-                RecentAuditLogs = await _auditService.GetAuditLogsAsync(pageSize: 10);
-                
+                // Create audit log
+                try
+                {
+                    await _auditService.LogCreateAsync(feedback);
+                    _logger.LogInformation("Audit log created successfully for feedback {Id}", feedback.Id);
+                }
+                catch (Exception auditEx)
+                {
+                    _logger.LogError(auditEx, "Failed to create audit log for feedback {Id}", feedback.Id);
+                }
+
+                StatusMessage = $"Test feedback created successfully with ID: {feedback.Id}";
                 return RedirectToPage();
             }
             catch (Exception ex)
             {
-                TestMessage = $"Error creating test feedback: {ex.Message}";
+                _logger.LogError(ex, "Error creating test feedback");
+                StatusMessage = $"Error creating test feedback: {ex.Message}";
                 return RedirectToPage();
             }
         }
