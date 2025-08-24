@@ -60,6 +60,52 @@
 
     <div class="separator-spacing"></div>
 
+    <!-- Search and Filter Section -->
+    <div class="admin-search-section">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fas fa-search"></i>
+                    Search & Filter Users
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <form method="get" class="admin-search-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="SearchString">Search by Name or Email</label>
+                                <input type="text" id="SearchString" name="SearchString" class="form-control" 
+                                       value="@Model.SearchString" placeholder="Enter name or email to search..." />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="RoleFilter">Filter by Role</label>
+                                <select id="RoleFilter" name="RoleFilter" class="form-control">
+                                    <option value="">All Roles</option>
+                                    <option value="Administrator" selected="@(Model.RoleFilter == "Administrator")">SuperAdmin</option>
+                                    <option value="Admin" selected="@(Model.RoleFilter == "Admin")">Admin</option>
+                                    <option value="Standard" selected="@(Model.RoleFilter == "Standard")">Standard User</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="separator-spacing"></div>
+
     <!-- Users List Section -->
     <div class="admin-users-list-section">
         <div class="admin-card">
@@ -70,14 +116,124 @@
                 </h3>
             </div>
             <div class="admin-card-body">
-                <div id="usersListContainer">
-                    <div class="text-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Loading users...</p>
+                @if (Model.Users.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table admin-table">
+                            <thead class="admin-table-header">
+                                <tr>
+                                    <th>User Information</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Registration Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model.Users)
+                                {
+                                    <tr class="admin-table-row">
+                                        <td>
+                                            <div class="user-info">
+                                                <div class="user-avatar">
+                                                    @(user.Name?.Substring(0, 1) ?? "")@(user.Surname?.Substring(0, 1) ?? "")
+                                                </div>
+                                                <div>
+                                                    <div class="user-name">@user.Name @user.Surname</div>
+                                                    <small class="text-muted">ID: @user.Id</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@user.Email</td>
+                                        <td>
+                                            @if (user.UserRoles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
+                                            {
+                                                <span class="admin-badge-admin">
+                                                    <i class="fas fa-crown"></i> SuperAdmin
+                                                </span>
+                                            }
+                                            else if (user.UserRoles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
+                                            {
+                                                <span class="admin-badge-admin">
+                                                    <i class="fas fa-user-shield"></i> Admin
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="admin-badge-user">
+                                                    <i class="fas fa-user"></i> Standard User
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>@user.RegisteredDate.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <div class="admin-action-buttons">
+                                                <a asp-page="Details" asp-route-id="@user.Id" class="admin-btn-details" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a asp-page="Edit" asp-route-id="@user.Id" class="admin-btn-edit" title="Edit User">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                @if (!user.UserRoles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
+                                                {
+                                                    <a asp-page="Delete" asp-route-id="@user.Id" class="admin-btn-delete" title="Delete User">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                </div>
+
+                    <!-- Pagination -->
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav aria-label="User pagination" class="admin-pagination">
+                            <ul class="pagination justify-content-center">
+                                @if (Model.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-page="Index" asp-route-CurrentPage="@(Model.CurrentPage - 1)" asp-route-SearchString="@Model.SearchString" asp-route-RoleFilter="@Model.RoleFilter">
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-page="Index" asp-route-CurrentPage="@i" asp-route-SearchString="@Model.SearchString" asp-route-RoleFilter="@Model.RoleFilter">@i</a>
+                                    </li>
+                                }
+
+                                @if (Model.CurrentPage < Model.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-page="Index" asp-route-CurrentPage="@(Model.CurrentPage + 1)" asp-route-SearchString="@Model.SearchString" asp-route-RoleFilter="@Model.RoleFilter">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                }
+                else
+                {
+                    <div class="admin-no-data">
+                        <i class="fas fa-users"></i>
+                        <p>No users found matching your search criteria.</p>
+                        @if (!string.IsNullOrEmpty(Model.SearchString) || !string.IsNullOrEmpty(Model.RoleFilter))
+                        {
+                            <a asp-page="Index" class="btn btn-primary">
+                                <i class="fas fa-times"></i> Clear Filters
+                            </a>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -694,72 +850,103 @@
         .search-button:focus {
             outline: none;
         }
+        
+        /* Form styling for search inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #522B5B;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: #522B5B;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #522B5B;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(82, 43, 91, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: #522B5B;
+            border-color: #522B5B;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #854F6C;
+            border-color: #854F6C;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary:focus {
+            box-shadow: 0 0 0 3px rgba(82, 43, 91, 0.3);
+        }
+        
+        /* Admin search section styling */
+        .admin-search-section {
+            margin: 30px 0;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .admin-search-form {
+            width: 100%;
+        }
+        
+        .admin-search-form .row {
+            margin: 0;
+        }
+        
+        .admin-search-form .col-md-6,
+        .admin-search-form .col-md-4,
+        .admin-search-form .col-md-2 {
+            padding: 0 10px;
+        }
+        
+        /* Responsive adjustments for search form */
+        @@media (max-width: 768px) {
+            .admin-search-form .col-md-6,
+            .admin-search-form .col-md-4,
+            .admin-search-form .col-md-2 {
+                margin-bottom: 15px;
+            }
+            
+            .form-control {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+            
+            .btn-primary {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
     </style>
 }
 
 @section Scripts {
     <script src="~/js/javascript.js"></script>
-    <script>
-      // Auto-load users list when page loads
-      document.addEventListener('DOMContentLoaded', function() {
-        loadUsersList();
-      });
-
-      async function loadUsersList() {
-        console.log('Loading users list...');
-        
-        const container = document.getElementById('usersListContainer');
-        
-        try {
-          const url = `?handler=UsersJson`;
-          console.log('Fetching from URL:', url);
-          
-          const resp = await fetch(url);
-          console.log('Response status:', resp.status);
-          
-          if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
-          }
-          
-          const data = await resp.json();
-          console.log('Received data:', data);
-          
-          if (!data || !data.users || data.users.length === 0) {
-            container.innerHTML = `
-              <div class="text-center p-4">
-                <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                <h5>No users found</h5>
-                <p class="text-muted">No users are currently available.</p>
-              </div>`;
-          } else {
-            const items = data.users.map(u => {
-              const roleText = (u.roles||[]).join(', ');
-              const isAdmin = roleText.toLowerCase().includes('admin') || roleText.toLowerCase().includes('administrator');
-              return `
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>${u.name ?? ''} ${u.surname ?? ''}</strong>
-                    <br><small class="text-muted">${u.email ?? ''}</small>
-                  </div>
-                  <span class="badge ${isAdmin ? 'bg-primary' : 'bg-secondary'}">${roleText || 'User'}</span>
-                </div>`;
-            }).join('');
-            container.innerHTML = `
-              <div class="mb-3">
-                <h6 class="fw-bold text-primary">All Users</h6>
-                <p class="text-muted mb-0">Showing ${data.users.length} user(s)</p>
-              </div>
-              <div class="list-group list-group-flush">${items}</div>`;
-          }
-        } catch (e) {
-          console.error('Error loading users list:', e);
-          container.innerHTML = `
-            <div class="text-center p-4">
-              <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-              <h5>Error loading users</h5>
-              <p class="text-muted">${e.message}</p>
-            </div>`;
-        }
-      }
-    </script>
 } 
