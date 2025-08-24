@@ -31,8 +31,5 @@ namespace soft20181_starter.Models
 
         [Phone(ErrorMessage = "Invalid phone number format")]
         public string PhoneNumber { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Role is required")]
-        public string Role { get; set; } = "User"; // Default role is User
     }
 } 

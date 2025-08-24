@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace soft20181_starter.Pages.Admin
 {
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator,Admin")]
     public class IndexModel : PageModel
     {
         private readonly EventAppDbContext _context;
@@ -19,6 +19,8 @@ namespace soft20181_starter.Pages.Admin
         public int TotalEvents { get; set; }
         public int TotalUsers { get; set; }
         public int RecentRegistrations { get; set; }
+        public bool IsSuperAdmin { get; set; } = false;
+        public string CurrentUserRole { get; set; } = string.Empty;
 
         public IndexModel(EventAppDbContext context, UserManager<AppUser> userManager)
         {
@@ -28,6 +30,15 @@ namespace soft20181_starter.Pages.Admin
 
         public async Task OnGetAsync()
         {
+            // Get current user's role
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null)
+            {
+                var userRoles = await _userManager.GetRolesAsync(currentUser);
+                CurrentUserRole = userRoles.FirstOrDefault() ?? "User";
+                IsSuperAdmin = CurrentUserRole.Equals("Administrator", StringComparison.OrdinalIgnoreCase);
+            }
+
             // Get total events
             TotalEvents = await _context.Events.CountAsync();
             

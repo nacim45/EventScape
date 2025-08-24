@@ -70,7 +70,7 @@ namespace soft20181_starter.Pages.Account
                     return Page();
                 }
 
-                // Create the user with all required fields
+                // Create the user with STANDARD USER role (no role selection)
                 var user = new AppUser
                 {
                     UserName = RegisterInput.Email,
@@ -78,7 +78,7 @@ namespace soft20181_starter.Pages.Account
                     Name = RegisterInput.FirstName?.Trim() ?? string.Empty,
                     Surname = RegisterInput.LastName?.Trim() ?? string.Empty,
                     PhoneNumber = RegisterInput.PhoneNumber?.Trim() ?? string.Empty,
-                    Role = RegisterInput.Role ?? "User",
+                    Role = "User", // ALWAYS create standard users
                     RegisteredDate = DateTime.Now,
                     CreatedAt = DateTime.UtcNow,
                     IsActive = true,
@@ -89,25 +89,27 @@ namespace soft20181_starter.Pages.Account
                     SecurityStamp = Guid.NewGuid().ToString()
                 };
 
+                _logger.LogInformation("Creating standard user with role: {Role}", user.Role);
+
                 // Use the UserService for robust user creation
                 var createdUser = await _userService.CreateUserAsync(user, RegisterInput.Password, user.Role);
 
                 if (createdUser != null)
                 {
-                    _logger.LogInformation("User {Email} created successfully with ID: {UserId}", RegisterInput.Email, createdUser.Id);
+                    _logger.LogInformation("Standard user {Email} created successfully with ID: {UserId}", RegisterInput.Email, createdUser.Id);
 
                     // Sign in the user automatically
                     await _signInManager.SignInAsync(createdUser, isPersistent: false);
 
-                    SuccessMessage = "Registration successful! You are now logged in.";
-                    _logger.LogInformation("User {Email} signed in successfully after registration", RegisterInput.Email);
+                    SuccessMessage = "Registration successful! You are now logged in as a standard user.";
+                    _logger.LogInformation("Standard user {Email} signed in successfully after registration", RegisterInput.Email);
 
                     // Redirect to home page or dashboard
                     return RedirectToPage("/Index");
                 }
                 else
                 {
-                    _logger.LogError("Failed to create user {Email}", RegisterInput.Email);
+                    _logger.LogError("Failed to create standard user {Email}", RegisterInput.Email);
                     ErrorMessage = "Registration failed. Please try again.";
                     return Page();
                 }

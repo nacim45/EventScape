@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace soft20181_starter.Pages.Admin.Users
 {
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator,Admin")]
     public class IndexModel : PageModel
     {
         private readonly EventAppDbContext _context;
@@ -79,7 +79,7 @@ namespace soft20181_starter.Pages.Admin.Users
 
                 // Totals before filters
                 TotalUserCount = userWithRoles.Count;
-                AdminCount = userWithRoles.Count(ur => ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)));
+                AdminCount = userWithRoles.Count(ur => ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase) || r.Equals("Admin", StringComparison.OrdinalIgnoreCase)));
                 StandardCount = TotalUserCount - AdminCount;
 
                 // Apply role filter
@@ -91,10 +91,16 @@ namespace soft20181_starter.Pages.Admin.Users
                             .Where(ur => ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
                             .ToList();
                     }
+                    else if (string.Equals(RoleFilter, "Admin", StringComparison.OrdinalIgnoreCase))
+                    {
+                        userWithRoles = userWithRoles
+                            .Where(ur => ur.Roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
+                            .ToList();
+                    }
                     else if (string.Equals(RoleFilter, "Standard", StringComparison.OrdinalIgnoreCase))
                     {
                         userWithRoles = userWithRoles
-                            .Where(ur => !ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
+                            .Where(ur => !ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase) || r.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
                             .ToList();
                     }
                 }
@@ -165,10 +171,16 @@ namespace soft20181_starter.Pages.Admin.Users
                             .Where(ur => ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
                             .ToList();
                     }
+                    else if (string.Equals(roleFilter, "Admin", StringComparison.OrdinalIgnoreCase))
+                    {
+                        userWithRoles = userWithRoles
+                            .Where(ur => ur.Roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
+                            .ToList();
+                    }
                     else if (string.Equals(roleFilter, "Standard", StringComparison.OrdinalIgnoreCase))
                     {
                         userWithRoles = userWithRoles
-                            .Where(ur => !ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase)))
+                            .Where(ur => !ur.Roles.Any(r => r.Equals("Administrator", StringComparison.OrdinalIgnoreCase) || r.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
                             .ToList();
                     }
                 }

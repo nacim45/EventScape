@@ -41,14 +41,41 @@ namespace soft20181_starter.Pages.Admin.Users
         public UserCreateViewModel UserViewModel { get; set; } = new UserCreateViewModel();
 
         public List<string> AvailableRoles { get; set; } = new List<string>();
+        public bool IsSuperAdmin { get; set; } = false;
+        public string CurrentUserRole { get; set; } = string.Empty;
 
         public async Task<IActionResult> OnGetAsync()
         {
-            // Initialize available roles
-            AvailableRoles = new List<string>();
-            foreach (var role in _roleManager.Roles)
+            // Get current user's role
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null)
             {
-                AvailableRoles.Add(role.Name);
+                var userRoles = await _userManager.GetRolesAsync(currentUser);
+                CurrentUserRole = userRoles.FirstOrDefault() ?? "User";
+                IsSuperAdmin = CurrentUserRole.Equals("Administrator", StringComparison.OrdinalIgnoreCase);
+            }
+
+            // Initialize available roles based on current user's role
+            AvailableRoles = new List<string>();
+            
+            if (IsSuperAdmin)
+            {
+                // SuperAdmin can create both Admin and User roles
+                foreach (var role in _roleManager.Roles)
+                {
+                    if (role.Name != null && (role.Name.Equals("Admin", StringComparison.OrdinalIgnoreCase) || 
+                                             role.Name.Equals("User", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        AvailableRoles.Add(role.Name);
+                    }
+                }
+                _logger.LogInformation("SuperAdmin user creating user - available roles: {Roles}", string.Join(", ", AvailableRoles));
+            }
+            else
+            {
+                // Regular Admin can only create User roles
+                AvailableRoles.Add("User");
+                _logger.LogInformation("Admin user creating user - restricted to User role only");
             }
             
             return Page();
@@ -58,11 +85,34 @@ namespace soft20181_starter.Pages.Admin.Users
         {
             _logger.LogInformation("=== USER CREATION STARTED ===");
             
-            // Re-populate available roles in case of validation errors
-            AvailableRoles = new List<string>();
-            foreach (var role in _roleManager.Roles)
+            // Get current user's role
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null)
             {
-                AvailableRoles.Add(role.Name ?? string.Empty);
+                var userRoles = await _userManager.GetRolesAsync(currentUser);
+                CurrentUserRole = userRoles.FirstOrDefault() ?? "User";
+                IsSuperAdmin = CurrentUserRole.Equals("Administrator", StringComparison.OrdinalIgnoreCase);
+            }
+
+            // Initialize available roles based on current user's role
+            AvailableRoles = new List<string>();
+            
+            if (IsSuperAdmin)
+            {
+                // SuperAdmin can create both Admin and User roles
+                foreach (var role in _roleManager.Roles)
+                {
+                    if (role.Name != null && (role.Name.Equals("Admin", StringComparison.OrdinalIgnoreCase) || 
+                                             role.Name.Equals("User", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        AvailableRoles.Add(role.Name);
+                    }
+                }
+            }
+            else
+            {
+                // Regular Admin can only create User roles
+                AvailableRoles.Add("User");
             }
 
             if (!ModelState.IsValid)
@@ -131,6 +181,14 @@ namespace soft20181_starter.Pages.Admin.Users
                     return Page();
                 }
 
+                // ROLE-BASED VALIDATION
+                if (!IsSuperAdmin && !UserViewModel.Role.Equals("User", StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogWarning("Admin user attempted to create user with role {Role} - denied", UserViewModel.Role);
+                    ModelState.AddModelError("UserViewModel.Role", "You can only create standard users. Admin roles can only be assigned by SuperAdmin.");
+                    return Page();
+                }
+
                 // Check if user already exists
                 var existingUser = await _userManager.FindByEmailAsync(UserViewModel.Email.Trim());
                 if (existingUser != null)
@@ -154,7 +212,7 @@ namespace soft20181_starter.Pages.Admin.Users
                         Surname = UserViewModel.Surname.Trim(),
                         PhoneNumber = UserViewModel.PhoneNumber?.Trim() ?? string.Empty,
                         RegisteredDate = DateTime.Now,
-                        Role = string.IsNullOrWhiteSpace(UserViewModel.Role) ? "User" : UserViewModel.Role,
+                        Role = IsSuperAdmin ? UserViewModel.Role : "User", // Force User role for Admin users
                         EmailConfirmed = true,
                         CreatedAt = DateTime.UtcNow,
                         SecurityStamp = Guid.NewGuid().ToString(),
@@ -165,82 +223,83 @@ namespace soft20181_starter.Pages.Admin.Users
                         TimeZone = "UTC"
                     };
 
-                    _logger.LogInformation("Creating user with email: {Email}", user.Email);
+                    _logger.LogInformation("Creating user with email: {Email}, role: {Role}", user.Email, user.Role);
                         
-                        // Execute the INSERT query to AspNetUsers table with form data
-                        var result = await _userManager.CreateAsync(user, UserViewModel.Password);
+                    // Execute the INSERT query to AspNetUsers table with form data
+                    var result = await _userManager.CreateAsync(user, UserViewModel.Password);
                         
-                        if (result.Succeeded)
+                    if (result.Succeeded)
+                    {
+                        _logger.LogInformation("=== USER DATABASE INSERT OPERATION SUCCESSFUL ===");
+                        _logger.LogInformation("Form data inserted into AspNetUsers table:");
+                        _logger.LogInformation("- User ID: {UserId}", user.Id);
+                        _logger.LogInformation("- Name: {Name}", user.Name);
+                        _logger.LogInformation("- Surname: {Surname}", user.Surname);
+                        _logger.LogInformation("- Email: {Email}", user.Email);
+                        _logger.LogInformation("- Phone: {Phone}", user.PhoneNumber);
+                        _logger.LogInformation("- Role: {Role}", user.Role);
+                        _logger.LogInformation("- Created At: {CreatedAt}", user.CreatedAt);
+                        _logger.LogInformation("- Is Active: {IsActive}", user.IsActive);
+                        _logger.LogInformation("- Email Confirmed: {EmailConfirmed}", user.EmailConfirmed);
+                        _logger.LogInformation("- Security Stamp: {SecurityStamp}", user.SecurityStamp);
+                        _logger.LogInformation("INSERT INTO AspNetUsers table completed successfully for user {UserId}", user.Id);
+
+                        // Assign role if specified
+                        if (!string.IsNullOrEmpty(user.Role))
                         {
-                            _logger.LogInformation("=== USER DATABASE INSERT OPERATION SUCCESSFUL ===");
-                            _logger.LogInformation("Form data inserted into AspNetUsers table:");
-                            _logger.LogInformation("- User ID: {UserId}", user.Id);
-                            _logger.LogInformation("- Name: {Name}", user.Name);
-                            _logger.LogInformation("- Surname: {Surname}", user.Surname);
-                            _logger.LogInformation("- Email: {Email}", user.Email);
-                            _logger.LogInformation("- Phone: {Phone}", user.PhoneNumber);
-                            _logger.LogInformation("- Role: {Role}", user.Role);
-                            _logger.LogInformation("- Created At: {CreatedAt}", user.CreatedAt);
-                            _logger.LogInformation("- Is Active: {IsActive}", user.IsActive);
-                            _logger.LogInformation("- Email Confirmed: {EmailConfirmed}", user.EmailConfirmed);
-                            _logger.LogInformation("- Security Stamp: {SecurityStamp}", user.SecurityStamp);
-                            _logger.LogInformation("INSERT INTO AspNetUsers table completed successfully for user {UserId}", user.Id);
-
-                            // Assign role if specified
-                            if (!string.IsNullOrEmpty(UserViewModel.Role))
+                            _logger.LogInformation("Assigning role {Role} to user {UserId}", user.Role, user.Id);
+                            var roleResult = await _userManager.AddToRoleAsync(user, user.Role);
+                            
+                            if (roleResult.Succeeded)
                             {
-                                _logger.LogInformation("Assigning role {Role} to user {UserId}", UserViewModel.Role, user.Id);
-                                var roleResult = await _userManager.AddToRoleAsync(user, UserViewModel.Role);
-                                
-                                if (roleResult.Succeeded)
-                                {
-                                    _logger.LogInformation("Role {Role} assigned successfully to user {UserId}", UserViewModel.Role, user.Id);
-                                }
-                                else
-                                {
-                                    _logger.LogWarning("Failed to assign role {Role} to user {UserId}. Errors: {Errors}", 
-                                        UserViewModel.Role, user.Id, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
-                                    // Don't fail the entire operation if role assignment fails
-                                }
+                                _logger.LogInformation("Role {Role} assigned successfully to user {UserId}", user.Role, user.Id);
                             }
-
-                            // Create audit log using the audit service
-                            try
+                            else
                             {
-                                await _auditService.LogCreateAsync(user);
-                                _logger.LogInformation("Audit log created for user {UserId}", user.Id);
-                            }
-                            catch (Exception auditEx)
-                            {
-                                _logger.LogWarning("Failed to create audit log for user {UserId}: {Error}", user.Id, auditEx.Message);
-                                // Don't fail the entire operation if audit log fails
-                            }
-
-                            // Commit transaction
-                            await transaction.CommitAsync();
-                            _logger.LogInformation("=== USER DATABASE TRANSACTION COMMITTED SUCCESSFULLY ===");
-                            _logger.LogInformation("Database INSERT operations completed successfully:");
-                            _logger.LogInformation("- User record inserted into AspNetUsers table with ID: {UserId}", user.Id);
-                            _logger.LogInformation("- Role assigned to user");
-                            _logger.LogInformation("- Audit log record inserted into AuditLogs table");
-                            _logger.LogInformation("- All form data successfully persisted to database");
-
-                            TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully with ID: {user.Id}. Database INSERT completed.";
-                            _logger.LogInformation("Redirecting to Index page with success message");
-                            return RedirectToPage("/Admin/Users/Index");
-                        }
-                        else
-                        {
-                            // Rollback transaction if user creation failed
-                            await transaction.RollbackAsync();
-                            _logger.LogError("=== USER DATABASE INSERT OPERATION FAILED ===");
-                            _logger.LogError("Failed to execute INSERT INTO AspNetUsers table");
-                            foreach (var error in result.Errors)
-                            {
-                                _logger.LogError("User creation error: {Error}", error.Description);
-                                ModelState.AddModelError(string.Empty, error.Description);
+                                _logger.LogWarning("Failed to assign role {Role} to user {UserId}. Errors: {Errors}", 
+                                    user.Role, user.Id, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+                                // Don't fail the entire operation if role assignment fails
                             }
                         }
+
+                        // Create audit log using the audit service
+                        try
+                        {
+                            await _auditService.LogCreateAsync(user);
+                            _logger.LogInformation("Audit log created for user {UserId}", user.Id);
+                        }
+                        catch (Exception auditEx)
+                        {
+                            _logger.LogWarning("Failed to create audit log for user {UserId}: {Error}", user.Id, auditEx.Message);
+                            // Don't fail the entire operation if audit log fails
+                        }
+
+                        // Commit transaction
+                        await transaction.CommitAsync();
+                        _logger.LogInformation("=== USER DATABASE TRANSACTION COMMITTED SUCCESSFULLY ===");
+                        _logger.LogInformation("Database INSERT operations completed successfully:");
+                        _logger.LogInformation("- User record inserted into AspNetUsers table with ID: {UserId}", user.Id);
+                        _logger.LogInformation("- Role assigned to user");
+                        _logger.LogInformation("- Audit log record inserted into AuditLogs table");
+                        _logger.LogInformation("- All form data successfully persisted to database");
+
+                        var roleMessage = IsSuperAdmin ? $" with role '{user.Role}'" : " as standard user";
+                        TempData["SuccessMessage"] = $"User '{user.Name} {user.Surname}' created successfully{roleMessage} with ID: {user.Id}. Database INSERT completed.";
+                        _logger.LogInformation("Redirecting to Index page with success message");
+                        return RedirectToPage("/Admin/Users/Index");
+                    }
+                    else
+                    {
+                        // Rollback transaction if user creation failed
+                        await transaction.RollbackAsync();
+                        _logger.LogError("=== USER DATABASE INSERT OPERATION FAILED ===");
+                        _logger.LogError("Failed to execute INSERT INTO AspNetUsers table");
+                        foreach (var error in result.Errors)
+                        {
+                            _logger.LogError("User creation error: {Error}", error.Description);
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -287,6 +346,6 @@ namespace soft20181_starter.Pages.Admin.Users
         public string ConfirmPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "User role is required")]
-        public string Role { get; set; } = string.Empty;
+        public string Role { get; set; } = "User";
     }
 } 
