@@ -1,72 +1,143 @@
+# Complete CI/CD Pipeline - Build, Push, and Deploy
+# This pipeline builds the Docker image, pushes to ACR, and deploys to Azure Web App
+
 trigger:
   branches:
     include:
       - main
 
 variables:
-  # Azure Resources
-  acrName: 'EventContainerTest'
+  # Azure Resources (UPDATE THESE WITH YOUR ACTUAL RESOURCE NAMES)
+  acrName: 'eventcontainertest'  # Your ACR name (lowercase)
   imageName: 'nacimeventscape'
-  imageTag: '7'  # Static tag (update manually or use $(Build.BuildId) for dynamic)
+  imageTag: '$(Build.BuildId)'  # Dynamic tag based on build ID
   resourceGroup: 'EventBooking'
   appServiceName: 'EventScape'
 
-  # Docker Configuration (Option 1: Dockerfile in ROOT)
-  dockerfilePath: 'Dockerfile'  # Assumes Dockerfile is in the root of your repo
-  buildContext: '.'             # Build context = root directory
+  # Docker Configuration
+  dockerfilePath: 'Dockerfile'
+  buildContext: '.'
 
-  # Service Connections
-  azureServiceConnection: 'eventbooking'               # ARM service connection
-  acrServiceConnection: 'eventbookingdockerregistry'   # Docker Registry service connection
+  # Service Connections (UPDATE THESE WITH YOUR ACTUAL SERVICE CONNECTION NAMES)
+  azureServiceConnection: 'eventbooking'
+  acrServiceConnection: 'eventbookingdockerregistry'
 
 stages:
 
-### STAGE 1: Build and Push to ACR
+# STAGE 1: Build and Push to ACR
 - stage: BuildAndPush
   displayName: 'Build and Push Docker Image'
   jobs:
     - job: Build
       displayName: 'Build and Push'
       pool:
-        vmImage: 'ubuntu-latest'  # Linux agent (recommended for Docker)
+        vmImage: 'ubuntu-latest'
       steps:
 
-        # ===== DEBUGGING: Verify Repository Structure =====
+        # Verify repository structure
         - script: |
             echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"
             echo "Files in repo root:"
             ls -la $(Build.SourcesDirectory)
-            echo "Checking for Dockerfile at: $(Build.SourcesDirectory)/$(dockerfilePath)"
-            test -f $(Build.SourcesDirectory)/$(dockerfilePath) && echo "✅ Dockerfile FOUND" || echo "❌ Dockerfile MISSING"
-          displayName: 'Debug: Check Dockerfile Exists'
+            echo "Checking for Dockerfile:"
+            if [ -f "$(Build.SourcesDirectory)/$(dockerfilePath)" ]; then
+              echo "✅ Dockerfile FOUND"
+            else
+              echo "❌ Dockerfile MISSING"
+              exit 1
+            fi
+            echo "Checking .csproj files:"
+            find $(Build.SourcesDirectory) -name "*.csproj" -exec echo "Found: {}" \;
+          displayName: 'Verify Repository Structure'
 
-        # ===== Build and Push to ACR =====
+        # Build and push to ACR
         - task: Docker@2
           displayName: 'Build and Push to ACR'
           inputs:
             containerRegistry: $(acrServiceConnection)
             repository: $(imageName)
             command: buildAndPush
-            Dockerfile: $(dockerfilePath)  # Path relative to repo root
-            buildContext: $(buildContext)   # Build from repo root
-            tags: $(imageTag)
+            Dockerfile: $(dockerfilePath)
+            buildContext: $(buildContext)
+            tags: |
+              $(imageTag)
+              latest
 
-### STAGE 2: Deploy to Azure Web App
+        # Output build information
+        - script: |
+            echo "=== BUILD COMPLETED ==="
+            echo "Registry: $(acrName).azurecr.io"
+            echo "Repository: $(imageName)"
+            echo "Tag: $(imageTag)"
+            echo "Full image: $(acrName).azurecr.io/$(imageName):$(imageTag)"
+          displayName: 'Display Build Information'
+
+# STAGE 2: Deploy to Azure Web App
 - stage: Deploy
   displayName: 'Deploy to Azure Web App'
   dependsOn: BuildAndPush
-  condition: succeeded()  # Only deploy if build succeeds
+  condition: succeeded()
   jobs:
     - job: DeployJob
       displayName: 'Deploy Container'
       pool:
         vmImage: 'ubuntu-latest'
       steps:
+        
+        # Validate Azure resources exist
+        - task: AzureCLI@2
+          displayName: 'Validate Azure Resources'
+          inputs:
+            azureSubscription: $(azureServiceConnection)
+            scriptType: bash
+            scriptLocation: inlineScript
+            inlineScript: |
+              echo "Checking if Web App exists..."
+              if az webapp show --name $(appServiceName) --resource-group $(resourceGroup) > /dev/null 2>&1; then
+                echo "✅ Web App '$(appServiceName)' exists"
+              else
+                echo "❌ Web App '$(appServiceName)' not found"
+                exit 1
+              fi
+              
+              echo "Checking if ACR exists..."
+              if az acr show --name $(acrName) --resource-group $(resourceGroup) > /dev/null 2>&1; then
+                echo "✅ ACR '$(acrName)' exists"
+              else
+                echo "❌ ACR '$(acrName)' not found"
+                exit 1
+              fi
+
+        # Deploy container to Web App
         - task: AzureWebAppContainer@1
-          displayName: 'Update Web App Container'
+          displayName: 'Deploy Container to Web App'
           inputs:
             azureSubscription: $(azureServiceConnection)
             appName: $(appServiceName)
             containers: $(acrName).azurecr.io/$(imageName):$(imageTag)
             appSettings: |
-              -DOCKER_ENABLE_CI true  # Force Azure to pull the latest image
+              -DOCKER_ENABLE_CI true
+              -ASPNETCORE_ENVIRONMENT Production
+              -WEBSITES_PORT 8080
+
+        # Verify deployment
+        - task: AzureCLI@2
+          displayName: 'Verify Deployment'
+          inputs:
+            azureSubscription: $(azureServiceConnection)
+            scriptType: bash
+            scriptLocation: inlineScript
+            inlineScript: |
+              echo "=== DEPLOYMENT COMPLETED ==="
+              echo "App Service: $(appServiceName)"
+              echo "Resource Group: $(resourceGroup)"
+              echo "Container Image: $(acrName).azurecr.io/$(imageName):$(imageTag)"
+              
+              # Get app URL
+              appUrl=$(az webapp show --name $(appServiceName) --resource-group $(resourceGroup) --query defaultHostName -o tsv)
+              echo "App URL: https://$appUrl"
+              
+              # Restart the app to ensure new container is loaded
+              echo "Restarting web app to load new container..."
+              az webapp restart --name $(appServiceName) --resource-group $(resourceGroup)
+              echo "Deployment verification completed!"

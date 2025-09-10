@@ -1,80 +1,132 @@
+# Standalone Deployment Pipeline
+# This pipeline deploys the latest image from ACR to Azure Web App
+
 trigger: none
 
 resources:
   pipelines:
   - pipeline: build_pipeline
-    source: "nacim45.EventScape (10)"
+    source: "nacim45.EventScape (10)"  # UPDATE: Set this to your actual build pipeline name
     trigger: true
 
 variables:
-  acrName: 'eventbookingcontainer'
+  # Azure Resources (UPDATE THESE WITH YOUR ACTUAL RESOURCE NAMES)
+  acrName: 'eventcontainertest'  # Your ACR name (lowercase)
   imageName: 'nacimeventscape'
   resourceGroup: 'EventBooking'
-  appServiceName: 'EventScapeApp'
-  azureServiceConnection: 'eventbooking'
+  appServiceName: 'EventScape'  # Your App Service name
+  azureServiceConnection: 'eventbooking'  # Your Azure service connection
 
 stages:
 - stage: Deploy
-  displayName: Deploy to Web App
+  displayName: Deploy Latest Image to Web App
   jobs:
   - job: Deploy
-    displayName: Update Web App Container
+    displayName: Deploy Container
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    # Step 1: Verify all resources exist
+    
+    # Validate Azure resources exist
     - task: AzureCLI@2
-      displayName: Validate Azure Resources
+      displayName: 'Validate Azure Resources'
       inputs:
         azureSubscription: $(azureServiceConnection)
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          echo "=== DEPLOYMENT VALIDATION ==="
+          
           echo "Checking Web App exists..."
-          az webapp show --name $(appServiceName) --resource-group $(resourceGroup)
+          if az webapp show --name $(appServiceName) --resource-group $(resourceGroup) > /dev/null 2>&1; then
+            echo "✅ Web App '$(appServiceName)' found"
+          else
+            echo "❌ Web App '$(appServiceName)' not found in resource group '$(resourceGroup)'"
+            exit 1
+          fi
           
           echo "Checking ACR exists..."
-          az acr show --name $(acrName) --resource-group $(resourceGroup)
+          if az acr show --name $(acrName) --resource-group $(resourceGroup) > /dev/null 2>&1; then
+            echo "✅ ACR '$(acrName)' found"
+          else
+            echo "❌ ACR '$(acrName)' not found in resource group '$(resourceGroup)'"
+            exit 1
+          fi
           
-          echo "Checking image exists..."
-          az acr repository show --name $(acrName) --repository $(imageName)
+          echo "Checking image repository exists..."
+          if az acr repository show --name $(acrName) --repository $(imageName) > /dev/null 2>&1; then
+            echo "✅ Image repository '$(imageName)' found in ACR"
+          else
+            echo "❌ Image repository '$(imageName)' not found in ACR '$(acrName)'"
+            exit 1
+          fi
 
-    # Step 2: Get the latest image tag
-    - bash: |
-        latestTag=$(az acr repository show-tags \
-          --name $(acrName) \
-          --repository $(imageName) \
-          --orderby time_desc \
-          --query '[0]' \
-          --output tsv)
-        echo "##vso[task.setvariable variable=imageTag]$latestTag"
-        echo "Using tag: $latestTag"
-      displayName: Get Latest ACR Image Tag
-
-    # Step 3: Deploy using Azure CLI (more reliable than AzureWebAppContainer)
+    # Get the latest image tag
     - task: AzureCLI@2
-      displayName: Deploy Container to Web App
+      displayName: 'Get Latest Image Tag'
       inputs:
         azureSubscription: $(azureServiceConnection)
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          # First update container configuration
+          echo "Getting latest image tag from ACR..."
+          latestTag=$(az acr repository show-tags \
+            --name $(acrName) \
+            --repository $(imageName) \
+            --orderby time_desc \
+            --query '[0]' \
+            --output tsv)
+          
+          if [ -z "$latestTag" ]; then
+            echo "❌ No tags found for image '$(imageName)' in ACR '$(acrName)'"
+            exit 1
+          fi
+          
+          echo "##vso[task.setvariable variable=imageTag]$latestTag"
+          echo "✅ Latest tag found: $latestTag"
+          echo "Full image name: $(acrName).azurecr.io/$(imageName):$latestTag"
+
+    # Deploy container using Azure CLI
+    - task: AzureCLI@2
+      displayName: 'Deploy Container to Web App'
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "=== DEPLOYING CONTAINER ==="
+          echo "Image: $(acrName).azurecr.io/$(imageName):$(imageTag)"
+          echo "Target: $(appServiceName) in $(resourceGroup)"
+          
+          # Update container configuration
           echo "Updating container settings..."
           az webapp config container set \
             --name $(appServiceName) \
             --resource-group $(resourceGroup) \
             --docker-custom-image-name $(acrName).azurecr.io/$(imageName):$(imageTag) \
-            --docker-registry-server-url https://$(acrName).azurecr.io
+            --docker-registry-server-url https://$(acrName).azurecr.io \
+            --docker-registry-server-user $(acrName) \
+            --docker-registry-server-password $(az acr credential show --name $(acrName) --query passwords[0].value -o tsv)
           
-          # Then update app settings separately
+          # Update application settings
           echo "Updating application settings..."
           az webapp config appsettings set \
             --name $(appServiceName) \
             --resource-group $(resourceGroup) \
-            --settings DOCKER_ENABLE_CI=true
+            --settings \
+              DOCKER_ENABLE_CI=true \
+              ASPNETCORE_ENVIRONMENT=Production \
+              WEBSITES_PORT=8080 \
+              ASPNETCORE_URLS=http://+:8080
           
-          # Force restart
-          echo "Restarting web app..."
+          # Restart web app to apply changes
+          echo "Restarting web app to apply changes..."
           az webapp restart --name $(appServiceName) --resource-group $(resourceGroup)
-          echo "Deployment completed successfully!"
+          
+          # Get app URL
+          appUrl=$(az webapp show --name $(appServiceName) --resource-group $(resourceGroup) --query defaultHostName -o tsv)
+          
+          echo "=== DEPLOYMENT COMPLETED ==="
+          echo "✅ Container deployed successfully!"
+          echo "🌐 App URL: https://$appUrl"
+          echo "📊 Image: $(acrName).azurecr.io/$(imageName):$(imageTag)"

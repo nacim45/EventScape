@@ -1,29 +1,70 @@
-# Docker
-# Build a Docker image
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+# ASP.NET Core - Build and Test Pipeline
+# Builds the .NET application and runs tests
 
 trigger:
-- main
+  branches:
+    include:
+    - main
 
 resources:
 - repo: self
 
 variables:
-  tag: '$(Build.BuildId)'
+  buildConfiguration: 'Release'
 
 stages:
 - stage: Build
-  displayName: Build image
+  displayName: Build and Test
   jobs:
   - job: Build
-    displayName: Build
+    displayName: Build .NET Application
     pool:
       vmImage: ubuntu-latest
     steps:
-    - task: Docker@2
-      displayName: Build an image
+    
+    # Install .NET SDK
+    - task: UseDotNet@2
+      displayName: 'Use .NET 8.0 SDK'
       inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/dockerfile.yml'
-        tags: |
-          $(tag)
+        packageType: 'sdk'
+        version: '8.0.x'
+    
+    # Restore dependencies
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore NuGet packages'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+    
+    # Build the application
+    - task: DotNetCoreCLI@2
+      displayName: 'Build application'
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+    
+    # Run tests (if you have any)
+    - task: DotNetCoreCLI@2
+      displayName: 'Run tests'
+      inputs:
+        command: 'test'
+        projects: '**/*Tests.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-build --verbosity normal'
+      continueOnError: true  # Continue even if no test projects found
+    
+    # Publish the application
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish application'
+      inputs:
+        command: 'publish'
+        projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) --no-build'
+    
+    # Publish build artifacts
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'

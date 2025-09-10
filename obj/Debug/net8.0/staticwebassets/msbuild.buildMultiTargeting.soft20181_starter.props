@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/soft20181_starter.props" />
-</Project>

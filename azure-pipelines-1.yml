@@ -1,35 +1,49 @@
-# Docker
-# Build and push an image to Azure Container Registry
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+# Docker Build and Push to Azure Container Registry
+# This pipeline builds a Docker image and pushes it to ACR
 
 trigger:
-- main
+  branches:
+    include:
+    - main
 
 resources:
 - repo: self
 
 variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '0cd9c5eb-75a8-4b7d-97c5-a719ac7c1944'
+  # Container registry service connection (UPDATE THIS WITH YOUR ACTUAL SERVICE CONNECTION NAME)
+  dockerRegistryServiceConnection: 'eventbookingdockerregistry'
   imageRepository: 'nacimeventscape'
   containerRegistry: 'eventcontainertest.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/dockerfile.yml'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
-
-  # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 stages:
 - stage: Build
-  displayName: Build and push stage
+  displayName: Build and Push Docker Image
   jobs:
   - job: Build
-    displayName: Build
+    displayName: Build and Push
     pool:
       vmImage: $(vmImageName)
     steps:
+    
+    # Debug: Show repository structure
+    - script: |
+        echo "Repository structure:"
+        ls -la $(Build.SourcesDirectory)
+        echo "Checking for Dockerfile:"
+        if [ -f "$(Build.SourcesDirectory)/Dockerfile" ]; then
+          echo "✅ Dockerfile found"
+        else
+          echo "❌ Dockerfile not found"
+          exit 1
+        fi
+      displayName: 'Verify Dockerfile exists'
+    
+    # Build and push Docker image
     - task: Docker@2
-      displayName: Build and push an image to container registry
+      displayName: 'Build and push Docker image to ACR'
       inputs:
         command: buildAndPush
         repository: $(imageRepository)
@@ -37,3 +51,13 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+          latest
+    
+    # Output image information
+    - script: |
+        echo "Image built and pushed:"
+        echo "Registry: $(containerRegistry)"
+        echo "Repository: $(imageRepository)"
+        echo "Tag: $(tag)"
+        echo "Full image name: $(containerRegistry)/$(imageRepository):$(tag)"
+      displayName: 'Display image information'
