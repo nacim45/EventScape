@@ -1,5 +1,6 @@
-# Simple Build Only Pipeline (No ACR Push)
-# This pipeline builds the Docker image without pushing to avoid authentication issues
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
 - main
@@ -8,51 +9,31 @@ resources:
 - repo: self
 
 variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '0cd9c5eb-75a8-4b7d-97c5-a719ac7c1944'
+  imageRepository: 'nacimeventscape'
+  containerRegistry: 'eventcontainertest.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
+
+  # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 stages:
 - stage: Build
-  displayName: Build Docker Image Only
+  displayName: Build and push stage
   jobs:
   - job: Build
-    displayName: Build Image
+    displayName: Build
     pool:
       vmImage: $(vmImageName)
     steps:
-    
-    # Verify repository structure
-    - script: |
-        echo "=== PIPELINE 3 - BUILD ONLY (NO PUSH) ==="
-        echo "Checking repository structure:"
-        ls -la $(Build.SourcesDirectory)
-        echo "Verifying Dockerfile exists:"
-        if [ -f "$(Build.SourcesDirectory)/Dockerfile" ]; then
-          echo "✅ Dockerfile found"
-        else
-          echo "❌ Dockerfile missing"
-          exit 1
-        fi
-        echo "Build tag: $(tag)"
-      displayName: 'Verify Build Environment'
-    
-    # Build Docker image (no push, no authentication needed)
     - task: Docker@2
-      displayName: 'Build Docker Image'
+      displayName: Build and push an image to container registry
       inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
-          nacimeventscape:$(tag)
-          nacimeventscape:latest
-    
-    # Display build information
-    - script: |
-        echo "=== BUILD COMPLETED SUCCESSFULLY ==="
-        echo "✅ Docker image built successfully"
-        echo "📦 Image: nacimeventscape:$(tag)"
-        echo "📦 Latest: nacimeventscape:latest"
-        echo "🎯 No authentication issues - build only pipeline"
-        echo ""
-        echo "To push to ACR, use pipeline 1 or 2 which have working authentication"
-      displayName: 'Build Success Information'
+          $(tag)
