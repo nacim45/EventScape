@@ -9,12 +9,14 @@ resources:
 - repo: self
 
 variables:
-  # Using the exact same service connection as your working pipeline 2
-  acrServiceConnection: 'eventbookingdockerregistry'
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '508806cd-03c5-4ad7-b992-bf11804a901a'
   imageRepository: 'nacimeventscape'
-  containerRegistry: 'eventcontainertest.azurecr.io'
+  containerRegistry: 'eventbookingcontainer.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
+
+  # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 stages:
@@ -26,26 +28,12 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    
-    # Diagnostic step
-    - script: |
-        echo "=== PIPELINE 3 DIAGNOSTICS ==="
-        echo "Service Connection: $(acrServiceConnection)"
-        echo "Registry: $(containerRegistry)"
-        echo "Repository: $(imageRepository)"
-        echo "Tag: $(tag)"
-        echo "Dockerfile path: $(dockerfilePath)"
-        ls -la $(Build.SourcesDirectory)/Dockerfile
-      displayName: 'Diagnostic Information'
-    
-    # Try with the same configuration as pipeline 2
     - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
         command: buildAndPush
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
-        containerRegistry: $(acrServiceConnection)
+        containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-          latest
