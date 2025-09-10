@@ -9,7 +9,7 @@ resources:
 
 variables:
   # Container registry service connection (UPDATE THIS WITH YOUR ACTUAL SERVICE CONNECTION)
-  dockerRegistryServiceConnection: 'eventbookingdockerregistry'
+  dockerRegistryServiceConnection: 'b57e88d6-e63b-4883-8c46-f1a7507ea729'  # Alternative service connection ID
   imageRepository: 'nacimeventscape'
   containerRegistry: 'eventbookingcontainer.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
