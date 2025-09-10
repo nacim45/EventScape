@@ -2,8 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
  
-# Copier la solution et le .csproj
-COPY *.sln ./
+# Copier le .csproj
 COPY soft20181_starter.csproj ./
  
 # Restaurer les dépendances
