@@ -1,6 +1,5 @@
-# Docker
-# Build and push an image to Azure Container Registry
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+# Docker Build and Push with Enhanced Authentication
+# Build and push an image to Azure Container Registry with proper authentication
 
 trigger:
 - main
@@ -9,27 +8,44 @@ resources:
 - repo: self
 
 variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '508806cd-03c5-4ad7-b992-bf11804a901a'
+  # Container registry configuration (UPDATE WITH YOUR ACTUAL VALUES)
+  dockerRegistryServiceConnection: 'eventbookingdockerregistry'  # UPDATE: Use your actual service connection name
   imageRepository: 'nacimeventscape'
   containerRegistry: 'eventbookingcontainer.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/dockerfile.yml'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: 'EventScape'
-
-  # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 stages:
 - stage: Build
-  displayName: Build and push stage
+  displayName: Build and Push with Authentication
   jobs:
   - job: Build
-    displayName: Build
+    displayName: Build and Push
     pool:
       vmImage: $(vmImageName)
     steps:
+    
+    # Verify repository structure and Dockerfile
+    - script: |
+        echo "=== PIPELINE 4 - ACR BUILD WITH AUTHENTICATION ==="
+        echo "Checking repository structure:"
+        ls -la $(Build.SourcesDirectory)
+        echo "Verifying Dockerfile exists:"
+        if [ -f "$(Build.SourcesDirectory)/Dockerfile" ]; then
+          echo "✅ Dockerfile found"
+        else
+          echo "❌ Dockerfile missing"
+          exit 1
+        fi
+        echo "Target registry: $(containerRegistry)"
+        echo "Image repository: $(imageRepository)"
+        echo "Build tag: $(tag)"
+      displayName: 'Verify Build Environment'
+    
+    # Build and push with enhanced error handling
     - task: Docker@2
-      displayName: Build and push an image to container registry
+      displayName: 'Build and Push to ACR with Authentication'
       inputs:
         command: buildAndPush
         repository: $(imageRepository)
@@ -37,3 +53,14 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+          latest
+      continueOnError: false
+    
+    # Display success information
+    - script: |
+        echo "=== BUILD AND PUSH SUCCESSFUL ==="
+        echo "Image pushed to: $(containerRegistry)/$(imageRepository):$(tag)"
+        echo "Latest tag also created: $(containerRegistry)/$(imageRepository):latest"
+        echo "Image is ready for deployment"
+      displayName: 'Build Success Information'
+      condition: succeeded()
