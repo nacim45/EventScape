@@ -1,0 +1,57 @@
+# Alternative Pipeline 3 - Using Azure CLI (No Docker Registry Service Connection)
+# This bypasses Docker service connection issues entirely
+
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  acrName: 'eventcontainertest'
+  imageRepository: 'nacimeventscape'
+  tag: '$(Build.BuildId)'
+  vmImageName: 'ubuntu-latest'
+  azureServiceConnection: 'eventbooking'  # Same as deploy-webapp.yml
+
+stages:
+- stage: Build
+  displayName: Build and push stage using Azure CLI
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    
+    # Build Docker image locally
+    - task: Docker@2
+      displayName: 'Build Docker Image'
+      inputs:
+        command: build
+        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+        tags: |
+          $(acrName).azurecr.io/$(imageRepository):$(tag)
+          $(acrName).azurecr.io/$(imageRepository):latest
+    
+    # Push using Azure CLI (same method as deploy-webapp.yml)
+    - task: AzureCLI@2
+      displayName: 'Push to ACR using Azure CLI'
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "=== AZURE CLI PUSH ==="
+          echo "ACR: $(acrName)"
+          echo "Repository: $(imageRepository)"
+          echo "Tag: $(tag)"
+          
+          # Login to ACR
+          az acr login --name $(acrName)
+          
+          # Push images
+          docker push $(acrName).azurecr.io/$(imageRepository):$(tag)
+          docker push $(acrName).azurecr.io/$(imageRepository):latest
+          
+          echo "✅ Push completed successfully!"
