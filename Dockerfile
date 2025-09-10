@@ -1,36 +1,37 @@
 # Stage 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
-
-# Copy csproj file first for better Docker layer caching
-COPY *.csproj ./
-
-# Restore dependencies
+ 
+# Copier la solution et le .csproj
+COPY *.sln ./
+COPY soft20181_starter.csproj ./
+ 
+# Restaurer les dépendances
 RUN dotnet restore
-
-# Copy everything else and build
+ 
+# Copier le reste des fichiers (nettoyé grâce à .dockerignore)
 COPY . ./
-
-# Publish the application
+ 
+# Publier l'application
 RUN dotnet publish -c Release -o /out --no-restore
-
+ 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-
-# Create non-root user for security
+ 
+# Créer un utilisateur non-root pour exécuter l'application
 RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
 USER appuser
-
-# Copy the published app from build stage
+ 
+# Copier les fichiers compilés depuis l'étape build
 COPY --from=build /out ./
-
-# Expose port
-EXPOSE 8080
-
-# Set environment variables for ASP.NET Core
-ENV ASPNETCORE_URLS=http://+:8080
+ 
+# Exposer le port HTTP
+EXPOSE 80
+ 
+# Variables d'environnement pour ASP.NET
+ENV ASPNETCORE_URLS=http://+:80
 ENV ASPNETCORE_ENVIRONMENT=Production
-
-# Entry point
+ 
+# Point d'entrée de l'application
 ENTRYPOINT ["dotnet", "soft20181_starter.dll"]
