@@ -52,24 +52,51 @@ stages:
         echo "This should match your Azure DevOps service connection configuration"
       displayName: 'Pre-build Service Connection Check'
 
-    # Build and push to alternative ACR with enhanced error handling
+    # Build Docker image locally first
     - task: Docker@2
-      displayName: 'Build and push to alternative ACR'
+      displayName: 'Build Docker Image'
       inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
+        command: build
         dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
-          $(tag)
-          latest
+          $(containerRegistry)/$(imageRepository):$(tag)
+          $(containerRegistry)/$(imageRepository):latest
+    
+    # Use Azure CLI to push to ACR (more reliable authentication)
+    - task: AzureCLI@2
+      displayName: 'Push to ACR using Azure CLI'
+      inputs:
+        azureSubscription: 'eventbooking'  # Use your ARM service connection
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "=== AZURE CLI ACR PUSH ==="
+          
+          # Extract ACR name from registry URL
+          ACR_NAME=$(echo "$(containerRegistry)" | cut -d'.' -f1)
+          echo "ACR Name: $ACR_NAME"
+          echo "Full Registry: $(containerRegistry)"
+          
+          # Login to ACR using Azure CLI (more reliable than Docker login)
+          echo "Logging into ACR..."
+          az acr login --name $ACR_NAME
+          
+          # Push the images
+          echo "Pushing image with tag: $(tag)"
+          docker push $(containerRegistry)/$(imageRepository):$(tag)
+          
+          echo "Pushing image with latest tag"
+          docker push $(containerRegistry)/$(imageRepository):latest
+          
+          echo "✅ Push completed successfully!"
       continueOnError: false
-      retryCountOnTaskFailure: 1
     
     # Display success information
     - script: |
-        echo "=== BUILD SUCCESSFUL ==="
-        echo "Image pushed to: $(containerRegistry)/$(imageRepository):$(tag)"
-        echo "Latest tag also created: $(containerRegistry)/$(imageRepository):latest"
-        echo "You can now use this image for deployment"
-      displayName: 'Build Success Information'
+        echo "=== BUILD AND PUSH SUCCESSFUL ==="
+        echo "✅ Docker image built successfully"
+        echo "✅ Image pushed to: $(containerRegistry)/$(imageRepository):$(tag)"
+        echo "✅ Latest tag also created: $(containerRegistry)/$(imageRepository):latest"
+        echo "🚀 Image is ready for deployment using Azure CLI authentication"
+      displayName: 'Build and Push Success Information'
+      condition: succeeded()
