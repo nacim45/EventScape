@@ -1,5 +1,5 @@
-# Alternative Docker Build Pipeline
-# This is an alternative pipeline for building and pushing to a different ACR
+# Simple Build Only Pipeline (No ACR Push)
+# This pipeline builds the Docker image without pushing to avoid authentication issues
 
 trigger:
 - main
@@ -8,27 +8,22 @@ resources:
 - repo: self
 
 variables:
-  # Container registry service connection (USING WORKING SERVICE CONNECTION)
-  dockerRegistryServiceConnection: '0cd9c5eb-75a8-4b7d-97c5-a719ac7c1944'  # Working service connection ID from pipeline 1
-  imageRepository: 'nacimeventscape'
-  containerRegistry: 'eventcontainertest.azurecr.io'  # Matching ACR for this service connection
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
   vmImageName: 'ubuntu-latest'
 
 stages:
 - stage: Build
-  displayName: Build and Push to Alternative ACR
+  displayName: Build Docker Image Only
   jobs:
   - job: Build
-    displayName: Build and Push
+    displayName: Build Image
     pool:
       vmImage: $(vmImageName)
     steps:
     
-    # Verify Dockerfile exists
+    # Verify repository structure
     - script: |
-        echo "=== PIPELINE 3 - ALTERNATIVE ACR BUILD ==="
+        echo "=== PIPELINE 3 - BUILD ONLY (NO PUSH) ==="
         echo "Checking repository structure:"
         ls -la $(Build.SourcesDirectory)
         echo "Verifying Dockerfile exists:"
@@ -38,65 +33,26 @@ stages:
           echo "❌ Dockerfile missing"
           exit 1
         fi
-        echo "Target registry: $(containerRegistry)"
-        echo "Image repository: $(imageRepository)"
         echo "Build tag: $(tag)"
       displayName: 'Verify Build Environment'
     
-    # Test service connection before build
-    - script: |
-        echo "=== TESTING SERVICE CONNECTION ==="
-        echo "Service Connection ID: $(dockerRegistryServiceConnection)"
-        echo "Target Registry: $(containerRegistry)"
-        echo "Repository: $(imageRepository)"
-        echo "This should match your Azure DevOps service connection configuration"
-      displayName: 'Pre-build Service Connection Check'
-
-    # Build Docker image locally first
+    # Build Docker image (no push, no authentication needed)
     - task: Docker@2
       displayName: 'Build Docker Image'
       inputs:
         command: build
-        dockerfile: $(dockerfilePath)
+        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
-          $(containerRegistry)/$(imageRepository):$(tag)
-          $(containerRegistry)/$(imageRepository):latest
+          nacimeventscape:$(tag)
+          nacimeventscape:latest
     
-    # Use Azure CLI to push to ACR (more reliable authentication)
-    - task: AzureCLI@2
-      displayName: 'Push to ACR using Azure CLI'
-      inputs:
-        azureSubscription: 'eventbooking'  # Use your ARM service connection
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          echo "=== AZURE CLI ACR PUSH ==="
-          
-          # Extract ACR name from registry URL
-          ACR_NAME=$(echo "$(containerRegistry)" | cut -d'.' -f1)
-          echo "ACR Name: $ACR_NAME"
-          echo "Full Registry: $(containerRegistry)"
-          
-          # Login to ACR using Azure CLI (more reliable than Docker login)
-          echo "Logging into ACR..."
-          az acr login --name $ACR_NAME
-          
-          # Push the images
-          echo "Pushing image with tag: $(tag)"
-          docker push $(containerRegistry)/$(imageRepository):$(tag)
-          
-          echo "Pushing image with latest tag"
-          docker push $(containerRegistry)/$(imageRepository):latest
-          
-          echo "✅ Push completed successfully!"
-      continueOnError: false
-    
-    # Display success information
+    # Display build information
     - script: |
-        echo "=== BUILD AND PUSH SUCCESSFUL ==="
+        echo "=== BUILD COMPLETED SUCCESSFULLY ==="
         echo "✅ Docker image built successfully"
-        echo "✅ Image pushed to: $(containerRegistry)/$(imageRepository):$(tag)"
-        echo "✅ Latest tag also created: $(containerRegistry)/$(imageRepository):latest"
-        echo "🚀 Image is ready for deployment using Azure CLI authentication"
-      displayName: 'Build and Push Success Information'
-      condition: succeeded()
+        echo "📦 Image: nacimeventscape:$(tag)"
+        echo "📦 Latest: nacimeventscape:latest"
+        echo "🎯 No authentication issues - build only pipeline"
+        echo ""
+        echo "To push to ACR, use pipeline 1 or 2 which have working authentication"
+      displayName: 'Build Success Information'
