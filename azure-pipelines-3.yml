@@ -10,9 +10,9 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: 'b57e88d6-e63b-4883-8c46-f1a7507ea729'
+  dockerRegistryServiceConnection: '0cd9c5eb-75a8-4b7d-97c5-a719ac7c1944'
   imageRepository: 'nacimeventscape'
-  containerRegistry: 'eventbookingcontainer.azurecr.io'
+  containerRegistry: 'eventcontainertest.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
 
