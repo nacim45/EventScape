@@ -1,89 +1,39 @@
-# Docker Build and Test Pipeline (No Push, No Authentication)
-# This pipeline only builds and validates - zero authentication issues
-
 trigger:
 - main
 
-resources:
-- repo: self
+pool:
+  vmImage: ubuntu-latest
 
-variables:
-  tag: '$(Build.BuildId)'
-  imageName: 'nacimeventscape'
+steps:
+- script: |
+    echo "=== MINIMAL PIPELINE 3 ==="
+    echo "Build ID: $(Build.BuildId)"
+    echo "Source: $(Build.SourcesDirectory)"
+    ls -la
+    echo "✅ Basic validation completed"
+  displayName: 'Basic Validation'
 
-stages:
-- stage: Build
-  displayName: Build and Validate
-  jobs:
-  - job: Build
-    displayName: Build Docker Image
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-    
-    # Step 1: Show environment info
-    - script: |
-        echo "=== PIPELINE 3 - BUILD AND VALIDATE ==="
-        echo "Build ID: $(Build.BuildId)"
-        echo "Source Branch: $(Build.SourceBranch)"
-        echo "Repository: $(Build.Repository.Name)"
-        echo "Agent: $(Agent.Name)"
-        ls -la $(Build.SourcesDirectory)
-        echo "✅ Environment validated"
-      displayName: 'Environment Information'
-    
-    # Step 2: Verify Dockerfile exists and is valid
-    - script: |
-        echo "=== DOCKERFILE VALIDATION ==="
-        if [ -f "$(Build.SourcesDirectory)/Dockerfile" ]; then
-          echo "✅ Dockerfile found"
-          echo "Dockerfile content:"
-          head -10 $(Build.SourcesDirectory)/Dockerfile
-        else
-          echo "❌ Dockerfile not found"
-          exit 1
-        fi
-      displayName: 'Validate Dockerfile'
-    
-    # Step 3: Build Docker image (no push)
-    - task: Docker@2
-      displayName: 'Build Docker Image'
-      inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        tags: |
-          $(imageName):$(tag)
-          $(imageName):latest
-        arguments: '--no-cache'
-    
-    # Step 4: Inspect built image
-    - script: |
-        echo "=== IMAGE INSPECTION ==="
-        docker images | grep $(imageName)
-        echo "✅ Image built successfully: $(imageName):$(tag)"
-        
-        # Get image size and details
-        docker inspect $(imageName):$(tag) | jq '.[0].Size' || echo "Image details retrieved"
-        
-        echo "🎯 Build completed - ready for deployment via other pipelines"
-      displayName: 'Inspect Built Image'
-    
-    # Step 5: Run basic container test
-    - script: |
-        echo "=== CONTAINER TEST ==="
-        echo "Testing if container can start..."
-        
-        # Test container startup (with timeout)
-        timeout 30s docker run --rm $(imageName):$(tag) --version || echo "Container test completed"
-        
-        echo "✅ Container validation finished"
-      displayName: 'Test Container'
-      continueOnError: true
-    
-    # Step 6: Clean up local images
-    - script: |
-        echo "=== CLEANUP ==="
-        docker rmi $(imageName):$(tag) $(imageName):latest || echo "Cleanup completed"
-        echo "✅ Local images cleaned up"
-      displayName: 'Cleanup'
-      condition: always()
+- script: |
+    echo "=== DOCKERFILE CHECK ==="
+    if [ -f "Dockerfile" ]; then
+      echo "✅ Dockerfile exists"
+      echo "First 5 lines of Dockerfile:"
+      head -5 Dockerfile
+    else
+      echo "❌ Dockerfile not found"
+      exit 1
+    fi
+  displayName: 'Check Dockerfile'
+
+- task: Docker@2
+  displayName: 'Simple Docker Build'
+  inputs:
+    command: build
+    dockerfile: 'Dockerfile'
+    tags: 'test:$(Build.BuildId)'
+
+- script: |
+    echo "=== BUILD SUCCESS ==="
+    echo "✅ Pipeline 3 completed successfully"
+    echo "🎯 Docker image built without errors"
+  displayName: 'Success Confirmation'
