@@ -1,29 +1,36 @@
-# Docker
-# Build a Docker image
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+# Pipeline 2: Docker → ACR (Push to Registry)
+# This pipeline builds and pushes Docker image to Azure Container Registry
 
-trigger:
-- main
+trigger: none  # Triggered by Pipeline 1
 
 resources:
 - repo: self
 
 variables:
+  # Container registry service connection
+  dockerRegistryServiceConnection: '508806cd-03c5-4ad7-b992-bf11804a901a'
+  imageRepository: 'nacimeventscape'
+  containerRegistry: 'eventbookingcontainer.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
+  vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: Build
-  displayName: Build image
+- stage: Push
+  displayName: Push to ACR
   jobs:
-  - job: Build
-    displayName: Build
+  - job: Push
+    displayName: Build and Push
     pool:
-      vmImage: ubuntu-latest
+      vmImage: $(vmImageName)
     steps:
     - task: Docker@2
-      displayName: Build an image
+      displayName: Build and push image to ACR
       inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+          latest
