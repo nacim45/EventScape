@@ -1,0 +1,47 @@
+# NEW Pipeline 3 - Build Only (No Push)
+# This is a completely new pipeline to ensure Azure DevOps picks up the changes
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildTag: '$(Build.BuildId)'
+
+steps:
+- script: |
+    echo "=== NEW PIPELINE 3 - BUILD ONLY ==="
+    echo "This pipeline does NOT push to any registry"
+    echo "Build Tag: $(buildTag)"
+    echo "Working Directory: $(System.DefaultWorkingDirectory)"
+    ls -la
+  displayName: 'Pipeline Info'
+
+- script: |
+    echo "=== DOCKERFILE VERIFICATION ==="
+    if [ -f "Dockerfile" ]; then
+      echo "✅ Dockerfile found"
+      echo "Dockerfile size: $(wc -l < Dockerfile) lines"
+    else
+      echo "❌ Dockerfile missing"
+      exit 1
+    fi
+  displayName: 'Verify Dockerfile'
+
+- task: Docker@2
+  displayName: 'Build Docker Image (Local Only)'
+  inputs:
+    command: 'build'
+    dockerfile: 'Dockerfile'
+    tags: 'eventscape-local:$(buildTag)'
+
+- script: |
+    echo "=== BUILD COMPLETED ==="
+    echo "✅ Docker image built successfully"
+    echo "🔍 Local images:"
+    docker images | grep eventscape-local || echo "Image built"
+    echo "🎯 NO PUSH OPERATIONS - BUILD ONLY"
+    echo "✅ Pipeline 3 completed without any registry operations"
+  displayName: 'Confirm Build Success'
